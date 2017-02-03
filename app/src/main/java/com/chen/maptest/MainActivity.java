@@ -2,6 +2,7 @@ package com.chen.maptest;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.BitmapFactory;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -15,21 +16,31 @@ import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.AMapOptions;
+import com.amap.api.maps.CameraUpdate;
+import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.LocationSource;
 import com.amap.api.maps.MapView;
 import com.amap.api.maps.Projection;
 import com.amap.api.maps.UiSettings;
-import com.amap.api.maps.model.MyLocationStyle;
+import com.amap.api.maps.model.BitmapDescriptor;
+import com.amap.api.maps.model.BitmapDescriptorFactory;
+import com.amap.api.maps.model.CameraPosition;
+import com.amap.api.maps.model.LatLng;
+import com.amap.api.maps.model.Marker;
+import com.amap.api.maps.model.MarkerOptions;
+import com.amap.api.services.cloud.CloudItem;
 import com.amap.api.services.cloud.CloudItemDetail;
 import com.amap.api.services.cloud.CloudResult;
 import com.amap.api.services.cloud.CloudSearch;
 import com.amap.api.services.core.AMapException;
 import com.amap.api.services.core.LatLonPoint;
 
+import java.util.ArrayList;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements LocationSource, AMapLocationListener, AMap.OnMapTouchListener, CloudSearch.OnCloudSearchListener {
+public class MainActivity extends AppCompatActivity implements LocationSource, AMapLocationListener, AMap.OnMapTouchListener, CloudSearch.OnCloudSearchListener, AMap.OnMarkerClickListener {
 
 
     private final static String TAG = "MainActivity";
@@ -47,6 +58,22 @@ public class MainActivity extends AppCompatActivity implements LocationSource, A
     private AMapLocationClientOption mLocationOption;
     private Projection mProjection;
     private CloudSearch mCloudSearch;
+
+    private boolean firstshow;
+
+
+
+    private ArrayList<MsgModel> mMsgs;
+
+    private class MsgModel{
+        CloudItem mCloudItem;
+        Marker mMarker;
+
+        public MsgModel(CloudItem cloudItem,Marker marker){
+            mCloudItem=cloudItem;
+            mMarker=marker;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,15 +126,15 @@ public class MainActivity extends AppCompatActivity implements LocationSource, A
         //设置倾斜手势
         mUiSettings.setTiltGesturesEnabled(false);
         //设置旋转手势
-        mUiSettings.setRotateGesturesEnabled(true);
+        mUiSettings.setRotateGesturesEnabled(false);
         //设置放大缩小指示器
-        mUiSettings.setZoomControlsEnabled(true);
+        mUiSettings.setZoomControlsEnabled(false);
         //设置指南针
-        mUiSettings.setCompassEnabled(true);
+        mUiSettings.setCompassEnabled(false);
         //设置定位按钮
-        mUiSettings.setMyLocationButtonEnabled(true);
+        mUiSettings.setMyLocationButtonEnabled(false);
         //设置比例尺控件
-        mUiSettings.setScaleControlsEnabled(true);
+        mUiSettings.setScaleControlsEnabled(false);
         //设置logo位置
         mUiSettings.setLogoPosition(AMapOptions.LOGO_POSITION_BOTTOM_LEFT);
 
@@ -118,6 +145,11 @@ public class MainActivity extends AppCompatActivity implements LocationSource, A
         mCloudSearch.setOnCloudSearchListener(this);// 设置回调函数
         // 设置中心点及检索范围
 
+        firstshow=true;
+
+        aMap.setOnMarkerClickListener(this);
+
+        mMsgs = new ArrayList<MsgModel>();
     }
 
     @Override
@@ -183,10 +215,13 @@ public class MainActivity extends AppCompatActivity implements LocationSource, A
     @Override
     public void onLocationChanged(AMapLocation amapLocation) {
         if (mListener != null && amapLocation != null) {
-            if (amapLocation != null
-                    && amapLocation.getErrorCode() == 0) {
+            if (amapLocation.getErrorCode() == 0) {
                 mListener.onLocationChanged(amapLocation);// 显示系统小蓝点
-                makeQuery(amapLocation);
+                if (firstshow) {
+                    gotoLocation(amapLocation);
+                    makeQuery(amapLocation);
+                    firstshow = false;
+                }
             } else {
                 String errText = "定位失败," + amapLocation.getErrorCode()+ ": " + amapLocation.getErrorInfo();
                 Log.e("AmapErr",errText);
@@ -194,12 +229,28 @@ public class MainActivity extends AppCompatActivity implements LocationSource, A
         }
     }
 
+    private void gotoLocation(AMapLocation amapLocation){
+        //参数依次是：视角调整区域的中心点坐标、希望调整到的缩放级别、俯仰角0°~45°（垂直与地图时为0）、偏航角 0~360° (正北方为0)
+        CameraUpdate mCameraUpdate = CameraUpdateFactory.newCameraPosition(
+                new CameraPosition(new LatLng(amapLocation.getLatitude(), amapLocation.getLongitude()),
+                        18,0,0));
+        aMap.animateCamera(mCameraUpdate,500,null);
+    }
+
+    private void gotoLocation2(LatLng latlng){
+        //参数依次是：视角调整区域的中心点坐标、希望调整到的缩放级别、俯仰角0°~45°（垂直与地图时为0）、偏航角 0~360° (正北方为0)
+        CameraUpdate mCameraUpdate = CameraUpdateFactory.newCameraPosition(
+                new CameraPosition(latlng,
+                        18,0,0));
+        aMap.animateCamera(mCameraUpdate,500,null);
+    }
+
     private void makeQuery(AMapLocation amapLocation){
         CloudSearch.SearchBound bound = new CloudSearch.SearchBound(new LatLonPoint(
                 amapLocation.getLatitude(), amapLocation.getLongitude()), 4000);
         //设置查询条件 mTableID是将数据存储到数据管理台后获得。
         try {
-            CloudSearch.Query mQuery = new CloudSearch.Query("58941b3a7bbf195ae87f2565", "医院", bound);
+            CloudSearch.Query mQuery = new CloudSearch.Query("58941b3a7bbf195ae87f2565", "", bound);
             mCloudSearch.searchCloudAsyn(mQuery);
         } catch (AMapException e) {
             e.printStackTrace();
@@ -211,17 +262,53 @@ public class MainActivity extends AppCompatActivity implements LocationSource, A
         Log.d(TAG,"onTouch "+motionEvent.toString());
     }
 
+
     @Override
     public void onCloudSearched(CloudResult cloudResult, int i) {
         Log.d(TAG,"onCloudSearched "+cloudResult.toString()+" "+cloudResult.getTotalCount());
-    //    Log.d(TAG,"detail "+cloudResult.getClouds().get(0).);
 
+        ArrayList<CloudItem> mResult = cloudResult.getClouds();
+        MarkerOptions markerOption = new MarkerOptions();
+        BitmapDescriptor bd = BitmapDescriptorFactory.fromBitmap(BitmapFactory
+                .decodeResource(getResources(),R.drawable.press_xingxing));
 
+        for (CloudItem item: mResult) {
+            Log.d(TAG,"detail "+item.toString());
+            LatLonPoint lf = item.getLatLonPoint();
+            markerOption.position(new LatLng(lf.getLatitude(),lf.getLongitude()))
+                    .alpha(0.5f)
+                    .draggable(false)
+                    .icon(bd)
+                    .anchor(0.5f,0.5f)
+                    .setFlat(true);     //设置marker平贴地图效果// 将Marker设置为贴地显示，可以双指下拉地图查看效果
+            Marker marker = aMap.addMarker(markerOption);
+            MsgModel mm = new MsgModel(item,marker);
+            mMsgs.add(mm);
+        }
+       // markerOption.title("西安市").snippet("西安市：34.341568, 108.940174");
     }
 
     @Override
     public void onCloudItemDetailSearched(CloudItemDetail cloudItemDetail, int i) {
         Log.d(TAG,"onCloudItemDetailSearched "+cloudItemDetail.toString()+" "+i);
 
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        gotoLocation2(marker.getPosition());
+        MsgModel mm = findMsg(marker);
+        if (mm!=null){
+            Log.d(TAG,"onMarkerClick "+mm.toString());
+        }
+        return true;   //false会移动地图到marker点，true不会
+    }
+
+    private MsgModel findMsg(Marker marker){
+        for (MsgModel mm:mMsgs) {
+            if (mm.mMarker.equals(marker))
+                return mm;
+        }
+        return null;
     }
 }
