@@ -28,4 +28,7 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.0-beta4'
     testCompile 'junit:junit:4.12'
     compile files('libs/AMap3DMap_4.1.3_AMapLocation_3.3.0_20170118.jar')
+
+    compile 'com.jakewharton:butterknife:8.0.1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.0.1'
 }
