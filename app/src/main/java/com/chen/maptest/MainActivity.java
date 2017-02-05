@@ -1,6 +1,7 @@
 package com.chen.maptest;
 
 import android.Manifest;
+import android.app.Service;
 import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.support.v4.app.ActivityCompat;
@@ -8,7 +9,9 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.View;
 
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
@@ -36,6 +39,7 @@ import com.amap.api.services.core.AMapException;
 import com.amap.api.services.core.LatLonPoint;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -49,6 +53,9 @@ public class MainActivity extends AppCompatActivity implements LocationSource, A
 
     @BindView(R.id.map)
     public MapView mMapView;
+
+    @BindView(R.id.user_message_layout)
+    public UserMessageLayout mUserMessageLayout;
 
     private AMap aMap;
     private UiSettings mUiSettings;
@@ -111,9 +118,9 @@ public class MainActivity extends AppCompatActivity implements LocationSource, A
         }
         // 设置定位监听
         aMap.setLocationSource(MainActivity.this);
-// 设置为true表示显示定位层并可触发定位，false表示隐藏定位层并不可触发定位，默认是false
+        // 设置为true表示显示定位层并可触发定位，false表示隐藏定位层并不可触发定位，默认是false
         aMap.setMyLocationEnabled(true);
-// 设置定位的类型为定位模式，有定位、跟随或地图根据面向方向旋转几种
+        // 设置定位的类型为定位模式，有定位、跟随或地图根据面向方向旋转几种
         aMap.setMyLocationType(AMap.LOCATION_TYPE_LOCATE);
         //设置地图手势监听器
         aMap.setOnMapTouchListener(this);
@@ -300,6 +307,11 @@ public class MainActivity extends AppCompatActivity implements LocationSource, A
         MsgModel mm = findMsg(marker);
         if (mm!=null){
             Log.d(TAG,"onMarkerClick "+mm.toString());
+            HashMap<String,String> customfield = mm.mCloudItem.getCustomfield();
+//            mUserMessageLayout.setUserIcon("");
+            mUserMessageLayout.setUserName(customfield.get("userid"));
+            mUserMessageLayout.setUserDescript("UserDescript");
+            mUserMessageLayout.setUserMessage(customfield.get("usermsg"));
         }
         return true;   //false会移动地图到marker点，true不会
     }
