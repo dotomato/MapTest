@@ -94,6 +94,8 @@ public class MainActivity extends AppCompatActivity implements LocationSource, A
         //在activity执行onCreate时执行mMapView.onCreate(savedInstanceState)，创建地图
         mMapView.onCreate(savedInstanceState);
         initAmap();
+
+        Myserver.apiTest();
     }
 
     private void initPremisstion(){
@@ -116,6 +118,7 @@ public class MainActivity extends AppCompatActivity implements LocationSource, A
         if (aMap == null) {
             aMap = mMapView.getMap();
         }
+
         // 设置定位监听
         aMap.setLocationSource(MainActivity.this);
         // 设置为true表示显示定位层并可触发定位，false表示隐藏定位层并不可触发定位，默认是false
@@ -197,6 +200,8 @@ public class MainActivity extends AppCompatActivity implements LocationSource, A
             mLocationOption = new AMapLocationClientOption();
             //设置定位回调监听
             mlocationClient.setLocationListener(this);
+
+            mLocationOption.setMockEnable(true);
             //设置为高精度定位模式
             mLocationOption.setLocationMode(AMapLocationClientOption.AMapLocationMode.Hight_Accuracy);
             //设置定位参数

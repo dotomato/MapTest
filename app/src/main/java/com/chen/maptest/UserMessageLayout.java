@@ -8,12 +8,14 @@ import android.util.AttributeSet;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+
 import butterknife.ButterKnife;
-import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Consumer;
-import io.reactivex.functions.Function;
-import io.reactivex.schedulers.Schedulers;
+
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 
 import butterknife.BindView;
 
@@ -56,18 +58,18 @@ public class UserMessageLayout extends ConstraintLayout {
 
     public void setUserIcon(String var){
         Observable.just(var)
-                .map(new Function<String, Bitmap>(){
+                .map(new Func1<String, Bitmap>(){
 
                     @Override
-                    public Bitmap apply(String s) throws Exception {
+                    public Bitmap call(String s) {
                         return BitmapFactory.decodeFile(s);
                     }
                 })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<Bitmap>() {
+                .subscribe(new Action1<Bitmap>() {
                     @Override
-                    public void accept(Bitmap bitmap) throws Exception {
+                    public void call(Bitmap bitmap) {
                         mUserIcon.setImageBitmap(bitmap);
                     }
                 });
