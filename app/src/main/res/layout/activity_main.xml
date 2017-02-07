@@ -22,15 +22,21 @@
     <include
         layout="@layout/layout_user_message"
         android:id="@+id/user_message_layout"
+        android:visibility="invisible"
         android:layout_width="0dp"
         android:layout_height="300dp"
-        android:layout_marginBottom="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginStart="16dp"
         app:layout_constraintBottom_toBottomOf="@+id/map"
         app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
+    <Button
+        android:id="@+id/button"
+        android:text="发送位置"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginEnd="16dp" />
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        />
 
 </android.support.constraint.ConstraintLayout>

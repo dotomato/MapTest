@@ -40,9 +40,11 @@ import com.amap.api.services.core.LatLonPoint;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class MainActivity extends AppCompatActivity implements LocationSource, AMapLocationListener, AMap.OnMapTouchListener, CloudSearch.OnCloudSearchListener, AMap.OnMarkerClickListener {
 
@@ -56,6 +58,8 @@ public class MainActivity extends AppCompatActivity implements LocationSource, A
 
     @BindView(R.id.user_message_layout)
     public UserMessageLayout mUserMessageLayout;
+
+
 
     private AMap aMap;
     private UiSettings mUiSettings;
@@ -229,6 +233,7 @@ public class MainActivity extends AppCompatActivity implements LocationSource, A
         if (mListener != null && amapLocation != null) {
             if (amapLocation.getErrorCode() == 0) {
                 mListener.onLocationChanged(amapLocation);// 显示系统小蓝点
+                mLocationData = amapLocation;
                 if (firstshow) {
                     gotoLocation(amapLocation);
                     makeQuery(amapLocation);
@@ -327,5 +332,20 @@ public class MainActivity extends AppCompatActivity implements LocationSource, A
                 return mm;
         }
         return null;
+    }
+
+    AMapLocation mLocationData;
+
+    @OnClick(R.id.button)
+    public void bfun(){
+        if (mLocationData==null)
+            return;
+        NewPointData npt = new NewPointData();
+        Random random = new Random();
+        npt.userID="ID"+random.nextInt();
+        npt.message="Test message!";
+        npt.latitude = mLocationData.getLatitude();
+        npt.longitude = mLocationData.getLongitude();
+        Myserver.newPoint(npt);
     }
 }
