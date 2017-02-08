@@ -14,6 +14,7 @@ import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import retrofit2.http.Query;
 import rx.Observable;
+import rx.Observer;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
@@ -47,6 +48,7 @@ class Myserver {
 
 
 
+
     private static MyserverInterface mServer=null;
 
     static MyserverInterface getServer(){
@@ -69,39 +71,38 @@ class Myserver {
                 .subscribe(new Action1<ApiTestResult>() {
                     @Override
                     public void call(ApiTestResult var) {
-                        Log.d(TAG, "api test result: " + var.statue +" "+var.data.get(1));
+                        Log.d(TAG, "api test result: " + var.statue);
                     }
                 });
     }
+}
 
-    static void newPointTest(){
-        NewPointData npd = new NewPointData();
-        Random random = new Random();
-        npd.latitude=random.nextDouble();
-        npd.longitude=random.nextDouble();
-        npd.userID="test user id"+random.nextInt();
-        npd.message="test message"+random.nextBoolean();
+//一个封装好了服务器已知错误和意外错误的Action1
+abstract class MyAction1<T> implements Observer<T> {
+    @Override
+    public void onCompleted() {
 
-        getServer().newPoint(npd)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<NewPointResult>() {
-                    @Override
-                    public void call(NewPointResult var) {
-                        Log.d(TAG, "api test result: " + var.statue +" "+var.pointID);
-                    }
-                });
     }
 
-    static void newPoint(NewPointData npd){
-        getServer().newPoint(npd)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<NewPointResult>() {
-                    @Override
-                    public void call(NewPointResult var) {
-                        Log.d(TAG, "api test result: " + var.statue +" "+var.pointID);
-                    }
-                });
+    @Override
+    public final void onError(Throwable e) {
+        e.printStackTrace();
+        error(-101, "服务器发生未知错误，或者是转换返回数据体时出错");
+    }
+
+    @Override
+    public final void onNext(T var){
+        BaseResult var2 = (BaseResult) var;
+        if (var2.statue != 100) {
+            error(var2.statue, var2.errorMessage);
+        } else {
+            call(var);
+        }
+    }
+
+    void call(T var){   }
+
+    void error(int statue, String errorMessage){
+        Log.e("MyAction1","statue="+statue+" errorMessage="+errorMessage);
     }
 }

@@ -1,7 +1,6 @@
 package com.chen.maptest;
 
 import android.Manifest;
-import android.app.Service;
 import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.support.v4.app.ActivityCompat;
@@ -9,9 +8,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
-import android.view.View;
 
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
@@ -45,6 +42,8 @@ import java.util.Random;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity implements LocationSource, AMapLocationListener, AMap.OnMapTouchListener, CloudSearch.OnCloudSearchListener, AMap.OnMarkerClickListener {
 
@@ -337,15 +336,32 @@ public class MainActivity extends AppCompatActivity implements LocationSource, A
     AMapLocation mLocationData;
 
     @OnClick(R.id.button)
-    public void bfun(){
+    public void newPoint(){
         if (mLocationData==null)
             return;
-        NewPointData npt = new NewPointData();
+        NewPointData npd = new NewPointData();
+        PointData pd = new PointData();
+
         Random random = new Random();
-        npt.userID="ID"+random.nextInt();
-        npt.message="Test message!";
-        npt.latitude = mLocationData.getLatitude();
-        npt.longitude = mLocationData.getLongitude();
-        Myserver.newPoint(npt);
+        pd.userID="ID"+random.nextInt();
+        pd.message="Test message!";
+        pd.latitude = mLocationData.getLatitude();
+        pd.longitude = mLocationData.getLongitude();
+
+        npd.pointData = pd;
+
+        Myserver.getServer().newPoint(npd)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new MyAction1<NewPointResult>() {
+                    @Override
+                    void call(NewPointResult var) {
+                        Log.d(TAG, "newPoint result: " + var.statue + " " + var.pointData.pointID);
+                    }
+                });
     }
+
+
+
+
 }
