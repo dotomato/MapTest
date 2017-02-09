@@ -2,9 +2,6 @@ package com.chen.maptest;
 
 import android.util.Log;
 
-import java.util.List;
-import java.util.Random;
-
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -34,15 +31,16 @@ class Myserver {
 
     interface MyserverInterface{
 
-        @GET(VERSION+"/pointlist")
-        Observable<String> getPointList(@Query("location") String location);
-
         @GET(VERSION+"/apitest")
         Observable<ApiTestResult> apitest(@Query("q") String var);
 
         @Headers({"Content-Type: application/json","Accept: application/json"})
         @POST(VERSION+"/newpoint")
         Observable<NewPointResult> newPoint(@Body NewPointData var);
+
+        @Headers({"Content-Type: application/json","Accept: application/json"})
+        @POST(VERSION+"/selectarea")
+        Observable<SelectAreaResult> selectArea(@Body SelectAreaData var);
 
     }
 
@@ -51,7 +49,7 @@ class Myserver {
 
     private static MyserverInterface mServer=null;
 
-    static MyserverInterface getServer(){
+    static MyserverInterface getApi(){
         if (mServer==null) {
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl(BASEURL)
@@ -65,7 +63,7 @@ class Myserver {
     }
 
     static void apiTest(){
-        getServer().apitest("api test message!")
+        getApi().apitest("api test message!")
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<ApiTestResult>() {

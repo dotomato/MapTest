@@ -1,6 +1,8 @@
 package com.chen.maptest;
 
 import android.content.Context;
+import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.util.Log;
 
 import com.amap.api.location.AMapLocation;
@@ -15,8 +17,13 @@ import com.amap.api.maps.LocationSource;
 import com.amap.api.maps.MapView;
 import com.amap.api.maps.Projection;
 import com.amap.api.maps.UiSettings;
+import com.amap.api.maps.model.BitmapDescriptor;
+import com.amap.api.maps.model.BitmapDescriptorFactory;
 import com.amap.api.maps.model.CameraPosition;
 import com.amap.api.maps.model.LatLng;
+import com.amap.api.maps.model.Marker;
+import com.amap.api.maps.model.MarkerOptions;
+import com.amap.api.services.cloud.CloudItem;
 
 /**
  * Created by chen on 17-2-9.
@@ -39,9 +46,16 @@ class MyAmapManeger implements LocationSource, AMapLocationListener{
     private AMap aMap;
     private boolean firstshow;
 
+    private MarkerOptions mMarkerOption;
+    private BitmapDescriptor mBitmapDescriptor;
+
     MyAmapManeger(Context context, MapView mapView){
         mContext = context;
         mMapView = mapView;
+
+        mMarkerOption= new MarkerOptions();
+        mBitmapDescriptor = BitmapDescriptorFactory.fromBitmap(BitmapFactory
+                .decodeResource(mContext.getResources(),R.drawable.press_xingxing));
 
         if (aMap == null) {
             aMap = mMapView.getMap();
@@ -138,7 +152,7 @@ class MyAmapManeger implements LocationSource, AMapLocationListener{
         }
     }
 
-    void gotoLocation(AMapLocation amapLocation){
+    private void gotoLocation(AMapLocation amapLocation){
         //参数依次是：视角调整区域的中心点坐标、希望调整到的缩放级别、俯仰角0°~45°（垂直与地图时为0）、偏航角 0~360° (正北方为0)
         CameraUpdate mCameraUpdate = CameraUpdateFactory.newCameraPosition(
                 new CameraPosition(new LatLng(amapLocation.getLatitude(), amapLocation.getLongitude()),
@@ -149,26 +163,29 @@ class MyAmapManeger implements LocationSource, AMapLocationListener{
     void gotoLocation2(LatLng latlng){
         //参数依次是：视角调整区域的中心点坐标、希望调整到的缩放级别、俯仰角0°~45°（垂直与地图时为0）、偏航角 0~360° (正北方为0)
         CameraUpdate mCameraUpdate = CameraUpdateFactory.newCameraPosition(
-                new CameraPosition(latlng,
-                        18,0,0));
+                new CameraPosition(latlng, aMap.getCameraPosition().zoom,0,0));
         aMap.animateCamera(mCameraUpdate,500,null);
     }
 
-    //    MarkerOptions markerOption = new MarkerOptions();
-//    BitmapDescriptor bd = BitmapDescriptorFactory.fromBitmap(BitmapFactory
-//            .decodeResource(getResources(),R.drawable.press_xingxing));
-//
-//        for (CloudItem item: mResult) {
-//        Log.d(TAG,"detail "+item.toString());
-//        LatLonPoint lf = item.getLatLonPoint();
-//        markerOption.position(new LatLng(lf.getLatitude(),lf.getLongitude()))
-//                .alpha(0.5f)
-//                .draggable(false)
-//                .icon(bd)
-//                .anchor(0.5f,0.5f)
-//                .setFlat(true);     //设置marker平贴地图效果// 将Marker设置为贴地显示，可以双指下拉地图查看效果
-//        Marker marker = aMap.addMarker(markerOption);
-//        MsgModel mm = new MsgModel(item,marker);
-//        mMsgs.add(mm);
-//    }
+    LatLng getLeftTopLatlng(){
+        return mProjection.fromScreenLocation(new Point(0,0));
+    }
+
+    LatLng getRightBottomLatlng(){
+        int a = mMapView.getWidth();
+        int b = mMapView.getBottom();
+        return mProjection.fromScreenLocation(new Point(a,b));
+    }
+
+    void addMarker(LatLng latlng, String pointID){
+        mMarkerOption.position(latlng)
+                .alpha(0.5f)
+                .draggable(false)
+                .icon(mBitmapDescriptor)
+                .anchor(0.5f,0.5f)
+                .setFlat(true);     //设置marker平贴地图效果// 将Marker设置为贴地显示，可以双指下拉地图查看效果
+        Marker marker = aMap.addMarker(mMarkerOption);
+        marker.setTitle(pointID);
+    }
+
 }

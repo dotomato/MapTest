@@ -39,4 +39,14 @@
         android:layout_height="wrap_content"
         />
 
+    <Button
+        android:id="@+id/button2"
+        android:text="获取屏幕内的点"
+        app:layout_constraintBottom_toTopOf="@+id/button"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        />
+
 </android.support.constraint.ConstraintLayout>
