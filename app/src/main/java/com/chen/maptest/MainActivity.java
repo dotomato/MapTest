@@ -1,6 +1,9 @@
 package com.chen.maptest;
 
 import android.Manifest;
+import android.animation.Animator;
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
 import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -56,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements AMap.OnMapTouchLi
 
         mMapView.onCreate(savedInstanceState);
         initAmap();
+        initAnimated();
 
         Myserver.apiTest();
 
@@ -91,6 +95,12 @@ public class MainActivity extends AppCompatActivity implements AMap.OnMapTouchLi
 
     }
 
+
+
+    private void initAnimated(){
+
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -121,13 +131,17 @@ public class MainActivity extends AppCompatActivity implements AMap.OnMapTouchLi
         mMapView.onSaveInstanceState(outState);
     }
 
+    int iii=0;
     @Override
     public void onTouch(MotionEvent motionEvent) {
-//        Log.d(TAG,"onTouch "+motionEvent.toString());
-//        switch (motionEvent.getAction()){
-//            MotionEvent.ACTION_UP:
-//
-//        }
+        switch (motionEvent.getAction()){
+            case MotionEvent.ACTION_UP:
+                mMapView.animate()
+                        .y(-700*iii)
+                        .setDuration(300)
+                        .start();
+                break;
+        }
     }
 
     @Override

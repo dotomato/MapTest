@@ -136,11 +136,13 @@ class MyAmapManeger implements LocationSource, AMapLocationListener{
         mlocationClient = null;
     }
 
+    private AMapLocation gpsLocation;
     @Override
     public void onLocationChanged(AMapLocation amapLocation) {
         if (mListener != null && amapLocation != null) {
             if (amapLocation.getErrorCode() == 0) {
                 mListener.onLocationChanged(amapLocation);// 显示系统小蓝点
+                gpsLocation = amapLocation;
                 if (firstshow) {
                     gotoLocation(amapLocation);
                     firstshow = false;
@@ -165,6 +167,10 @@ class MyAmapManeger implements LocationSource, AMapLocationListener{
         CameraUpdate mCameraUpdate = CameraUpdateFactory.newCameraPosition(
                 new CameraPosition(latlng, aMap.getCameraPosition().zoom,0,0));
         aMap.animateCamera(mCameraUpdate,500,null);
+    }
+
+    void gotoGpsLocation(){
+        gotoLocation(gpsLocation);
     }
 
     LatLng getLeftTopLatlng(){
