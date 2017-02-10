@@ -42,6 +42,10 @@ class Myserver {
         @POST(VERSION+"/selectarea")
         Observable<SelectAreaResult> selectArea(@Body SelectAreaData var);
 
+        @Headers({"Content-Type: application/json","Accept: application/json"})
+        @POST(VERSION+"/getpoint")
+        Observable<GetPointResult> getPoint(@Body GetPointData var);
+
     }
 
 
@@ -94,11 +98,14 @@ abstract class MyAction1<T> implements Observer<T> {
         if (var2.statue != 100) {
             error(var2.statue, var2.errorMessage);
         } else {
-            call(var);
+            mVar = var;
+            call();
         }
     }
 
-    void call(T var){   }
+    T mVar;
+
+    void call(){   }
 
     void error(int statue, String errorMessage){
         Log.e("MyAction1","statue="+statue+" errorMessage="+errorMessage);

@@ -15,7 +15,7 @@ class BaseResult{
 class PointData{
     String pointID;
     String userID;
-    String message;
+    String userMessage;
     double latitude;
     double longitude;
     String time;

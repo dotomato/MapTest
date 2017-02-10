@@ -25,17 +25,14 @@ import com.amap.api.maps.model.Marker;
 import com.amap.api.maps.model.MarkerOptions;
 import com.amap.api.services.cloud.CloudItem;
 
+import java.util.HashMap;
+
 /**
  * Created by chen on 17-2-9.
  * Copyright *
  */
 
 class MyAmapManeger implements LocationSource, AMapLocationListener{
-
-
-    AMapLocation mLocationData;
-
-
     private Context mContext;
 
     private OnLocationChangedListener mListener;
@@ -49,13 +46,15 @@ class MyAmapManeger implements LocationSource, AMapLocationListener{
     private MarkerOptions mMarkerOption;
     private BitmapDescriptor mBitmapDescriptor;
 
+    private HashMap<String,Marker> markerMap;
+
     MyAmapManeger(Context context, MapView mapView){
         mContext = context;
         mMapView = mapView;
 
         mMarkerOption= new MarkerOptions();
         mBitmapDescriptor = BitmapDescriptorFactory.fromBitmap(BitmapFactory
-                .decodeResource(mContext.getResources(),R.drawable.press_xingxing));
+                .decodeResource(mContext.getResources(),R.drawable.press_xingxing_small));
 
         if (aMap == null) {
             aMap = mMapView.getMap();
@@ -92,6 +91,8 @@ class MyAmapManeger implements LocationSource, AMapLocationListener{
         mProjection = aMap.getProjection();
 
         firstshow=true;
+
+        markerMap = new HashMap<>();
     }
 
     void onDestroy() {
@@ -140,7 +141,6 @@ class MyAmapManeger implements LocationSource, AMapLocationListener{
         if (mListener != null && amapLocation != null) {
             if (amapLocation.getErrorCode() == 0) {
                 mListener.onLocationChanged(amapLocation);// 显示系统小蓝点
-                mLocationData = amapLocation;
                 if (firstshow) {
                     gotoLocation(amapLocation);
                     firstshow = false;
@@ -177,15 +177,31 @@ class MyAmapManeger implements LocationSource, AMapLocationListener{
         return mProjection.fromScreenLocation(new Point(a,b));
     }
 
-    void addMarker(LatLng latlng, String pointID){
-        mMarkerOption.position(latlng)
-                .alpha(0.5f)
+    LatLng getCurLatlng(){
+        int a = mMapView.getWidth();
+        int b = mMapView.getBottom();
+        return mProjection.fromScreenLocation(new Point(a/2,b/2));
+    }
+
+    void rmAllMarker(){
+        for (Marker var:markerMap.values()) {
+            var.remove();
+        }
+    }
+
+    void addMarker(PointSimpleData psd){
+        mMarkerOption.position(new LatLng(psd.latitude,psd.longitude))
                 .draggable(false)
                 .icon(mBitmapDescriptor)
                 .anchor(0.5f,0.5f)
                 .setFlat(true);     //设置marker平贴地图效果// 将Marker设置为贴地显示，可以双指下拉地图查看效果
         Marker marker = aMap.addMarker(mMarkerOption);
-        marker.setTitle(pointID);
+        marker.setTitle(psd.pointID);
+        markerMap.put(psd.pointID,marker);
+//        marker.setObject(psd);
     }
 
+    Marker getMarker(String poindID){
+        return markerMap.get(poindID);
+    }
 }

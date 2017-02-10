@@ -8,6 +8,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.MapView;
@@ -36,6 +38,9 @@ public class MainActivity extends AppCompatActivity implements AMap.OnMapTouchLi
 
     @BindView(R.id.user_message_layout)
     public UserMessageLayout mUserMessageLayout;
+
+    @BindView(R.id.edittext)
+    public EditText mUserMessageEdittext;
 
 
     @Override
@@ -115,22 +120,39 @@ public class MainActivity extends AppCompatActivity implements AMap.OnMapTouchLi
     @Override
     public boolean onMarkerClick(Marker marker) {
         mMyAmapManeger.gotoLocation2(marker.getPosition());
+        GetPointData gpd = new GetPointData();
+        gpd.pointID=marker.getTitle();
+        Myserver.getApi().getPoint(gpd)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new MyAction1<GetPointResult>() {
+                    @Override
+                    void call() {
+                        Log.d(TAG, "GetPoint result: " + mVar.statue + " " + mVar.pointData.pointID);
+                        Toast.makeText(MainActivity.this, "userID:"+
+                                mVar.pointData.userID+
+                                "\nuserMessage:"+
+                                mVar.pointData.userMessage,Toast.LENGTH_LONG).show();
+                    }
+                });
         return true;   //false会移动地图到marker点，true不会
     }
 
 
     @OnClick(R.id.button)
     public void newPoint(){
-        if (mMyAmapManeger.mLocationData==null)
-            return;
+        LatLng l = mMyAmapManeger.getCurLatlng();
+
         NewPointData npd = new NewPointData();
         PointData pd = new PointData();
 
         Random random = new Random();
-        pd.userID="ID"+random.nextInt();
-        pd.message="Test message!";
-        pd.latitude = mMyAmapManeger.mLocationData.getLatitude();
-        pd.longitude = mMyAmapManeger.mLocationData.getLongitude();
+//        pd.userID="ID"+Math.abs(random.nextInt());
+        pd.userID="开发客户端v0.01";
+        pd.userMessage=mUserMessageEdittext.getText().toString();
+
+        pd.latitude = l.latitude;
+        pd.longitude = l.longitude;
 
         npd.pointData = pd;
 
@@ -139,8 +161,8 @@ public class MainActivity extends AppCompatActivity implements AMap.OnMapTouchLi
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new MyAction1<NewPointResult>() {
                     @Override
-                    void call(NewPointResult var) {
-                        Log.d(TAG, "newPoint result: " + var.statue + " " + var.pointData.pointID);
+                    void call() {
+                        Log.d(TAG, "newPoint result: " + mVar.statue + " " + mVar.pointData.pointID);
                     }
                 });
     }
@@ -160,10 +182,11 @@ public class MainActivity extends AppCompatActivity implements AMap.OnMapTouchLi
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new MyAction1<SelectAreaResult>() {
                     @Override
-                    void call(SelectAreaResult var) {
-                        Log.d(TAG, "selectArea result: " + var.statue + " " + var.pointsCount);
-                        for (PointSimpleData psd:var.points) {
-                            mMyAmapManeger.addMarker(new LatLng(psd.latitude,psd.longitude),psd.pointID);
+                    void call() {
+                        mMyAmapManeger.rmAllMarker();
+                        Log.d(TAG, "selectArea result: " + mVar.statue + " " + mVar.pointsCount);
+                        for (PointSimpleData psd:mVar.points) {
+                            mMyAmapManeger.addMarker(psd);
                         }
                     }
                 });
