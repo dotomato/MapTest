@@ -1,7 +1,18 @@
 package com.chen.maptest;
 
+import android.app.Application;
 import android.util.Log;
+import android.widget.Toast;
 
+import com.google.gson.Gson;
+
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
+import retrofit2.Converter;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -70,10 +81,10 @@ class Myserver {
         getApi().apitest("api test message!")
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<ApiTestResult>() {
+                .subscribe(new MyAction1<ApiTestResult>() {
                     @Override
-                    public void call(ApiTestResult var) {
-                        Log.d(TAG, "api test result: " + var.statue);
+                    void call() {
+                        Log.d(TAG, "api test result: " + mVar.statue);
                     }
                 });
     }
@@ -110,4 +121,6 @@ abstract class MyAction1<T> implements Observer<T> {
     void error(int statue, String errorMessage){
         Log.e("MyAction1","statue="+statue+" errorMessage="+errorMessage);
     }
+
+
 }

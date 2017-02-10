@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.MapView;
+import com.amap.api.maps.model.CameraPosition;
 import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.Marker;
 
@@ -24,14 +25,16 @@ import butterknife.OnClick;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
-public class MainActivity extends AppCompatActivity implements AMap.OnMapTouchListener, AMap.OnMarkerClickListener {
+public class MainActivity extends AppCompatActivity implements AMap.OnMapTouchListener, AMap.OnMarkerClickListener, AMap.OnCameraChangeListener {
 
 
     private final static String TAG = "MainActivity";
 
     private final static int WRITE_COARSE_LOCATION_REQUEST_CODE = 0;
 
-    MyAmapManeger mMyAmapManeger;
+    public MyAmapManeger mMyAmapManeger;
+
+    public SelectHelper mSelectHelper;
 
     @BindView(R.id.map)
     public MapView mMapView;
@@ -41,7 +44,6 @@ public class MainActivity extends AppCompatActivity implements AMap.OnMapTouchLi
 
     @BindView(R.id.edittext)
     public EditText mUserMessageEdittext;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +58,12 @@ public class MainActivity extends AppCompatActivity implements AMap.OnMapTouchLi
         initAmap();
 
         Myserver.apiTest();
+
+        mSelectHelper = new SelectHelper();
+        new Thread(mSelectHelper).start();
     }
+
+
 
     private void initPremisstion(){
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
@@ -80,6 +87,7 @@ public class MainActivity extends AppCompatActivity implements AMap.OnMapTouchLi
         AMap aMap = mMapView.getMap();
         aMap.setOnMapTouchListener(this);
         aMap.setOnMarkerClickListener(this);
+        aMap.setOnCameraChangeListener(this);
 
     }
 
@@ -89,6 +97,7 @@ public class MainActivity extends AppCompatActivity implements AMap.OnMapTouchLi
         //在activity执行onDestroy时执行mMapView.onDestroy()，销毁地图
         mMapView.onDestroy();
         mMyAmapManeger.onDestroy();
+        mSelectHelper.stop();
     }
 
     @Override
@@ -115,6 +124,10 @@ public class MainActivity extends AppCompatActivity implements AMap.OnMapTouchLi
     @Override
     public void onTouch(MotionEvent motionEvent) {
 //        Log.d(TAG,"onTouch "+motionEvent.toString());
+//        switch (motionEvent.getAction()){
+//            MotionEvent.ACTION_UP:
+//
+//        }
     }
 
     @Override
@@ -167,8 +180,7 @@ public class MainActivity extends AppCompatActivity implements AMap.OnMapTouchLi
                 });
     }
 
-    @OnClick(R.id.button2)
-    public void selectArea(){
+    private void selectArea(){
         SelectAreaData sad = new SelectAreaData();
         LatLng lt = mMyAmapManeger.getLeftTopLatlng();
         LatLng rb = mMyAmapManeger.getRightBottomLatlng();
@@ -190,5 +202,49 @@ public class MainActivity extends AppCompatActivity implements AMap.OnMapTouchLi
                         }
                     }
                 });
+    }
+
+    private class SelectHelper implements Runnable {
+
+        private int mStatue;
+        private static final int FINISH=0;
+        private static final int RUN=1;
+        private static final int STOP=2;
+
+        @Override
+        public void run() {
+            while(true){
+                if (mStatue==RUN) {
+                    selectArea();
+                    mStatue = FINISH;
+                }
+                if (mStatue==STOP){
+                    break;
+                }
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        public void call() {
+            this.mStatue = RUN;
+        }
+
+        public void stop(){
+            this.mStatue = STOP;
+        }
+    }
+
+    @Override
+    public void onCameraChange(CameraPosition cameraPosition) {
+    }
+
+    @Override
+    public void onCameraChangeFinish(CameraPosition cameraPosition) {
+        Log.d(TAG,"onCameraChangeFinish");
+        mSelectHelper.call();
     }
 }
