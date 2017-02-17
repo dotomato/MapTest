@@ -5,13 +5,17 @@ import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.content.pm.PackageManager;
+import android.graphics.Rect;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.ScrollView;
 import android.widget.Toast;
 
 import com.amap.api.maps.AMap;
@@ -28,7 +32,9 @@ import butterknife.OnClick;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
-public class MainActivity extends AppCompatActivity implements AMap.OnMapTouchListener, AMap.OnMarkerClickListener, AMap.OnCameraChangeListener {
+public class MainActivity extends AppCompatActivity implements
+        AMap.OnMapTouchListener, AMap.OnMarkerClickListener, AMap.OnCameraChangeListener,
+        TopEventScrollView.OverScrollCallback{
 
 
     private final static String TAG = "MainActivity";
@@ -48,6 +54,10 @@ public class MainActivity extends AppCompatActivity implements AMap.OnMapTouchLi
     @BindView(R.id.edittext)
     public EditText mUserMessageEdittext;
 
+    @BindView(R.id.topeventscrollview)
+    public TopEventScrollView mTopEventScrollVew;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements AMap.OnMapTouchLi
 
         mMapView.onCreate(savedInstanceState);
         initAmap();
-        initAnimated();
+        mTopEventScrollVew.setOverScrollCallback(this);
 
         Myserver.apiTest();
 
@@ -67,7 +77,11 @@ public class MainActivity extends AppCompatActivity implements AMap.OnMapTouchLi
         new Thread(mSelectHelper).start();
     }
 
-
+    @Override
+    protected void onStart(){
+        super.onStart();
+        setMessageVisibility(false,0);
+    }
 
     private void initPremisstion(){
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
@@ -92,12 +106,6 @@ public class MainActivity extends AppCompatActivity implements AMap.OnMapTouchLi
         aMap.setOnMapTouchListener(this);
         aMap.setOnMarkerClickListener(this);
         aMap.setOnCameraChangeListener(this);
-
-    }
-
-
-
-    private void initAnimated(){
 
     }
 
@@ -131,19 +139,6 @@ public class MainActivity extends AppCompatActivity implements AMap.OnMapTouchLi
         mMapView.onSaveInstanceState(outState);
     }
 
-    int iii=0;
-    @Override
-    public void onTouch(MotionEvent motionEvent) {
-        switch (motionEvent.getAction()){
-            case MotionEvent.ACTION_UP:
-                mMapView.animate()
-                        .y(-700*iii)
-                        .setDuration(300)
-                        .start();
-                break;
-        }
-    }
-
     @Override
     public boolean onMarkerClick(Marker marker) {
         mMyAmapManeger.gotoLocation2(marker.getPosition());
@@ -162,9 +157,47 @@ public class MainActivity extends AppCompatActivity implements AMap.OnMapTouchLi
                                 mVar.pointData.userMessage,Toast.LENGTH_LONG).show();
                     }
                 });
+        setMessageVisibility(true,300);
+        mUserMessageLayout.initshow();
         return true;   //false会移动地图到marker点，true不会
     }
 
+    boolean lb=true;
+    public void setMessageVisibility(boolean b,long duration){
+        if (b==lb)
+            return;
+        lb=b;
+
+        int h = MyUtils.dip2px(this,200);
+        Rect frame = new Rect();
+        getWindow().getDecorView().getWindowVisibleDisplayFrame(frame);
+        int dh = frame.height();
+
+
+        if (b){
+            mMapView.animate()
+                    .y(-(dh-h)/2)
+                    .setDuration(duration)
+                    .start();
+            mUserMessageLayout.animate()
+                    .y(0)
+                    .setDuration(duration)
+                    .start();
+        } else {
+            mMapView.animate()
+                    .y(0)
+                    .setDuration(duration)
+                    .start();
+            mUserMessageLayout.animate()
+                    .y(dh)
+                    .setDuration(duration)
+                    .start();
+        }
+    }
+
+    private void changeMessageVisibility(long duration){
+        setMessageVisibility(!lb,duration);
+    }
 
     @OnClick(R.id.button)
     public void newPoint(){
@@ -216,6 +249,16 @@ public class MainActivity extends AppCompatActivity implements AMap.OnMapTouchLi
                         }
                     }
                 });
+    }
+
+    @Override
+    public void onOverScroll(ScrollView scrollView) {
+        setMessageVisibility(false,300);
+    }
+
+    @Override
+    public void onTouch(MotionEvent motionEvent) {
+
     }
 
     private class SelectHelper implements Runnable {

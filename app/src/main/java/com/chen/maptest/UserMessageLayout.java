@@ -7,6 +7,7 @@ import android.support.constraint.ConstraintLayout;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 
@@ -38,6 +39,11 @@ public class UserMessageLayout extends ConstraintLayout {
 
     @BindView(R.id.usermessage)
     public TextView mUserMessage;
+
+
+    @BindView(R.id.topeventscrollview)
+    public TopEventScrollView mTopEventScrollVew;
+
 
     public UserMessageLayout(Context context) {
         super(context);
@@ -86,5 +92,9 @@ public class UserMessageLayout extends ConstraintLayout {
 
     public void setUserMessage(String var){
         mUserMessage.setText(var);
+    }
+
+    public void initshow(){
+        mTopEventScrollVew.scrollTo(0,0);
     }
 }
