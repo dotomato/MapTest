@@ -5,6 +5,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.constraint.ConstraintLayout;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.MotionEvent;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ScrollView;
@@ -28,6 +30,8 @@ import butterknife.BindView;
 
 public class UserMessageLayout extends ConstraintLayout {
 
+    private final static String TAG = "UserMessageLayout";
+
     @BindView(R.id.usericon)
     public ImageView mUserIcon;
 
@@ -45,16 +49,25 @@ public class UserMessageLayout extends ConstraintLayout {
     public TopEventScrollView mTopEventScrollVew;
 
 
+    private float spaceHight;
+
     public UserMessageLayout(Context context) {
         super(context);
+        init(context);
     }
 
     public UserMessageLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
+        init(context);
     }
 
     public UserMessageLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        init(context);
+    }
+
+    private void init(Context context){
+        spaceHight = MyUtils.dip2px(context,200);
     }
 
     @Override
@@ -96,5 +109,25 @@ public class UserMessageLayout extends ConstraintLayout {
 
     public void initshow(){
         mTopEventScrollVew.scrollTo(0,0);
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        Log.d(TAG,"onInterceptTouchEvent"+ev.getY());
+        if (ev.getY()<(spaceHight-mTopEventScrollVew.getScrollY())){
+            if(mSpaceTouchEventCallback!=null){
+                mSpaceTouchEventCallback.onSpaceTouchEvent(ev);
+            }
+            return true;
+        }
+        return super.onInterceptTouchEvent(ev);
+    }
+
+    SpaceTouchEventCallback mSpaceTouchEventCallback=null;
+    interface SpaceTouchEventCallback{
+        void onSpaceTouchEvent(MotionEvent ev);
+    }
+    public void setSpaceTouchEventCallback(SpaceTouchEventCallback var){
+        mSpaceTouchEventCallback=var;
     }
 }

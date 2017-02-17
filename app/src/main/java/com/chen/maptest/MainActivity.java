@@ -34,7 +34,7 @@ import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity implements
         AMap.OnMapTouchListener, AMap.OnMarkerClickListener, AMap.OnCameraChangeListener,
-        TopEventScrollView.OverScrollCallback{
+        TopEventScrollView.OverScrollCallback, UserMessageLayout.SpaceTouchEventCallback {
 
 
     private final static String TAG = "MainActivity";
@@ -70,6 +70,7 @@ public class MainActivity extends AppCompatActivity implements
         mMapView.onCreate(savedInstanceState);
         initAmap();
         mTopEventScrollVew.setOverScrollCallback(this);
+        mUserMessageLayout.setSpaceTouchEventCallback(this);
 
         Myserver.apiTest();
 
@@ -259,6 +260,11 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onTouch(MotionEvent motionEvent) {
 
+    }
+
+    @Override
+    public void onSpaceTouchEvent(MotionEvent ev) {
+        mMapView.dispatchTouchEvent(ev);
     }
 
     private class SelectHelper implements Runnable {
