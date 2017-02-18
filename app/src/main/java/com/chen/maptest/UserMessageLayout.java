@@ -10,11 +10,13 @@ import android.view.MotionEvent;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ScrollView;
+import android.widget.Space;
 import android.widget.TextView;
 
 
 import butterknife.ButterKnife;
 
+import butterknife.OnTouch;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -28,7 +30,7 @@ import butterknife.BindView;
  * Copyright *
  */
 
-public class UserMessageLayout extends ConstraintLayout {
+public class UserMessageLayout extends TopEventScrollView {
 
     private final static String TAG = "UserMessageLayout";
 
@@ -44,10 +46,8 @@ public class UserMessageLayout extends ConstraintLayout {
     @BindView(R.id.usermessage)
     public TextView mUserMessage;
 
-
-    @BindView(R.id.topeventscrollview)
-    public TopEventScrollView mTopEventScrollVew;
-
+    @BindView(R.id.space)
+    public Space mSpace;
 
     private float spaceHight;
 
@@ -108,19 +108,17 @@ public class UserMessageLayout extends ConstraintLayout {
     }
 
     public void initshow(){
-        mTopEventScrollVew.scrollTo(0,0);
+        scrollTo(0,0);
     }
 
     @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-        Log.d(TAG,"onInterceptTouchEvent"+ev.getY());
-        if (ev.getY()<(spaceHight-mTopEventScrollVew.getScrollY())){
-            if(mSpaceTouchEventCallback!=null){
+    public boolean onTouchEvent(MotionEvent ev){
+        if (ev.getY()<mSpace.getHeight()-getScrollY() ) {
+            if (mSpaceTouchEventCallback != null)
                 mSpaceTouchEventCallback.onSpaceTouchEvent(ev);
-            }
             return true;
         }
-        return super.onInterceptTouchEvent(ev);
+        return super.onTouchEvent(ev);
     }
 
     SpaceTouchEventCallback mSpaceTouchEventCallback=null;
@@ -129,5 +127,10 @@ public class UserMessageLayout extends ConstraintLayout {
     }
     public void setSpaceTouchEventCallback(SpaceTouchEventCallback var){
         mSpaceTouchEventCallback=var;
+    }
+
+
+    public int getSpaceHeight(){
+        return mSpace.getHeight();
     }
 }

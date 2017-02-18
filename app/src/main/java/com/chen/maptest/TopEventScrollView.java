@@ -48,6 +48,8 @@ public class TopEventScrollView extends ScrollView {
         delatY = MyUtils.dip2px(context,20);
     }
 
+
+    private boolean upFlag=true;
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         switch (ev.getAction()) {
@@ -57,10 +59,14 @@ public class TopEventScrollView extends ScrollView {
             case MotionEvent.ACTION_MOVE:
                 int deltY = (int) (ev.getY() - lastY);
                 lastY = (int) ev.getY();
-                if (getScrollY() == 0 && (deltY > delatY)) {
+                if (getScrollY() == 0 && (deltY > delatY)  && upFlag) {
                     if (mOverScrollCallback!=null)
                         mOverScrollCallback.onOverScroll(this);
+                    upFlag=false;
                 }
+                break;
+            case MotionEvent.ACTION_UP:
+                upFlag=true;
                 break;
         }
         return super.onTouchEvent(ev);
