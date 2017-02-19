@@ -34,11 +34,17 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme" >
 
-        <service android:name="com.amap.api.location.APSService"></service>
+        <service android:name="com.amap.api.location.APSService" />
+        <service android:name="com.baidu.location.f" android:enabled="true" android:process=":remote"/>
 
-        <meta-data android:name="com.amap.api.v2.apikey" android:value="436ede7d149ab1c37f9a82f2027b9238">
-            //开发者申请的key
-        </meta-data>
+
+        <meta-data
+            android:name="com.amap.api.v2.apikey"
+            android:value="436ede7d149ab1c37f9a82f2027b9238" />
+
+        <meta-data
+            android:name="com.baidu.lbsapi.API_KEY"
+            android:value="0GwEEEMpSNLb1dInCcO0dVhz9HiNiImH" />
 
         <activity
             android:name=".MainActivity"

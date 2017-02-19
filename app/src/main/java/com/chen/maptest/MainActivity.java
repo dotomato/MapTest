@@ -14,7 +14,7 @@ import butterknife.OnClick;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
-public class MainActivity extends AmapAdapterActivity implements MapAdaterCallback {
+public class MainActivity extends BmapAdapterActivity implements MapAdaterCallback {
 
 
     private final static String TAG = "MainActivity";
