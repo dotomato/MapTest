@@ -2,6 +2,7 @@ package com.chen.maptest;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.ScrollView;
 
@@ -11,6 +12,8 @@ import android.widget.ScrollView;
  */
 
 public class TopEventScrollView extends ScrollView {
+
+    private final static String TAG = "TopEventScrollView";
 
     private float lastY;
 
@@ -45,28 +48,38 @@ public class TopEventScrollView extends ScrollView {
     }
 
     private void init(Context context){
-        delatY = MyUtils.dip2px(context,20);
+        delatY = MyUtils.dip2px(context,5);
     }
 
 
     private boolean upFlag=true;
+    private boolean down_moveFlag=false;
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
+        Log.d(TAG,ev.toString());
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 lastY = (int) ev.getY();
+                down_moveFlag = true;
                 break;
             case MotionEvent.ACTION_MOVE:
-                int deltY = (int) (ev.getY() - lastY);
-                lastY = (int) ev.getY();
-                if (getScrollY() == 0 && (deltY > delatY)  && upFlag) {
-                    if (mOverScrollCallback!=null)
-                        mOverScrollCallback.onOverScroll(this);
-                    upFlag=false;
+                if (!down_moveFlag){
+                    lastY = (int) ev.getY();
+                    down_moveFlag = true;
+                    break;
+                } else {
+                    int deltY = (int) (ev.getY() - lastY);
+                    lastY = (int) ev.getY();
+                    if (getScrollY() == 0 && (deltY > delatY) && upFlag) {
+                        if (mOverScrollCallback != null)
+                            mOverScrollCallback.onOverScroll(this);
+                        upFlag = false;
+                    }
+                    break;
                 }
-                break;
             case MotionEvent.ACTION_UP:
                 upFlag=true;
+                down_moveFlag=false;
                 break;
         }
         return super.onTouchEvent(ev);

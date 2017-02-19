@@ -1,20 +1,16 @@
 package com.chen.maptest;
 
 import android.Manifest;
-import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Rect;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
-import android.view.View;
-import android.view.WindowManager;
 import android.widget.ScrollView;
-import android.widget.Toast;
 
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.MapView;
@@ -22,10 +18,9 @@ import com.amap.api.maps.model.CameraPosition;
 import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.Marker;
 
-import java.util.Random;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
@@ -50,6 +45,8 @@ public class MainActivity extends AppCompatActivity implements
     @BindView(R.id.user_edit_layout)
     public UserEditLayout mUserEditLayout;
 
+    @BindView(R.id.floatingActionButton)
+    public FloatingActionButton mFloatingActionButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,16 +59,7 @@ public class MainActivity extends AppCompatActivity implements
 
         mMapView.onCreate(savedInstanceState);
         initAmap();
-
-        mUserMessageLayout.setOverScrollCallback(mOverScrollCallback1);
-        mUserMessageLayout.setSpaceTouchEventCallback(mSpaceTouchEvent1);
-
-        mUserEditLayout.setOverScrollCallback(mOverScrollCallback2);
-        mUserEditLayout.setSpaceTouchEventCallback(mSpaceTouchEvent2);
-
-        getWindow().setSoftInputMode(   WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
-
-
+        initLayout();
         Myserver.apiTest();
 
         mSelectHelper = new SelectHelper();
@@ -108,6 +96,41 @@ public class MainActivity extends AppCompatActivity implements
         aMap.setOnMarkerClickListener(this);
         aMap.setOnCameraChangeListener(this);
 
+    }
+
+    private void initLayout(){
+        mUserMessageLayout.setOverScrollCallback(new TopEventScrollView.OverScrollCallback() {
+            @Override
+            public void onOverScroll(ScrollView scrollView) {
+                switchShowMode(MODE_MAP,300);
+            }
+        });
+
+
+        mUserMessageLayout.setSpaceTouchEventCallback(new UserMessageLayout.SpaceTouchEventCallback() {
+            @Override
+            public void onSpaceTouchEvent(MotionEvent ev) {
+                ev.offsetLocation(0,-mMapView.getY());
+                mMapView.dispatchTouchEvent(ev);
+            }
+        });
+
+
+        mUserEditLayout.setOverScrollCallback(new TopEventScrollView.OverScrollCallback() {
+            @Override
+            public void onOverScroll(ScrollView scrollView) {
+                switchShowMode(MODE_MAP,300);
+            }
+        });
+
+
+        mUserEditLayout.setSpaceTouchEventCallback(new UserEditLayout.SpaceTouchEventCallback() {
+            @Override
+            public void onSpaceTouchEvent(MotionEvent ev) {
+                ev.offsetLocation(0,-mMapView.getY());
+                mMapView.dispatchTouchEvent(ev);
+            }
+        });
     }
 
     @Override
@@ -151,28 +174,45 @@ public class MainActivity extends AppCompatActivity implements
                 .subscribe(new MyAction1<GetPointResult>() {
                     @Override
                     void call() {
-                        Log.d(TAG, "GetPoint result: " + mVar.statue + " " + mVar.pointData.pointID);
-                        Toast.makeText(MainActivity.this, "userID:"+
-                                mVar.pointData.userID+
-                                "\nuserMessage:"+
-                                mVar.pointData.userMessage,Toast.LENGTH_LONG).show();
+                        mUserMessageLayout.setUserMessage(mVar.pointData.userMessage);
+                        mUserMessageLayout.setUserDescript(mVar.pointData.userID);
+                        switchShowMode(MODE_MESSAGE,300);
+                        mUserMessageLayout.initshow();
                     }
                 });
-        switchShowMode(MODE_MESSAGE,300);
-        mUserMessageLayout.initshow();
         return true;   //false会移动地图到marker点，true不会
     }
-
 
     final static int MODE_MAP = 0;
     final static int MODE_MESSAGE = 1;
     final static int MODE_EDIT = 2;
 
     int lmode=-1;
+    int mMode;
+    long mDuration;
     public void switchShowMode(int mode, long duration){
-        if (mode==lmode)
-            return;
-        lmode=mode;
+        mMode = mode;
+        mDuration = duration;
+        if (lmode==MODE_EDIT) {
+            mUserEditLayout.tryExit(new UserEditLayout.ExitCallback() {
+                @Override
+                public void call() {
+                    _switchShowMode();
+                }
+            });
+        } else {
+            _switchShowMode();
+        }
+    }
+
+    public void switchShowMode_force(int mode, long duration){
+        mMode = mode;
+        mDuration = duration;
+        _switchShowMode();
+    }
+
+    private void _switchShowMode(){
+        lmode=mMode;
 
         Rect frame = new Rect();
         getWindow().getDecorView().getWindowVisibleDisplayFrame(frame);
@@ -183,37 +223,39 @@ public class MainActivity extends AppCompatActivity implements
         mUserMessageLayout.clearAnimation();
         mUserEditLayout.clearAnimation();
 
-        switch (mode){
+        switch (mMode){
             case MODE_MAP:
-                mMapView.animate().y(0).setDuration(duration).start();
-                mUserMessageLayout.animate().y(dh).setDuration(duration).start();
-                mUserEditLayout.animate().y(dh).setDuration(duration).start();
+                mMapView.animate().y(0).setDuration(mDuration).start();
+                mUserMessageLayout.animate().y(dh).setDuration(mDuration).start();
+                mUserEditLayout.animate().y(dh).setDuration(mDuration).start();
+                mFloatingActionButton.show();
                 break;
             case MODE_MESSAGE:
                 spaceHeight = mUserMessageLayout.getSpaceHeight();
-                mMapView.animate().y(-(dh-spaceHeight)/2).setDuration(duration).start();
-                mUserMessageLayout.animate().y(0).setDuration(duration).start();
-                mUserEditLayout.animate().y(dh).setDuration(duration).start();
+                mMapView.animate().y(-(dh-spaceHeight)/2).setDuration(mDuration).start();
+                mUserMessageLayout.animate().y(0).setDuration(mDuration).start();
+                mUserEditLayout.animate().y(dh).setDuration(mDuration).start();
+                mFloatingActionButton.hide();
                 break;
             case MODE_EDIT:
                 spaceHeight = mUserEditLayout.getSpaceHeight();
-                mMapView.animate().y(-(dh-spaceHeight)/2).setDuration(duration).start();
-                mUserMessageLayout.animate().y(dh).setDuration(duration).start();
-                mUserEditLayout.animate().y(0).setDuration(duration).start();
+                mMapView.animate().y(-(dh-spaceHeight)/2).setDuration(mDuration).start();
+                mUserMessageLayout.animate().y(dh).setDuration(mDuration).start();
+                mUserEditLayout.animate().y(0).setDuration(mDuration).start();
+                mFloatingActionButton.hide();
                 break;
         }
     }
 
+    @OnClick(R.id.sendButton)
     public void newPoint(){
         LatLng l = mMyAmapManeger.getCurLatlng();
 
         NewPointData npd = new NewPointData();
         PointData pd = new PointData();
 
-        Random random = new Random();
-//        pd.userID="ID"+Math.abs(random.nextInt());
         pd.userID="开发客户端v0.01";
-        pd.userMessage="sdfadf";
+        pd.userMessage=mUserEditLayout.getUserEdit();
 
         pd.latitude = l.latitude;
         pd.longitude = l.longitude;
@@ -227,6 +269,8 @@ public class MainActivity extends AppCompatActivity implements
                     @Override
                     void call() {
                         Log.d(TAG, "newPoint result: " + mVar.statue + " " + mVar.pointData.pointID);
+                        selectArea();
+                        switchShowMode_force(MODE_MAP,300);
                     }
                 });
     }
@@ -300,45 +344,8 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onCameraChangeFinish(CameraPosition cameraPosition) {
-        Log.d(TAG,"onCameraChangeFinish");
         mSelectHelper.call();
     }
-
-    UserMessageLayout.SpaceTouchEventCallback mSpaceTouchEvent1 = new UserMessageLayout.SpaceTouchEventCallback() {
-        @Override
-        public void onSpaceTouchEvent(MotionEvent ev) {
-            mMapView.dispatchTouchEvent(ev);
-        }
-    } ;
-
-    TopEventScrollView.OverScrollCallback mOverScrollCallback1 = new TopEventScrollView.OverScrollCallback() {
-        @Override
-        public void onOverScroll(ScrollView scrollView) {
-            switchShowMode(MODE_MAP,300);
-        }
-    };
-
-    UserEditLayout.SpaceTouchEventCallback mSpaceTouchEvent2 = new UserEditLayout.SpaceTouchEventCallback() {
-        @Override
-        public void onSpaceTouchEvent(MotionEvent ev) {
-            mMapView.dispatchTouchEvent(ev);
-        }
-    } ;
-
-    TopEventScrollView.OverScrollCallback mOverScrollCallback2 = new TopEventScrollView.OverScrollCallback() {
-        @Override
-        public void onOverScroll(ScrollView scrollView) {
-            Log.d(TAG,"OverScrollCallback");
-            new AlertDialog.Builder(MainActivity.this).setTitle("内容未发送")
-                    .setPositiveButton("保存",new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            switchShowMode(MODE_MAP,300);
-                        }})
-                    .setNegativeButton("取消",null)
-                    .show();//在按键响应事件中显示此对话框
-        }
-    };
 
     @Override
     public void onBackPressed() {
@@ -348,4 +355,8 @@ public class MainActivity extends AppCompatActivity implements
             switchShowMode(MODE_MAP,300);
     }
 
+    @OnClick(R.id.floatingActionButton)
+    public void floatingClick(){
+        switchShowMode(MODE_EDIT,300);
+    }
 }

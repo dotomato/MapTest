@@ -14,7 +14,7 @@
         <Space
             android:id="@+id/space"
             android:layout_width="match_parent"
-            android:layout_height="200dp" />
+            android:layout_height="280dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -36,7 +36,8 @@
                     android:textColor="@android:color/black"
                     android:textSize="20sp"
                     app:layout_constraintLeft_toRightOf="@+id/usericon"
-                    app:layout_constraintTop_toBottomOf="@+id/username" />
+                    app:layout_constraintTop_toBottomOf="@+id/username"
+                    android:layout_marginStart="16dp" />
 
                 <TextView
                     android:id="@+id/username"
@@ -48,7 +49,8 @@
                     android:textColor="@android:color/black"
                     android:textSize="24sp"
                     app:layout_constraintLeft_toRightOf="@+id/usericon"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:layout_marginStart="16dp" />
 
                 <ImageView
                     android:id="@+id/usericon"
@@ -58,26 +60,41 @@
                     android:layout_marginTop="16dp"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@mipmap/ic_launcher" />
+                    app:srcCompat="@mipmap/ic_launcher"
+                    android:layout_marginStart="16dp" />
 
 
             </android.support.constraint.ConstraintLayout>
 
             <EditText
-                android:id="@+id/usermessage"
+                android:id="@+id/usereditmessage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:hint="请输入内容"
+                android:layout_margin="16dp"
+                android:background="@null"
+                android:gravity="top"
+                android:hint="你在这里的所闻、所想……"
                 android:minLines="5"
                 android:textSize="18sp"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
+
+            <android.support.constraint.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp">
+
+                <Button
+                    android:id="@+id/sendButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="16dp"
+                    android:layout_marginTop="0dp"
+                    android:text="Button"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </android.support.constraint.ConstraintLayout>
+
         </LinearLayout>
 
     </LinearLayout>
