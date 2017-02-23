@@ -66,34 +66,31 @@
 
             </android.support.constraint.ConstraintLayout>
 
-            <EditText
-                android:id="@+id/usereditmessage"
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:background="@null"
-                android:gravity="top"
-                android:hint="你在这里的所闻、所想……"
-                android:minLines="5"
-                android:textSize="18sp"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                android:layout_height="wrap_content">
 
-            <android.support.constraint.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="50dp">
-
-                <Button
-                    android:id="@+id/sendButton"
-                    android:layout_width="wrap_content"
+                <EditText
+                    android:id="@+id/usereditmessage"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginRight="16dp"
-                    android:layout_marginTop="0dp"
-                    android:text="Button"
+                    android:layout_margin="16dp"
+                    android:background="@null"
+                    android:gravity="top"
+                    android:hint="你在这里的所闻、所想……"
+                    android:minLines="5"
+                    android:textSize="18sp"
+                    app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintRight_toRightOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
-            </android.support.constraint.ConstraintLayout>
+
+            </FrameLayout>
+
+            <Button
+                android:id="@+id/sendButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Button" />
 
         </LinearLayout>
 

@@ -3,10 +3,16 @@ package com.chen.maptest;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Outline;
+import android.os.Build;
+import android.provider.ContactsContract;
+import android.support.annotation.RequiresApi;
 import android.support.constraint.ConstraintLayout;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewOutlineProvider;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ScrollView;
@@ -33,6 +39,9 @@ import butterknife.BindView;
 public class UserMessageLayout extends TopEventScrollView {
 
     private final static String TAG = "UserMessageLayout";
+
+    @BindView(R.id.back)
+    public ImageView mBack;
 
     @BindView(R.id.usericon)
     public ImageView mUserIcon;
@@ -70,10 +79,26 @@ public class UserMessageLayout extends TopEventScrollView {
         spaceHight = MyUtils.dip2px(context,200);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onFinishInflate(){
         super.onFinishInflate();
         ButterKnife.bind(this);
+
+        mUserIcon.setOutlineProvider(new ViewOutlineProvider() {
+            @Override
+            public void getOutline(View view, Outline outline) {
+                outline.setOval(0,0,view.getWidth(),view.getHeight());
+            }
+        });
+
+        mBack.setOutlineProvider(new ViewOutlineProvider() {
+            @Override
+            public void getOutline(View view, Outline outline) {
+                outline.setRect(0,0,view.getWidth(),view.getHeight());
+            }
+        });
+
     }
 
     public void setUserIcon(String var){

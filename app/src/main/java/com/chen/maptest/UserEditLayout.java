@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Space;
@@ -41,7 +42,6 @@ public class UserEditLayout extends TopEventScrollView{
 
     @BindView(R.id.space)
     public Space mSpace;
-
 
     private Context mContext;
 
@@ -121,5 +121,6 @@ public class UserEditLayout extends TopEventScrollView{
     public String getUserEdit(){
         return mUserMessage.getText().toString();
     }
+
 
 }
