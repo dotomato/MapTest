@@ -32,6 +32,8 @@ import com.baidu.mapapi.model.LatLng;
 
 import java.util.HashMap;
 
+
+import com.chen.maptest.MyModel.*;
 /**
  * Created by chen on 17-2-19.
  * Copyright *

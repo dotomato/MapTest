@@ -34,6 +34,9 @@ import com.amap.api.maps.model.MarkerOptions;
 import java.util.HashMap;
 
 
+import com.chen.maptest.MyModel.*;
+
+
 /**
  * Created by chen on 17-2-19.
  * Copyright *

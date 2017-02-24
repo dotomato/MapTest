@@ -21,7 +21,10 @@ import android.widget.Space;
 import android.widget.TextView;
 
 
+import com.chen.maptest.MyUpyun.ImageDelegate;
 import com.chen.maptest.View.TopEventScrollView;
+
+import com.chen.maptest.MyModel.*;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -158,6 +161,7 @@ public class UserMessageLayout extends TopEventScrollView {
                 mEditLayout.setVisibility(VISIBLE);
                 break;
             case MainActivity.MODE_MESSAGE:
+//                new ImageDelegate(mUserIcon).setSrc("test src").doit();
 
                 mEditMessage.setVisibility(GONE);
 

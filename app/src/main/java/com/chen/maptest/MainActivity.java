@@ -16,6 +16,8 @@ import butterknife.OnClick;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
+import com.chen.maptest.MyModel.*;
+
 public class MainActivity extends BmapAdapterActivity implements MapAdaterCallback {
 
 
@@ -261,7 +263,7 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
     @OnClick(R.id.floatingActionButton)
     public void floatingClick(){
         switchShowMode(MODE_EDIT,300);
-        PointData pd = MyModel.getEditDeafultPointData();
+        PointData pd = MyModelFactory.getEditDeafultPointData();
         MyLatlng l = getCurLatlng();
         pd.latitude = l.latitude;
         pd.longitude = l.longitude;

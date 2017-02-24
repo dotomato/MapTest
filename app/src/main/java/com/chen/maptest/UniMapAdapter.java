@@ -2,7 +2,7 @@ package com.chen.maptest;
 
 import android.view.MotionEvent;
 
-import com.chen.maptest.PointSimpleData;
+import com.chen.maptest.MyModel.*;
 
 /**
  * Created by chen on 17-2-19.
