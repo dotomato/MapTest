@@ -8,6 +8,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ScrollView;
 
+import com.chen.maptest.View.TopEventScrollView;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -23,9 +25,6 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
 
     @BindView(R.id.user_message_layout)
     public UserMessageLayout mUserMessageLayout;
-
-    @BindView(R.id.user_edit_layout)
-    public UserEditLayout mUserEditLayout;
 
     @BindView(R.id.floatingActionButton)
     public FloatingActionButton mFloatingActionButton;
@@ -47,12 +46,14 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
         new Thread(mSelectHelper).start();
 
         setMapAdaterCallback(this);
+
+
+        switchShowMode(MODE_MAP,300);
     }
 
     @Override
     protected void onStart(){
         super.onStart();
-        switchShowMode(MODE_MAP,300);
     }
 
     private void initLayout(){
@@ -65,23 +66,6 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
 
 
         mUserMessageLayout.setSpaceTouchEventCallback(new UserMessageLayout.SpaceTouchEventCallback() {
-            @Override
-            public void onSpaceTouchEvent(MotionEvent ev) {
-                ev.offsetLocation(0,-mapView.getY());
-                mapView.dispatchTouchEvent(ev);
-            }
-        });
-
-
-        mUserEditLayout.setOverScrollCallback(new TopEventScrollView.OverScrollCallback() {
-            @Override
-            public void onOverScroll(ScrollView scrollView) {
-                switchShowMode(MODE_MAP,300);
-            }
-        });
-
-
-        mUserEditLayout.setSpaceTouchEventCallback(new UserEditLayout.SpaceTouchEventCallback() {
             @Override
             public void onSpaceTouchEvent(MotionEvent ev) {
                 ev.offsetLocation(0,-mapView.getY());
@@ -110,10 +94,8 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
                 .subscribe(new MyAction1<GetPointResult>() {
                     @Override
                     void call() {
-                        mUserMessageLayout.setUserMessage(mVar.pointData.userMessage);
-                        mUserMessageLayout.setUserDescript(mVar.pointData.userID);
                         switchShowMode(MODE_MESSAGE,300);
-                        mUserMessageLayout.initshow();
+                        mUserMessageLayout.initshow(MODE_MESSAGE,mVar.pointData);
                     }
                 });
     }
@@ -134,7 +116,7 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
         mMode = mode;
         mDuration = duration;
         if (lmode==MODE_EDIT) {
-            mUserEditLayout.tryExit(new UserEditLayout.ExitCallback() {
+            mUserMessageLayout.tryExit(new UserMessageLayout.ExitCallback() {
                 @Override
                 public void call() {
                     _switchShowMode();
@@ -161,41 +143,34 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
 
         mapView.clearAnimation();
         mUserMessageLayout.clearAnimation();
-        mUserEditLayout.clearAnimation();
 
         switch (mMode){
             case MODE_MAP:
                 mapView.animate().y(0).setDuration(mDuration).start();
                 mUserMessageLayout.animate().y(dh).setDuration(mDuration).start();
-                mUserEditLayout.animate().y(dh).setDuration(mDuration).start();
                 mFloatingActionButton.show();
                 break;
             case MODE_MESSAGE:
                 spaceHeight = mUserMessageLayout.getSpaceHeight();
                 mapView.animate().y(-(dh-spaceHeight)/2).setDuration(mDuration).start();
                 mUserMessageLayout.animate().y(0).setDuration(mDuration).start();
-                mUserEditLayout.animate().y(dh).setDuration(mDuration).start();
                 mFloatingActionButton.hide();
                 break;
             case MODE_EDIT:
-                spaceHeight = mUserEditLayout.getSpaceHeight();
+                spaceHeight = mUserMessageLayout.getSpaceHeight();
                 mapView.animate().y(-(dh-spaceHeight)/2).setDuration(mDuration).start();
-                mUserMessageLayout.animate().y(dh).setDuration(mDuration).start();
-                mUserEditLayout.animate().y(0).setDuration(mDuration).start();
+                mUserMessageLayout.animate().y(0).setDuration(mDuration).start();
                 mFloatingActionButton.hide();
                 break;
         }
     }
 
-    @OnClick(R.id.sendButton)
+    @OnClick(R.id.sendbutton)
     public void newPoint(){
         MyLatlng l = getCurLatlng();
 
         NewPointData npd = new NewPointData();
-        PointData pd = new PointData();
-
-        pd.userID="开发客户端v0.01";
-        pd.userMessage=mUserEditLayout.getUserEdit();
+        PointData pd = mUserMessageLayout.getPD();
 
         pd.latitude = l.latitude;
         pd.longitude = l.longitude;
@@ -286,5 +261,10 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
     @OnClick(R.id.floatingActionButton)
     public void floatingClick(){
         switchShowMode(MODE_EDIT,300);
+        PointData pd = MyModel.getEditDeafultPointData();
+        MyLatlng l = getCurLatlng();
+        pd.latitude = l.latitude;
+        pd.longitude = l.longitude;
+        mUserMessageLayout.initshow(MODE_EDIT,pd);
     }
 }

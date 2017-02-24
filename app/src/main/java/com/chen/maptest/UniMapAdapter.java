@@ -2,6 +2,8 @@ package com.chen.maptest;
 
 import android.view.MotionEvent;
 
+import com.chen.maptest.PointSimpleData;
+
 /**
  * Created by chen on 17-2-19.
  * Copyright *

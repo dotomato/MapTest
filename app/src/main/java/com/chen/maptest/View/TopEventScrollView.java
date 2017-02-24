@@ -1,10 +1,12 @@
-package com.chen.maptest;
+package com.chen.maptest.View;
 
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.ScrollView;
+
+import com.chen.maptest.MyUtils;
 
 /**
  * Created by chen on 17-2-18.

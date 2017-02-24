@@ -48,7 +48,7 @@
                     app:layout_constraintTop_toTopOf="@id/back"
                     app:layout_constraintBottom_toBottomOf="parent" />
 
-                <com.chen.maptest.RoundImageView
+                <com.chen.maptest.View.RoundImageView
                     android:id="@+id/usericon"
                     android:layout_width="80dp"
                     android:layout_height="80dp"
@@ -113,27 +113,68 @@
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintRight_toRightOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
-            </FrameLayout>
 
-            <android.support.constraint.ConstraintLayout
-                android:id="@+id/bottomview"
-                android:layout_width="match_parent"
-                android:layout_height="300dp"
-                android:background="#FFFFFFFF">
-
-                <TextView
-                    android:id="@+id/time"
-                    android:layout_width="wrap_content"
+                <EditText
+                    android:id="@+id/usereditmessage"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="2017-02-23 在 国科大的一条小溪旁"
-                    android:textColor="@android:color/darker_gray"
-                    android:textSize="14dp"
+                    android:layout_margin="16dp"
+                    android:background="@null"
+                    android:gravity="top"
+                    android:hint="你在这里的所闻、所想……"
+                    android:minLines="4"
+                    android:textSize="16sp"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintTop_toBottomOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent" />
 
-            </android.support.constraint.ConstraintLayout>
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="300dp">
+
+                <android.support.constraint.ConstraintLayout
+                    android:id="@+id/messagelayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#FFFFFFFF">
+
+                    <TextView
+                        android:id="@+id/time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:text="2017-02-23 在 国科大的一条小溪旁"
+                        android:textColor="@android:color/darker_gray"
+                        android:textSize="14sp"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toBottomOf="parent" />
+
+                </android.support.constraint.ConstraintLayout>
+
+                <android.support.constraint.ConstraintLayout
+                    android:id="@+id/editlayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#FFFFFFFF">
+
+                    <Button
+                        android:id="@+id/sendbutton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:backgroundTint="@color/colorPrimary"
+                        android:text="发送"
+                        android:textSize="14sp"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintRight_toRightOf="parent" />
+
+                </android.support.constraint.ConstraintLayout>
+
+            </FrameLayout>
+
+
         </LinearLayout>
 
     </LinearLayout>

@@ -1,4 +1,4 @@
-package com.chen.maptest;
+package com.chen.maptest.View;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;

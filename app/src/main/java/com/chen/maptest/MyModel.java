@@ -7,6 +7,14 @@ import java.util.List;
  * Copyright *
  */
 
+class MyModel{
+    static PointData getEditDeafultPointData(){
+        PointData result = new PointData();
+        result.userID = "开发客户端v0.01";
+        return result;
+    }
+}
+
 class BaseResult{
     int statue;
     String errorMessage;
@@ -18,7 +26,7 @@ class PointData{
     String userMessage;
     double latitude;
     double longitude;
-    String time;
+    long pointTime;
 }
 
 class PointSimpleData{
