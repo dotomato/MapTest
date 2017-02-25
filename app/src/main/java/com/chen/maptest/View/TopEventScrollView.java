@@ -6,7 +6,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.ScrollView;
 
-import com.chen.maptest.MyUtils;
+import com.chen.maptest.Utils.MyUtils;
 
 /**
  * Created by chen on 17-2-18.

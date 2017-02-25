@@ -1,4 +1,4 @@
-package com.chen.maptest;
+package com.chen.maptest.MyServer;
 
 import android.util.Log;
 
@@ -13,7 +13,6 @@ import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import retrofit2.http.Query;
 import rx.Observable;
-import rx.Observer;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
@@ -22,7 +21,7 @@ import rx.schedulers.Schedulers;
  * Copyright *
  */
 
-class Myserver {
+public class Myserver {
 
     final static private String TAG = "Myserver";
 
@@ -30,7 +29,7 @@ class Myserver {
     final static private String BASEURL = "http://192.168.1.106:5001";
     final static private String VERSION = "/api/v0.01";
 
-    interface MyserverInterface{
+    public interface MyserverInterface{
 
         @GET(VERSION+"/apitest")
         Observable<ApiTestResult> apitest(@Query("q") String var);
@@ -54,7 +53,7 @@ class Myserver {
 
     private static MyserverInterface mServer=null;
 
-    static MyserverInterface getApi(){
+    public static MyserverInterface getApi(){
         if (mServer==null) {
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl(BASEURL)
@@ -67,50 +66,16 @@ class Myserver {
         return mServer;
     }
 
-    static void apiTest(){
+    public static void apiTest(){
         getApi().apitest("api test message!")
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new MyAction1<ApiTestResult>() {
                     @Override
-                    void call() {
+                    public void call() {
                         Log.d(TAG, "api test result: " + mVar.statue);
                     }
                 });
     }
 }
 
-//一个封装好了服务器已知错误和意外错误的Action1
-abstract class MyAction1<T> implements Observer<T> {
-    @Override
-    public void onCompleted() {
-
-    }
-
-    @Override
-    public final void onError(Throwable e) {
-        e.printStackTrace();
-        error(-101, "服务器发生未知错误，或者是转换返回数据体时出错");
-    }
-
-    @Override
-    public final void onNext(T var){
-        BaseResult var2 = (BaseResult) var;
-        if (var2.statue != 100) {
-            error(var2.statue, var2.errorMessage);
-        } else {
-            mVar = var;
-            call();
-        }
-    }
-
-    T mVar;
-
-    void call(){   }
-
-    void error(int statue, String errorMessage){
-        Log.e("MyAction1","statue="+statue+" errorMessage="+errorMessage);
-    }
-
-
-}

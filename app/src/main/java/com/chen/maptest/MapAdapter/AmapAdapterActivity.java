@@ -1,4 +1,4 @@
-package com.chen.maptest;
+package com.chen.maptest.MapAdapter;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -8,32 +8,36 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.baidu.location.BDLocation;
-import com.baidu.location.BDLocationListener;
-import com.baidu.location.LocationClient;
-import com.baidu.location.LocationClientOption;
-import com.baidu.mapapi.SDKInitializer;
-import com.baidu.mapapi.map.BaiduMap;
-import com.baidu.mapapi.map.BitmapDescriptor;
-import com.baidu.mapapi.map.BitmapDescriptorFactory;
-import com.baidu.mapapi.map.LogoPosition;
-import com.baidu.mapapi.map.MapStatus;
-import com.baidu.mapapi.map.MapStatusUpdate;
-import com.baidu.mapapi.map.MapStatusUpdateFactory;
-import com.baidu.mapapi.map.MapView;
-import com.baidu.mapapi.map.Marker;
-import com.baidu.mapapi.map.MarkerOptions;
-import com.baidu.mapapi.map.Projection;
-import com.baidu.mapapi.map.UiSettings;
-import com.baidu.mapapi.model.LatLng;
+import com.amap.api.location.AMapLocation;
+import com.amap.api.location.AMapLocationClient;
+import com.amap.api.location.AMapLocationClientOption;
+import com.amap.api.location.AMapLocationListener;
+import com.amap.api.maps.AMap;
+import com.amap.api.maps.AMapOptions;
+import com.amap.api.maps.CameraUpdate;
+import com.amap.api.maps.CameraUpdateFactory;
+import com.amap.api.maps.LocationSource;
+import com.amap.api.maps.MapView;
+import com.amap.api.maps.Projection;
+import com.amap.api.maps.UiSettings;
+import com.amap.api.maps.model.BitmapDescriptor;
+import com.amap.api.maps.model.BitmapDescriptorFactory;
+import com.amap.api.maps.model.CameraPosition;
+import com.amap.api.maps.model.LatLng;
+import com.amap.api.maps.model.Marker;
+import com.amap.api.maps.model.MarkerOptions;
 
 import java.util.HashMap;
 
 
 import com.chen.maptest.MyModel.*;
+import com.chen.maptest.R;
+
+
 /**
  * Created by chen on 17-2-19.
  * Copyright *
@@ -41,33 +45,26 @@ import com.chen.maptest.MyModel.*;
 
 
 
-public class BmapAdapterActivity extends AppCompatActivity implements
-        BaiduMap.OnMapStatusChangeListener, BaiduMap.OnMapTouchListener, BaiduMap.OnMarkerClickListener ,
-        BDLocationListener, BaiduMap.OnMapLoadedCallback{
 
-    @Override
-    public void onMapLoaded() {
-        mProjection = bMap.getProjection();
-        if (mMapAdaterCallback!=null)
-            mMapAdaterCallback.MyCameraChangeFinish();
-    }
+public class AmapAdapterActivity extends AppCompatActivity implements
+        AMap.OnMapTouchListener, AMap.OnMarkerClickListener, AMap.OnCameraChangeListener, LocationSource, AMapLocationListener {
 
-    class MyLatlng {
-        //TODO 完成坐标的百度系与标准系的转换
-        double latitude;
-        double longitude;
+    public  class MyLatlng {
+        //TODO 完成坐标的高德系与标准系的转换
+        public double latitude;
+        public double longitude;
 
-        MyLatlng(double v1, double v2) {
+        public MyLatlng(double v1, double v2) {
             latitude=v1;
             longitude=v2;
         }
 
-        MyLatlng(LatLng latlng){
+        public MyLatlng(LatLng latlng){
             latitude = latlng.latitude;
             longitude = latlng.longitude;
         }
 
-        LatLng toLatlng(){
+        public LatLng toLatlng(){
             return new LatLng(latitude,longitude);
         }
 
@@ -83,44 +80,44 @@ public class BmapAdapterActivity extends AppCompatActivity implements
 
     public void gotoLocation2(MyLatlng latlng){
         //参数依次是：视角调整区域的中心点坐标、希望调整到的缩放级别、俯仰角0°~45°（垂直与地图时为0）、偏航角 0~360° (正北方为0)
-        MapStatusUpdate mCameraUpdate =
-                MapStatusUpdateFactory.newLatLngZoom(latlng.toLatlng(), bMap.getMapStatus().zoom);
-        bMap.animateMapStatus(mCameraUpdate,500);
+        CameraUpdate mCameraUpdate = CameraUpdateFactory.newCameraPosition(
+                new CameraPosition(latlng.toLatlng(), aMap.getCameraPosition().zoom,0,0));
+        aMap.animateCamera(mCameraUpdate,500,null);
     }
 
     public void gotoGpsLocation(){
         gotoLocation(gpsLocation);
     }
 
-    MyLatlng getLeftTopLatlng(){
+    public MyLatlng getLeftTopLatlng(){
         return new MyLatlng(mProjection.fromScreenLocation(new Point(0,0)));
     }
 
-    MyLatlng getRightBottomLatlng(){
+    public MyLatlng getRightBottomLatlng(){
         int a = mMapView.getWidth();
         int b = mMapView.getBottom();
         return new MyLatlng(mProjection.fromScreenLocation(new Point(a,b)));
     }
 
-    MyLatlng getCurLatlng(){
+    public MyLatlng getCurLatlng(){
         int a = mMapView.getWidth();
         int b = mMapView.getBottom();
         return new MyLatlng(mProjection.fromScreenLocation(new Point(a/2,b/2)));
     }
 
-    void rmAllMarker(){
+    public void rmAllMarker(){
         for (Marker var:markerMap.values()) {
             var.remove();
         }
     }
 
-    void addMarker(PointSimpleData psd){
+    public void addMarker(PointSimpleData psd){
         mMarkerOption.position(new LatLng(psd.latitude,psd.longitude))
                 .draggable(false)
                 .icon(mBitmapDescriptor)
                 .anchor(0.5f,0.5f)
-                .flat(true);     //设置marker平贴地图效果// 将Marker设置为贴地显示，可以双指下拉地图查看效果
-        Marker marker = (Marker) bMap.addOverlay(mMarkerOption);
+                .setFlat(true);     //设置marker平贴地图效果// 将Marker设置为贴地显示，可以双指下拉地图查看效果
+        Marker marker = aMap.addMarker(mMarkerOption);
         marker.setTitle(psd.pointID);
         markerMap.put(psd.pointID,marker);
 //        marker.setObject(psd);
@@ -134,13 +131,15 @@ public class BmapAdapterActivity extends AppCompatActivity implements
     private final static int WRITE_COARSE_LOCATION_REQUEST_CODE = 0;
 
     private MapView mMapView;
-    private BaiduMap bMap;
+    private AMap aMap;
 
-    private LocationClient mlocationClient;
+    private OnLocationChangedListener mListener;
+    private AMapLocationClient mlocationClient;
     private Projection mProjection;
 
     private MarkerOptions mMarkerOption;
     private BitmapDescriptor mBitmapDescriptor;
+
     private HashMap<String,Marker> markerMap;
     private boolean firstshow;
 
@@ -148,14 +147,16 @@ public class BmapAdapterActivity extends AppCompatActivity implements
     MapAdaterCallback mMapAdaterCallback=null;
 
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         initPremisstion();
-        SDKInitializer.initialize(getApplicationContext());
+
         setContentView(R.layout.activity_main);
         mMapView = (MapView)findViewById(R.id.map);
+        mMapView.onCreate(savedInstanceState);
 
         initAmap();
     }
@@ -179,41 +180,40 @@ public class BmapAdapterActivity extends AppCompatActivity implements
 
     private void initAmap(){
 
-        bMap = mMapView.getMap();
-        bMap.setOnMapTouchListener(this);
-        bMap.setOnMarkerClickListener(this);
-        bMap.setOnMapStatusChangeListener(this);
-        bMap.setOnMapLoadedCallback(this);
+        aMap = mMapView.getMap();
+        aMap.setOnMapTouchListener(this);
+        aMap.setOnMarkerClickListener(this);
+        aMap.setOnCameraChangeListener(this);
 
         // 设置定位监听
-//        bMap.setLocationSource(this);
+        aMap.setLocationSource(this);
         // 设置为true表示显示定位层并可触发定位，false表示隐藏定位层并不可触发定位，默认是false
-        bMap.setMyLocationEnabled(true);
+        aMap.setMyLocationEnabled(true);
         // 设置定位的类型为定位模式，有定位、跟随或地图根据面向方向旋转几种
-//        bMap.setMyLocationType(BaiduMap.LOCATION_TYPE_LOCATE);
+        aMap.setMyLocationType(AMap.LOCATION_TYPE_LOCATE);
 
-        UiSettings mUiSettings = bMap.getUiSettings();
+        UiSettings mUiSettings = aMap.getUiSettings();
         //设置滑动手势
         mUiSettings.setScrollGesturesEnabled(true);
         //设置缩放手势
         mUiSettings.setZoomGesturesEnabled(true);
         //设置倾斜手势
-//        mUiSettings.setTiltGesturesEnabled(false);
+        mUiSettings.setTiltGesturesEnabled(false);
         //设置旋转手势
         mUiSettings.setRotateGesturesEnabled(false);
         //设置放大缩小指示器
-//        mUiSettings.setZoomControlsEnabled(false);
+        mUiSettings.setZoomControlsEnabled(false);
         //设置指南针
         mUiSettings.setCompassEnabled(false);
         //设置定位按钮
-//        mUiSettings.setMyLocationButtonEnabled(false);
+        mUiSettings.setMyLocationButtonEnabled(false);
         //设置比例尺控件
-//        mUiSettings.setScaleControlsEnabled(false);
+        mUiSettings.setScaleControlsEnabled(false);
         //设置logo位置
-        mMapView.setLogoPosition(LogoPosition.logoPostionleftBottom);
+        mUiSettings.setLogoPosition(AMapOptions.LOGO_POSITION_BOTTOM_LEFT);
 
-        //得到坐标转换器，放在OnMapLoad后获取
-//        mProjection = bMap.getProjection();
+        //得到坐标转换器
+        mProjection = aMap.getProjection();
 
         firstshow=true;
 
@@ -222,17 +222,6 @@ public class BmapAdapterActivity extends AppCompatActivity implements
         mMarkerOption= new MarkerOptions();
         mBitmapDescriptor = BitmapDescriptorFactory.fromBitmap(BitmapFactory
                 .decodeResource(getResources(),R.drawable.press_xingxing_small));
-
-
-        mlocationClient = new LocationClient(getApplicationContext());
-        LocationClientOption mLocationOption = new LocationClientOption();
-        mLocationOption.setLocationMode(LocationClientOption.LocationMode.Hight_Accuracy);
-        mLocationOption.setScanSpan(3000);
-//        mLocationOption.setOpenGps(true);
-        mLocationOption.setIgnoreKillProcess(false);
-        mlocationClient.setLocOption(mLocationOption);
-        mlocationClient.start();//启动定位
-        mlocationClient.registerLocationListener(this);
     }
 
     @Override
@@ -240,7 +229,7 @@ public class BmapAdapterActivity extends AppCompatActivity implements
         super.onDestroy();
         //在activity执行onDestroy时执行mMapView.onDestroy()，销毁地图
         mMapView.onDestroy();
-        mlocationClient.stop();
+        mlocationClient.onDestroy();
     }
 
     @Override
@@ -283,42 +272,73 @@ public class BmapAdapterActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onMapStatusChangeStart(MapStatus mapStatus) {
-
+    public void onCameraChange(CameraPosition cameraPosition) {
     }
 
     @Override
-    public void onMapStatusChange(MapStatus mapStatus) {
-
-    }
-
-    @Override
-    public void onMapStatusChangeFinish(MapStatus mapStatus) {
+    public void onCameraChangeFinish(CameraPosition cameraPosition) {
         if (mMapAdaterCallback!=null)
             mMapAdaterCallback.MyCameraChangeFinish();
     }
 
-
-    private BDLocation gpsLocation;
     @Override
-    public void onReceiveLocation(BDLocation bdLocation) {
-//        bdLocation.getLocType();
-        gpsLocation = bdLocation;
-        if (firstshow) {
-            gotoLocation(bdLocation);
-            firstshow = false;
+    public void activate(OnLocationChangedListener listener) {
+        mListener = listener;
+        if (mlocationClient == null) {
+            //初始化定位
+            mlocationClient = new AMapLocationClient(this);
+            //初始化定位参数
+            AMapLocationClientOption mLocationOption = new AMapLocationClientOption();
+            //设置定位回调监听
+            mlocationClient.setLocationListener(this);
+
+            mLocationOption.setMockEnable(true);
+            //设置为高精度定位模式
+            mLocationOption.setLocationMode(AMapLocationClientOption.AMapLocationMode.Hight_Accuracy);
+            //设置定位参数
+            mlocationClient.setLocationOption(mLocationOption);
+            // 此方法为每隔固定时间会发起一次定位请求，为了减少电量消耗或网络流量消耗，
+            // 注意设置合适的定位时间的间隔（最小间隔支持为2000ms），并且在合适时间调用stopLocation()方法来取消定位请求
+            // 在定位结束后，在合适的生命周期调用onDestroy()方法
+            // 在单次定位情况下，定位无论成功与否，都无需调用stopLocation()方法移除请求，定位sdk内部会移除
+            mlocationClient.startLocation();//启动定位
         }
     }
 
     @Override
-    public void onConnectHotSpotMessage(String s, int i) {
-
+    public void deactivate() {
+        mListener = null;
+        if (mlocationClient != null) {
+            mlocationClient.stopLocation();
+            mlocationClient.onDestroy();
+        }
+        mlocationClient = null;
     }
 
-    private void gotoLocation(BDLocation amapLocation){
+    private AMapLocation gpsLocation;
+    @Override
+    public void onLocationChanged(AMapLocation amapLocation) {
+        if (mListener != null && amapLocation != null) {
+            if (amapLocation.getErrorCode() == 0) {
+                mListener.onLocationChanged(amapLocation);// 显示系统小蓝点
+                gpsLocation = amapLocation;
+                if (firstshow) {
+                    gotoLocation(amapLocation);
+                    firstshow = false;
+                }
+            } else {
+                String errText = "定位失败," + amapLocation.getErrorCode()+ ": " + amapLocation.getErrorInfo();
+                Log.e("AmapErr",errText);
+            }
+        }
+    }
+
+    private void gotoLocation(AMapLocation amapLocation){
         //参数依次是：视角调整区域的中心点坐标、希望调整到的缩放级别、俯仰角0°~45°（垂直与地图时为0）、偏航角 0~360° (正北方为0)
-        MapStatusUpdate mCameraUpdate =
-            MapStatusUpdateFactory.newLatLngZoom(new LatLng(amapLocation.getLatitude(), amapLocation.getLongitude()),18);
-        bMap.animateMapStatus(mCameraUpdate,500);
+        CameraUpdate mCameraUpdate = CameraUpdateFactory.newCameraPosition(
+                new CameraPosition(new LatLng(amapLocation.getLatitude(), amapLocation.getLongitude()),
+                        18,0,0));
+        aMap.animateCamera(mCameraUpdate,500,null);
     }
+
 }

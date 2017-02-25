@@ -1,4 +1,4 @@
-package com.chen.maptest;
+package com.chen.maptest.MapAdapter;
 
 import android.view.MotionEvent;
 
@@ -9,8 +9,7 @@ import com.chen.maptest.MyModel.*;
  * Copyright *
  */
 
-
-interface MapAdaterCallback{
+public interface MapAdaterCallback{
     void MyTouch(MotionEvent motionEvent);
     void MyMarkerClick(PointSimpleData psd);
     void MyCameraChangeFinish();

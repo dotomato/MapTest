@@ -8,6 +8,10 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ScrollView;
 
+import com.chen.maptest.MapAdapter.BmapAdapterActivity;
+import com.chen.maptest.MapAdapter.MapAdaterCallback;
+import com.chen.maptest.MyServer.MyAction1;
+import com.chen.maptest.MyServer.Myserver;
 import com.chen.maptest.View.TopEventScrollView;
 
 import butterknife.BindView;
@@ -95,7 +99,7 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new MyAction1<GetPointResult>() {
                     @Override
-                    void call() {
+                    public void call() {
                         switchShowMode(MODE_MESSAGE,300);
                         mUserMessageLayout.initshow(MODE_MESSAGE,mVar.pointData);
                     }
@@ -184,7 +188,7 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new MyAction1<NewPointResult>() {
                     @Override
-                    void call() {
+                    public void call() {
                         Log.d(TAG, "newPoint result: " + mVar.statue + " " + mVar.pointData.pointID);
                         selectArea();
                         switchShowMode_force(MODE_MAP,300);
@@ -206,7 +210,7 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new MyAction1<SelectAreaResult>() {
                     @Override
-                    void call() {
+                    public void call() {
                         rmAllMarker();
                         Log.d(TAG, "selectArea result: " + mVar.statue + " " + mVar.pointsCount);
                         for (PointSimpleData psd:mVar.points) {
