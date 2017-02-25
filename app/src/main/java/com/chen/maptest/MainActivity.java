@@ -3,16 +3,18 @@ package com.chen.maptest;
 import android.graphics.Rect;
 import android.support.design.widget.FloatingActionButton;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ScrollView;
 
 import com.chen.maptest.MapAdapter.BmapAdapterActivity;
 import com.chen.maptest.MapAdapter.MapAdaterCallback;
 import com.chen.maptest.MyServer.MyAction1;
 import com.chen.maptest.MyServer.Myserver;
-import com.chen.maptest.View.TopEventScrollView;
+import com.chen.maptest.MyView.TopEventScrollView;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -35,7 +37,12 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
     @BindView(R.id.floatingActionButton)
     public FloatingActionButton mFloatingActionButton;
 
+    @BindView(R.id.leftDrawer)
+    public ViewGroup mLeftDrawerLayout;
+
     private View mapView;
+
+    private ActionBarDrawerToggle mDrawerToggle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +85,11 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
                 mapView.dispatchTouchEvent(ev);
             }
         });
+        drawerLayoutinit();
+    }
+
+    private void drawerLayoutinit(){
+
     }
 
     @Override

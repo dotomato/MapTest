@@ -21,10 +21,7 @@ import android.widget.Space;
 import android.widget.TextView;
 
 
-import com.chen.maptest.MainActivity;
-import com.chen.maptest.MyUpyun.ImageDelegate;
-import com.chen.maptest.R;
-import com.chen.maptest.View.TopEventScrollView;
+import com.chen.maptest.MyView.TopEventScrollView;
 
 import com.chen.maptest.MyModel.*;
 

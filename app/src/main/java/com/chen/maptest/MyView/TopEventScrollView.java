@@ -1,4 +1,4 @@
-package com.chen.maptest.View;
+package com.chen.maptest.MyView;
 
 import android.content.Context;
 import android.util.AttributeSet;

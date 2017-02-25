@@ -48,7 +48,7 @@
                     app:layout_constraintTop_toTopOf="@id/back"
                     app:layout_constraintBottom_toBottomOf="parent" />
 
-                <com.chen.maptest.View.RoundImageView
+                <com.chen.maptest.MyView.RoundImageView
                     android:id="@+id/usericon"
                     android:layout_width="80dp"
                     android:layout_height="80dp"
