@@ -50,6 +50,7 @@ public class MyListViewAdapter extends ArrayAdapter<ListViewItemData>{
         }
         ListViewItemData data= mData.get(position);
         holder.mTextView.setText(data.text);
+        holder.mIcon.setImageResource(data.imageRes);
         return convertView;
     }
 

@@ -21,6 +21,7 @@ import android.widget.Space;
 import android.widget.TextView;
 
 
+import com.chen.maptest.MyView.OutlineProvider;
 import com.chen.maptest.MyView.TopEventScrollView;
 
 import com.chen.maptest.MyModel.*;
@@ -109,20 +110,8 @@ public class UserMessageLayout extends TopEventScrollView {
         super.onFinishInflate();
         ButterKnife.bind(this);
 
-        mUserIcon.setOutlineProvider(new ViewOutlineProvider() {
-            @Override
-            public void getOutline(View view, Outline outline) {
-                outline.setOval(0,0,view.getWidth(),view.getHeight());
-            }
-        });
-
-        mBack.setOutlineProvider(new ViewOutlineProvider() {
-            @Override
-            public void getOutline(View view, Outline outline) {
-                outline.setRect(0,0,view.getWidth(),view.getHeight());
-            }
-        });
-
+        OutlineProvider.setOutline(mUserIcon,OutlineProvider.SHAPE_OVAL);
+        OutlineProvider.setOutline(mBack,OutlineProvider.SHAPE_RECT);
     }
 
     public void setUserIcon(String var){

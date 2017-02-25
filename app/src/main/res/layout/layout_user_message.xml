@@ -164,7 +164,7 @@
                         android:id="@+id/sendbutton"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:backgroundTint="@color/colorPrimary"
+                        android:backgroundTint="#FF8888FF"
                         android:text="发送"
                         android:textSize="14sp"
                         app:layout_constraintLeft_toLeftOf="parent"

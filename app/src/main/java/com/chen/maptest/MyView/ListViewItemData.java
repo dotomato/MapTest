@@ -8,8 +8,10 @@ package com.chen.maptest.MyView;
 public class ListViewItemData {
     public String text;
     public Class activity;
-    public ListViewItemData(String v1,Class v2){
+    public int imageRes;
+    public ListViewItemData(String v1,Class v2,int v3){
         text=v1;
         activity=v2;
+        imageRes=v3;
     }
 }

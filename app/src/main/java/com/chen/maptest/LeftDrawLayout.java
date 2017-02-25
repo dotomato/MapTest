@@ -2,16 +2,23 @@ package com.chen.maptest;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.Outline;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewOutlineProvider;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ScrollView;
 
 import com.chen.maptest.MyView.ListViewItemData;
 import com.chen.maptest.MyView.MyListViewAdapter;
+import com.chen.maptest.MyView.OutlineProvider;
 
 import java.util.ArrayList;
 
@@ -31,6 +38,8 @@ public class LeftDrawLayout extends ListView {
     private ArrayList<ListViewItemData> mData = new ArrayList<>();
 
     private View mHeader;
+
+    public ImageView mUsericon;
 
     public LeftDrawLayout(Context context) {
         super(context);
@@ -63,17 +72,24 @@ public class LeftDrawLayout extends ListView {
         mHeader = LayoutInflater.from(mContext).inflate(R.layout.layout_listview_header,this,false);
         addHeaderView(mHeader);
 
-        mData.add(new ListViewItemData("设置",MainActivity.class));
-        mData.add(new ListViewItemData("设置2",MainActivity.class));
-        mData.add(new ListViewItemData("设置3",MainActivity.class));
+        OutlineProvider.setOutline(mHeader.findViewById(R.id.usericon),OutlineProvider.SHAPE_OVAL);
+
+        mData.add(new ListViewItemData("私信", MainActivity.class, android.R.drawable.ic_dialog_email));
+        mData.add(new ListViewItemData("回复",MainActivity.class, android.R.drawable.ic_dialog_info));
+        mData.add(new ListViewItemData("我的",MainActivity.class, android.R.drawable.ic_dialog_map));
         MyListViewAdapter ia = new MyListViewAdapter(mContext,R.layout.layout_listviewitem,mData);
         setAdapter(ia);
-        setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                ListViewItemData id = mData.get(i);
-                Intent intent = new Intent(mContext,id.activity);
-                mContext.startActivity(intent);
+                if (i==0){
+                    Intent intent = new Intent(mContext, UserinfoActivity.class);
+                    mContext.startActivity(intent);
+                } else {
+                    ListViewItemData id = mData.get(i-1);
+                    Intent intent = new Intent(mContext, id.activity);
+                    mContext.startActivity(intent);
+                }
             }
         });
     }

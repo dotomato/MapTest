@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools" tools:context=".UserinfoActivity">
+
+    <item
+        android:id="@+id/complete"
+        android:icon="@android:drawable/ic_menu_edit"
+        android:title="完成"
+        app:showAsAction="always" />
+
+
+    <item
+        android:id="@+id/useruuid"
+        android:icon="@android:drawable/ic_dialog_dialer"
+        android:title="用户ID"
+        app:showAsAction="never" />
+</menu>
