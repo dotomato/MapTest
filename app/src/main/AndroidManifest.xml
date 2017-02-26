@@ -54,6 +54,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".UserinfoActivity"></activity>
+        <activity android:name=".CrobPhotoActivity"></activity>
     </application>
 
 </manifest>

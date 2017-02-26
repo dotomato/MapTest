@@ -1,6 +1,11 @@
 package com.chen.maptest.Utils;
 
 import android.content.Context;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.provider.MediaStore;
 
 /**
  * Created by chen on 17-2-18.
@@ -16,5 +21,77 @@ public class MyUtils {
     public static int px2dip(Context context, float pxValue){
         final float scale = context.getResources().getDisplayMetrics().density;
         return (int)(pxValue / scale + 0.5f);
+    }
+
+    public static String UritoFullName(Context context, Uri uri) {
+        String[] proj = {MediaStore.Images.ImageColumns.DATA};
+        Cursor cur = context.getContentResolver().query(uri, proj, null, null, null);
+        String fullname = null;
+        if (cur == null) {
+            return null;
+        } else {
+            int index = cur.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cur.moveToFirst();
+            fullname = cur.getString(index);
+            cur.close();
+        }
+        return fullname;
+    }
+
+    public static Bitmap getBitmapSmall(String localImagePath) {
+
+        Bitmap temBitmap = null;
+
+        try {
+            BitmapFactory.Options outOptions = new BitmapFactory.Options();
+
+            // 设置该属性为true，不加载图片到内存，只返回图片的宽高到options中。
+            outOptions.inJustDecodeBounds = true;
+
+            // 加载获取图片的宽高
+            BitmapFactory.decodeFile(localImagePath, outOptions);
+
+            outOptions.inSampleSize = computeSampleSize(outOptions, -1, 2400 * 3200);
+            ;
+            // 重新设置该属性为false，加载图片返回
+            outOptions.inJustDecodeBounds = false;
+            temBitmap = BitmapFactory.decodeFile(localImagePath, outOptions);
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
+
+        return temBitmap;
+    }
+
+    public static int computeSampleSize(BitmapFactory.Options options, int minSideLength, int maxNumOfPixels) {
+        int initialSize = computeInitialSampleSize(options, minSideLength, maxNumOfPixels);
+        int roundedSize;
+        if (initialSize <= 8) {
+            roundedSize = 1;
+            while (roundedSize < initialSize) {
+                roundedSize <<= 1;
+            }
+        } else {
+            roundedSize = (initialSize + 7) / 8 * 8;
+        }
+        return roundedSize;
+    }
+
+    private static int computeInitialSampleSize(BitmapFactory.Options options, int minSideLength, int maxNumOfPixels) {
+        double w = options.outWidth;
+        double h = options.outHeight;
+        int lowerBound = (maxNumOfPixels == -1) ? 1 : (int) Math.ceil(Math.sqrt(w * h / maxNumOfPixels));
+        int upperBound = (minSideLength == -1) ? 128 : (int) Math.min(Math.floor(w / minSideLength), Math.floor(h / minSideLength));
+        if (upperBound < lowerBound) {
+            // return the larger one when there is no overlapping zone.
+            return lowerBound;
+        }
+        if ((maxNumOfPixels == -1) && (minSideLength == -1)) {
+            return 1;
+        } else if (minSideLength == -1) {
+            return lowerBound;
+        } else {
+            return upperBound;
+        }
     }
 }
