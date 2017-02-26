@@ -31,15 +31,18 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <service android:name="com.amap.api.location.APSService" />
+
+        <!--<service android:name="com.amap.api.location.APSService" />-->
+
         <service
             android:name="com.baidu.location.f"
             android:enabled="true"
             android:process=":remote" />
 
-        <meta-data
-            android:name="com.amap.api.v2.apikey"
-            android:value="436ede7d149ab1c37f9a82f2027b9238" />
+        <!--<meta-data-->
+            <!--android:name="com.amap.api.v2.apikey"-->
+            <!--android:value="436ede7d149ab1c37f9a82f2027b9238" />-->
+
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
             android:value="0GwEEEMpSNLb1dInCcO0dVhz9HiNiImH" />
@@ -53,8 +56,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity android:name=".UserinfoActivity"></activity>
-        <activity android:name=".CrobPhotoActivity"></activity>
+
+        <activity
+            android:name="com.yalantis.ucrop.UCropActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme"/>
     </application>
 
 </manifest>
