@@ -43,9 +43,10 @@ public class CrobPhotoActivity extends Activity {
         Intent i = getIntent();
         String fullname = i.getStringExtra(PFNKEY);
         mCurrentOrientation = i.getIntExtra(ORKEY, CropImageLayout.ORIENTATION_UP);
-
-        Bitmap bitmap = MyUtils.getBitmapSmall(fullname);
-        mCropImageLayout.setCropImageBitmap(bitmap);
+//
+//        Bitmap bitmap = MyUtils.getBitmapSmall(fullname);
+//        mCropImageLayout.setCropImage(bitmap);
+        mCropImageLayout.setCropImage(fullname);
     }
 
 

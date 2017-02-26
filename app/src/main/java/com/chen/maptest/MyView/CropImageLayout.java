@@ -16,6 +16,8 @@ import android.view.SurfaceView;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import com.bumptech.glide.Glide;
+
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -33,7 +35,7 @@ public class CropImageLayout extends RelativeLayout {
     public final static int ORIENTATION_RIGHT = 3;
 
     private CropImageEdge mCropImageEdge = null;
-    private CropImageBack mCropImageBack = null;
+    private ImageView mCropImageBack = null;
     private Context mContext;
     private Bitmap mBitmap;
 
@@ -55,8 +57,11 @@ public class CropImageLayout extends RelativeLayout {
     private void init(Context context) {
         mContext = context;
 
-        mCropImageBack = new CropImageBack(mContext);
-        addView(mCropImageBack, new RelativeLayout.LayoutParams(
+//        mCropImageBack = new CropImageBack(mContext);
+//        addView(mCropImageBack, new RelativeLayout.LayoutParams(
+//                LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        mCropImageBack = new ImageView(mContext);
+        addView(mCropImageBack,new RelativeLayout.LayoutParams(
                 LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
         mCropImageEdge = new CropImageEdge(mContext);
@@ -64,9 +69,14 @@ public class CropImageLayout extends RelativeLayout {
                 LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
     }
 
-    public void setCropImageBitmap(Bitmap bitmap) {
-        mBitmap = bitmap;
-        mCropImageBack.setCropImageBitmap(bitmap);
+//    public void setCropImage(Bitmap bitmap) {
+//        mBitmap = bitmap;
+//        mCropImageBack.setCropImageBitmap(bitmap);
+//    }
+
+    public void setCropImage(String filename){
+        Glide.with(mContext).load(filename).into(mCropImageBack);
+        mCropImageEdge.setBorderBound(new RectF(0,0,1080,1820));
     }
 
     public String getCroppedImage(int currentOrientation) {
@@ -207,8 +217,11 @@ public class CropImageLayout extends RelativeLayout {
         public String getCropImage(int currentOrientation) {
 
             // Extract the scale and translation values. Note, we currently do not handle any other transformations (e.g. skew).
-            final float scaleX = mCropImageBack.getScalar();
-            final float scaleY = mCropImageBack.getScalar();
+//            final float scaleX = mCropImageBack.getScalar();
+//            final float scaleY = mCropImageBack.getScalar();
+
+            final float scaleX = mCropImageBack.getScaleX();
+            final float scaleY = mCropImageBack.getScaleY();
 
             // Calculate the top-left corner of the crop window relative to the ~original~ bitmap size.
             RectF borderBound = mCropImageEdge.mBorderBound;
