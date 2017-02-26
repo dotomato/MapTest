@@ -1,5 +1,6 @@
 package com.chen.maptest;
 
+import android.content.SharedPreferences;
 import android.graphics.Rect;
 import android.support.design.widget.FloatingActionButton;
 import android.os.Bundle;
@@ -24,6 +25,8 @@ import rx.schedulers.Schedulers;
 
 import com.chen.maptest.MyModel.*;
 
+import java.util.UUID;
+
 public class MainActivity extends BmapAdapterActivity implements MapAdaterCallback {
 
 
@@ -38,7 +41,7 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
     public FloatingActionButton mFloatingActionButton;
 
     @BindView(R.id.leftDrawer)
-    public ViewGroup mLeftDrawerLayout;
+    public LeftDrawLayout mLeftDrawerLayout;
 
     private View mapView;
 
@@ -53,6 +56,8 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
 
         initLayout();
 
+        initUserinfo();
+
         Myserver.apiTest();
 
         mSelectHelper = new SelectHelper();
@@ -65,8 +70,9 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
     }
 
     @Override
-    protected void onStart(){
-        super.onStart();
+    protected void onResume(){
+        super.onResume();
+        initUserView();
     }
 
     private void initLayout(){
@@ -86,6 +92,57 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
             }
         });
         drawerLayoutinit();
+    }
+
+    private void initUserinfo(){
+        SharedPreferences pref = getSharedPreferences("data",MODE_PRIVATE);
+        String userID = pref.getString("userID",null);
+        if (userID==null) {
+            userID = genUserID();
+
+
+            UserID nuid = new UserID();
+            nuid.userID=userID;
+            Myserver.getApi().newuser(nuid)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new MyAction1<UserIDResult>() {
+                        @Override
+                        public void call() {
+                            SharedPreferences pref = getSharedPreferences("data",MODE_PRIVATE);
+                            SharedPreferences.Editor editor = pref.edit();
+                            editor.putString("userID", mVar.userinfo.userID);
+                            editor.apply();
+
+                            GlobalVar.mUserinfo = mVar.userinfo;
+                            initUserView();
+                        }
+                    });
+        } else {
+            UserID nuid = new UserID();
+            nuid.userID=userID;
+            Myserver.getApi().getuser(nuid)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new MyAction1<UserIDResult>() {
+                        @Override
+                        public void call() {
+                            GlobalVar.mUserinfo = mVar.userinfo;
+                            initUserView();
+                        }
+                    });
+        }
+    }
+
+    private String genUserID(){
+        return UUID.randomUUID().toString();
+    }
+
+
+    private void initUserView(){
+        if (GlobalVar.mUserinfo==null)
+            return;
+        mLeftDrawerLayout.initUserView();
     }
 
     private void drawerLayoutinit(){
@@ -114,6 +171,19 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
                     public void call() {
                         switchShowMode(MODE_MESSAGE,300);
                         mUserMessageLayout.initshow(MODE_MESSAGE,mVar.pointData);
+                    }
+                });
+
+        UserID nuid = new UserID();
+        nuid.userID=psd.userID;
+        Myserver.getApi().getuser(nuid)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new MyAction1<UserIDResult>() {
+                    @Override
+                    public void call() {
+                        GlobalVar.mUserinfo = mVar.userinfo;
+                        mUserMessageLayout.initshow2(mVar.userinfo);
                     }
                 });
     }
@@ -284,5 +354,8 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
         pd.latitude = l.latitude;
         pd.longitude = l.longitude;
         mUserMessageLayout.initshow(MODE_EDIT,pd);
+
+        if (GlobalVar.mUserinfo!=null)
+            mUserMessageLayout.initshow2(GlobalVar.mUserinfo);
     }
 }

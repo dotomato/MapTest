@@ -5,9 +5,9 @@ package com.chen.maptest.MyModel;
  * Copyright *
  */
 
-public class PointSimpleData{
-    public String pointID;
+public class Userinfo{
     public String userID;
-    public double latitude;
-    public double longitude;
+    public String userIcon;
+    public String userName;
+    public String userDes;
 }

@@ -167,6 +167,11 @@ public class UserMessageLayout extends TopEventScrollView {
         scrollTo(0,0);
     }
 
+    public void initshow2(Userinfo ui){
+        mUserName.setText(ui.userName);
+        mUserDescirpt.setText(ui.userDes);
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent ev){
         if (ev.getY()<mSpace.getHeight()-getScrollY() ) {

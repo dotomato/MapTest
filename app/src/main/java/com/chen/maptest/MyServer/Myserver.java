@@ -47,9 +47,18 @@ public class Myserver {
         @POST(VERSION+"/getpoint")
         Observable<GetPointResult> getPoint(@Body GetPointData var);
 
+        @Headers({"Content-Type: application/json","Accept: application/json"})
+        @POST(VERSION+"/newuser")
+        Observable<UserIDResult> newuser(@Body UserID var);
+
+        @Headers({"Content-Type: application/json","Accept: application/json"})
+        @POST(VERSION+"/getuser")
+        Observable<UserIDResult> getuser(@Body UserID var);
+
+        @Headers({"Content-Type: application/json","Accept: application/json"})
+        @POST(VERSION+"/updateuser")
+        Observable<UserIDResult> updateuser(@Body Userinfo var);
     }
-
-
 
 
     private static MyserverInterface mServer=null;

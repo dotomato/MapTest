@@ -125,7 +125,7 @@ public class BmapAdapterActivity extends AppCompatActivity implements
         Marker marker = (Marker) bMap.addOverlay(mMarkerOption);
         marker.setTitle(psd.pointID);
         markerMap.put(psd.pointID,marker);
-//        marker.setObject(psd);
+        PSDMap.put(psd.pointID,psd);
     }
 
 
@@ -144,6 +144,7 @@ public class BmapAdapterActivity extends AppCompatActivity implements
     private MarkerOptions mMarkerOption;
     private BitmapDescriptor mBitmapDescriptor;
     private HashMap<String,Marker> markerMap;
+    private HashMap<String,PointSimpleData> PSDMap;
     private boolean firstshow;
 
 
@@ -220,6 +221,7 @@ public class BmapAdapterActivity extends AppCompatActivity implements
         firstshow=true;
 
         markerMap = new HashMap<>();
+        PSDMap = new HashMap<>();
 
         mMarkerOption= new MarkerOptions();
         mBitmapDescriptor = BitmapDescriptorFactory.fromBitmap(BitmapFactory
@@ -269,11 +271,7 @@ public class BmapAdapterActivity extends AppCompatActivity implements
     @Override
     public boolean onMarkerClick(Marker marker) {
         if (mMapAdaterCallback!=null) {
-            PointSimpleData psd = new PointSimpleData();
-            psd.pointID = marker.getTitle();
-            psd.latitude = marker.getPosition().latitude;
-            psd.longitude = marker.getPosition().longitude;
-            mMapAdaterCallback.MyMarkerClick(psd);
+            mMapAdaterCallback.MyMarkerClick(PSDMap.get(marker.getTitle()));
         }
         return true;   //false会移动地图到marker点，true不会
     }

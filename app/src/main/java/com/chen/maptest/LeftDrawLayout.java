@@ -15,6 +15,8 @@ import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ScrollView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.chen.maptest.MyView.ListViewItemData;
 import com.chen.maptest.MyView.MyListViewAdapter;
@@ -40,6 +42,8 @@ public class LeftDrawLayout extends ListView {
     private View mHeader;
 
     public ImageView mUsericon;
+    public TextView mUserName;
+    public TextView mUserDes;
 
     public LeftDrawLayout(Context context) {
         super(context);
@@ -72,6 +76,10 @@ public class LeftDrawLayout extends ListView {
         mHeader = LayoutInflater.from(mContext).inflate(R.layout.layout_listview_header,this,false);
         addHeaderView(mHeader);
 
+        mUsericon = (ImageView) mHeader.findViewById(R.id.usericon);
+        mUserName = (TextView)mHeader.findViewById(R.id.username);
+        mUserDes = (TextView)mHeader.findViewById(R.id.userdes);
+
         OutlineProvider.setOutline(mHeader.findViewById(R.id.usericon),OutlineProvider.SHAPE_OVAL);
 
         mData.add(new ListViewItemData("私信", MainActivity.class, android.R.drawable.ic_dialog_email));
@@ -83,16 +91,23 @@ public class LeftDrawLayout extends ListView {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 if (i==0){
-                    Intent intent = new Intent(mContext, UserinfoActivity.class);
-                    mContext.startActivity(intent);
+                    if (GlobalVar.mUserinfo != null) {
+                        Intent intent = new Intent(mContext, UserinfoActivity.class);
+                        mContext.startActivity(intent);
+                    } else {
+                        Toast.makeText(mContext,"还没有连上服务器……",Toast.LENGTH_SHORT).show();
+                    }
                 } else {
                     ListViewItemData id = mData.get(i-1);
                     Intent intent = new Intent(mContext, id.activity);
-                    mContext.startActivity(intent);
+//                    mContext.startActivity(intent);
                 }
             }
         });
     }
 
-
+    public void initUserView(){
+        mUserName.setText(GlobalVar.mUserinfo.userName);
+        mUserDes.setText(GlobalVar.mUserinfo.userDes);
+    }
 }
