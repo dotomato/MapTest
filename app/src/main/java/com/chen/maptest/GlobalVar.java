@@ -1,5 +1,7 @@
 package com.chen.maptest;
 
+import android.graphics.Matrix;
+
 import com.chen.maptest.MyModel.Userinfo;
 
 /**
@@ -9,5 +11,6 @@ import com.chen.maptest.MyModel.Userinfo;
 
 public class GlobalVar {
     static public Userinfo mUserinfo;
-    static public MainActivity.MyLatlng curLatlng;
+    static public MainActivity.MyLatlng viewLatlng;
+    static public MainActivity.MyLatlng gpsLatlng;
 }

@@ -9,12 +9,17 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
 
+import com.chen.maptest.GlobalVar;
+import com.chen.maptest.MyModel.Userinfo;
+import com.google.gson.Gson;
+
 /**
  * Created by chen on 17-2-18.
  * Copyright *
  */
 
 public class MyUtils {
+
     public static int dip2px(Context context, float dipValue){
         final float scale = context.getResources().getDisplayMetrics().density;
         return (int)(dipValue * scale + 0.5f);
@@ -49,4 +54,9 @@ public class MyUtils {
     }
 
 
+    public static <T> T pojoCopy(T obj){
+        Gson gson = new Gson();
+        String st = gson.toJson(obj);
+        return (T)gson.fromJson(st,obj.getClass());
+    }
 }

@@ -21,6 +21,7 @@ import android.widget.Toast;
 import com.chen.maptest.MyView.ListViewItemData;
 import com.chen.maptest.MyView.MyListViewAdapter;
 import com.chen.maptest.MyView.OutlineProvider;
+import com.chen.maptest.Utils.UserIconWarp;
 
 import java.util.ArrayList;
 
@@ -40,6 +41,7 @@ public class LeftDrawLayout extends ListView {
     private ArrayList<ListViewItemData> mData = new ArrayList<>();
 
     private View mHeader;
+
 
     public ImageView mUsericon;
     public TextView mUserName;
@@ -109,5 +111,6 @@ public class LeftDrawLayout extends ListView {
     public void initUserView(){
         mUserName.setText(GlobalVar.mUserinfo.userName);
         mUserDes.setText(GlobalVar.mUserinfo.userDes);
+        UserIconWarp.just(mContext,GlobalVar.mUserinfo.userIcon,mUsericon);
     }
 }

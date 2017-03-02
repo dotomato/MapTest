@@ -1,14 +1,20 @@
 package com.chen.maptest;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Rect;
 import android.support.design.widget.FloatingActionButton;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ScrollView;
+import android.widget.Toast;
 
 import com.chen.maptest.MapAdapter.BmapAdapterActivity;
 import com.chen.maptest.MapAdapter.MapAdaterCallback;
@@ -48,6 +54,8 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
 
     private ActionBarDrawerToggle mDrawerToggle;
 
+    private boolean shouldInitonResume = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,13 +63,11 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
 
         mapView = getMapView();
 
-        initGlobalVar();
-
         initLayout();
 
-        initUserinfo();
-
         Myserver.apiTest();
+
+        initUserinfo();
 
         mSelectHelper = new OnceRunner() {
             @Override
@@ -74,18 +80,39 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
 
         setMapAdaterCallback(this);
 
+        setBoardcastReceiver();
+
         switchShowMode(MODE_MAP,300);
+    }
+
+    private void setBoardcastReceiver() {
+        IntentFilter ifilter = new IntentFilter();
+        ifilter.addAction(GlobalConst.UPDATE_USERINFO_VIEW);
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                switch (intent.getAction()){
+                    case GlobalConst.UPDATE_USERINFO_VIEW:
+                        shouldInitonResume=true;
+                        break;
+                }
+            }
+        },ifilter);
     }
 
     @Override
     protected void onResume(){
         super.onResume();
-        initUserView();
+        if (shouldInitonResume) {
+            initUserView();
+            shouldInitonResume = false;
+        }
     }
 
     private void initGlobalVar(){
-        GlobalVar.curLatlng = new MyLatlng(-1,-1);
-        GlobalVar.mUserinfo = new Userinfo();
+//        GlobalVar.viewLatlng = new MyLatlng(-1,-1);
+//        GlobalVar.mUserinfo = new Userinfo();
     }
 
     private void initLayout(){
@@ -104,7 +131,7 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
                 mapView.dispatchTouchEvent(ev);
             }
         });
-        drawerLayoutinit();
+//        drawerLayoutinit();
     }
 
     private void initUserinfo(){
@@ -153,8 +180,8 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
 
 
     private void initUserView(){
-        if (GlobalVar.mUserinfo==null)
-            return;
+//        if (GlobalVar.mUserinfo==null)
+//            return;
         mLeftDrawerLayout.initUserView();
     }
 
@@ -195,7 +222,6 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
                 .subscribe(new MyAction1<UserIDResult>() {
                     @Override
                     public void call() {
-                        GlobalVar.mUserinfo = mVar.userinfo;
                         mUserMessageLayout.initshow2(mVar.userinfo);
                     }
                 });
@@ -203,13 +229,16 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
 
 
     public void MyCameraChangeFinish() {
-        if (SHOULD_CUR)
-            GlobalVar.curLatlng=getCurLatlng();
-        else
-            GlobalVar.curLatlng=getViewCenterLatlng();
+        GlobalVar.viewLatlng = getViewLatlng();
 
         mSelectHelper.start();
     }
+
+    @Override
+    public void MyGPSRecive(MyLatlng latlng) {
+        GlobalVar.gpsLatlng = latlng;
+    }
+
 
     final static int MODE_MAP = 0;
     final static int MODE_MESSAGE = 1;
@@ -322,14 +351,15 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
 
     @OnClick(R.id.floatingActionButton)
     public void floatingClick(){
-        switchShowMode(MODE_EDIT,300);
-        PointData pd = MyModelFactory.getEditDeafultPointData();
-        MyLatlng l = getCurLatlng();
-        pd.latitude = l.latitude;
-        pd.longitude = l.longitude;
-        mUserMessageLayout.initshow(MODE_EDIT,pd);
+        if (GlobalVar.mUserinfo==null
+                || (SHOULD_CUR && GlobalVar.viewLatlng==null)
+                || (!SHOULD_CUR && GlobalVar.gpsLatlng==null)){
+            Toast.makeText(this,"还没有连上网络",Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        if (GlobalVar.mUserinfo!=null)
-            mUserMessageLayout.initshow2(GlobalVar.mUserinfo);
+        switchShowMode(MODE_EDIT,300);
+        mUserMessageLayout.initshow(MODE_EDIT,null);
+        mUserMessageLayout.initshow2(GlobalVar.mUserinfo);
     }
 }

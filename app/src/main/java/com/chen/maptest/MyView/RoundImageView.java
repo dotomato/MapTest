@@ -97,7 +97,7 @@ public class RoundImageView extends ImageView {
 
     /**
      * 获取裁剪后的圆形图片
-     * @param radius半径
+     * @param radius 半径
      */
     public Bitmap getCroppedRoundBitmap(Bitmap bmp, int radius) {
         Bitmap scaledSrcBmp;

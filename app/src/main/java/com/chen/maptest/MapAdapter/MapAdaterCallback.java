@@ -2,6 +2,7 @@ package com.chen.maptest.MapAdapter;
 
 import android.view.MotionEvent;
 
+import com.chen.maptest.MainActivity;
 import com.chen.maptest.MyModel.*;
 
 /**
@@ -13,4 +14,5 @@ public interface MapAdaterCallback{
     void MyTouch(MotionEvent motionEvent);
     void MyMarkerClick(PointSimpleData psd);
     void MyCameraChangeFinish();
+    void MyGPSRecive(MainActivity.MyLatlng latlng);
 }

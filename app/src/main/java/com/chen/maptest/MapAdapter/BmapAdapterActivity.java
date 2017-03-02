@@ -33,6 +33,7 @@ import com.baidu.mapapi.model.LatLng;
 import java.util.HashMap;
 
 
+import com.chen.maptest.GlobalVar;
 import com.chen.maptest.MyModel.*;
 import com.chen.maptest.R;
 
@@ -104,11 +105,11 @@ public class BmapAdapterActivity extends AppCompatActivity implements
         return new MyLatlng(mProjection.fromScreenLocation(new Point(a,b)));
     }
 
-    public MyLatlng getCurLatlng(){
+    public MyLatlng getGPSLatlng(){
         return gpsLocation==null?new MyLatlng(-1,-1):new MyLatlng(gpsLocation.getLatitude(),gpsLocation.getLongitude());
     }
 
-    public MyLatlng getViewCenterLatlng(){
+    public MyLatlng getViewLatlng(){
         int a = mMapView.getWidth();
         int b = mMapView.getBottom();
         return mProjection==null?new MyLatlng(-1,-1):new MyLatlng(mProjection.fromScreenLocation(new Point(a/2,b/2))) ;
@@ -308,6 +309,10 @@ public class BmapAdapterActivity extends AppCompatActivity implements
     public void onReceiveLocation(BDLocation bdLocation) {
 //        bdLocation.getLocType();
         gpsLocation = bdLocation;
+
+        if (mMapAdaterCallback!=null)
+            mMapAdaterCallback.MyGPSRecive(getGPSLatlng());
+
         if (firstshow) {
             gotoLocation(bdLocation);
             firstshow = false;

@@ -5,13 +5,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.provider.MediaStore;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,7 +25,7 @@ import com.chen.maptest.MyServer.Myserver;
 import com.chen.maptest.MyUpyun.MyUpyunManager;
 import com.chen.maptest.MyView.OutlineProvider;
 import com.chen.maptest.Utils.MyUtils;
-import com.google.gson.Gson;
+import com.chen.maptest.Utils.UserIconWarp;
 import com.yalantis.ucrop.UCrop;
 
 import java.io.File;
@@ -84,9 +82,7 @@ public class UserinfoActivity extends AppCompatActivity implements Toolbar.OnMen
 
         OutlineProvider.setOutline(mUsericon,OutlineProvider.SHAPE_OVAL);
 
-        Gson gson = new Gson();
-        String st = gson.toJson(GlobalVar.mUserinfo);
-        tempUserinfo = gson.fromJson(st,Userinfo.class);
+        tempUserinfo = MyUtils.pojoCopy(GlobalVar.mUserinfo);
 
         initUserView();
         iconChange = false;
@@ -97,7 +93,7 @@ public class UserinfoActivity extends AppCompatActivity implements Toolbar.OnMen
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.userinfo_toolbar_menu, menu);
         mMenu = menu;
-        mMenu.findItem(R.id.complete).setVisible(false);
+        setMenuComplete(false);
         change = false;
         return true;
     }
@@ -134,11 +130,17 @@ public class UserinfoActivity extends AppCompatActivity implements Toolbar.OnMen
 
                                 GlobalVar.mUserinfo = mVar.userinfo;
                                 initUserView();
+                                setMenuComplete(false);
+                                awareUserinfoUpdate();
                             }
                         });
                 break;
         }
         return true;
+    }
+
+    private void setMenuComplete(boolean b) {
+        mMenu.findItem(R.id.complete).setVisible(b);
     }
 
     private void updateUserinfo(){
@@ -149,8 +151,15 @@ public class UserinfoActivity extends AppCompatActivity implements Toolbar.OnMen
                     @Override
                     public void call() {
                         GlobalVar.mUserinfo = mVar.userinfo;
+                        awareUserinfoUpdate();
+                        UserinfoActivity.this.finish();
                     }
                 });
+    }
+
+    private void awareUserinfoUpdate() {
+        Intent intent = new Intent(GlobalConst.UPDATE_USERINFO_VIEW);
+        LocalBroadcastManager.getInstance(UserinfoActivity.this).sendBroadcast(intent);
     }
 
     private void initUserView(){
@@ -158,6 +167,7 @@ public class UserinfoActivity extends AppCompatActivity implements Toolbar.OnMen
             return;
         mUsername.setText(GlobalVar.mUserinfo.userName);
         mUserdes.setText(GlobalVar.mUserinfo.userDes);
+        UserIconWarp.just(this,GlobalVar.mUserinfo.userIcon,mUsericon);
     }
 
 
@@ -175,7 +185,7 @@ public class UserinfoActivity extends AppCompatActivity implements Toolbar.OnMen
     @OnTextChanged(value={R.id.userdes,R.id.username})
     public void afterTextChanged(CharSequence s, int start, int before, int count) {
         if (mMenu!=null)
-            mMenu.findItem(R.id.complete).setVisible(true);
+            setMenuComplete(true);
         tempUserinfo.userName = mUsername.getText().toString();
         tempUserinfo.userDes = mUserdes.getText().toString();
         change=true;
@@ -204,7 +214,7 @@ public class UserinfoActivity extends AppCompatActivity implements Toolbar.OnMen
 
                     UCrop.of(imageUri, mDestinationUri)
                             .withAspectRatio(1, 1)
-                            .withMaxResultSize(512, 512)
+                            .withMaxResultSize(128, 128)
                             .withOptions(options)
                             .start(this);
                 }
@@ -216,7 +226,7 @@ public class UserinfoActivity extends AppCompatActivity implements Toolbar.OnMen
                 iconChange = true;
                 tempIconUri = resultUri;
                 change=true;
-                mMenu.findItem(R.id.complete).setVisible(true);
+                setMenuComplete(true);
                 break;
             default:
                 break;
@@ -230,7 +240,6 @@ public class UserinfoActivity extends AppCompatActivity implements Toolbar.OnMen
 
     @Override
     public void onComplete(boolean isSuccess,String url) {
-        Log.d("MyUpyunManager",url);
         tempUserinfo.userIcon=url;
         updateUserinfo();
     }

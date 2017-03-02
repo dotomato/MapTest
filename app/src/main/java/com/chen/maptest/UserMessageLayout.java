@@ -4,18 +4,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Outline;
 import android.os.Build;
+import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AlertDialog;
-import android.text.Editable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
-import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewOutlineProvider;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -23,13 +19,11 @@ import android.widget.Space;
 import android.widget.TextView;
 
 
-import com.chen.maptest.MapAdapter.BmapAdapterActivity;
-import com.chen.maptest.MyServer.MyAction1;
-import com.chen.maptest.MyServer.Myserver;
 import com.chen.maptest.MyView.OutlineProvider;
 import com.chen.maptest.MyView.TopEventScrollView;
 
 import com.chen.maptest.MyModel.*;
+import com.chen.maptest.Utils.UserIconWarp;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -37,7 +31,6 @@ import java.util.Date;
 
 import butterknife.ButterKnife;
 
-import butterknife.OnClick;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -135,18 +128,21 @@ public class UserMessageLayout extends TopEventScrollView {
                 });
     }
 
-    public void initshow(int mode, PointData pd){
+    public void initshow(int mode,@Nullable PointData pd){
         mPointData = pd;
 
         switch (mode) {
             case MainActivity.MODE_EDIT:
                 mEditMessage.setText("");
                 mEditMessage.setFocusable(true);
+                //TODO 恢复编辑有问题
 
                 mMessageLayout.setVisibility(GONE);
                 mEditLayout.setVisibility(VISIBLE);
                 break;
             case MainActivity.MODE_MESSAGE:
+                if (pd==null)
+                    return;
                 mEditMessage.setText(pd.userMessage);
                 mEditMessage.setFocusable(false);
 
@@ -164,6 +160,7 @@ public class UserMessageLayout extends TopEventScrollView {
     public void initshow2(Userinfo ui){
         mUserName.setText(ui.userName);
         mUserDescirpt.setText(ui.userDes);
+        UserIconWarp.just(mContext,ui.userIcon,mUserIcon);
     }
 
     @Override
@@ -221,7 +218,7 @@ public class UserMessageLayout extends TopEventScrollView {
     }
 
     public NewPointData getNewPointData(){
-        MainActivity.MyLatlng l = GlobalVar.curLatlng;
+        MainActivity.MyLatlng l = GlobalVar.viewLatlng;
 
         NewPointData npd = new NewPointData();
         PointData pd = new PointData();
