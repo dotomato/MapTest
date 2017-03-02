@@ -39,6 +39,8 @@ import rx.schedulers.Schedulers;
 
 import butterknife.BindView;
 
+import static com.chen.maptest.Utils.MyUtils.setEditTextEditable;
+
 /**
  * Created by chen on 17-2-3.
  * Copyright *
@@ -134,8 +136,7 @@ public class UserMessageLayout extends TopEventScrollView {
         switch (mode) {
             case MainActivity.MODE_EDIT:
                 mEditMessage.setText("");
-                mEditMessage.setFocusable(true);
-                //TODO 恢复编辑有问题
+                setEditTextEditable(mEditMessage,true);
 
                 mMessageLayout.setVisibility(GONE);
                 mEditLayout.setVisibility(VISIBLE);
@@ -144,7 +145,7 @@ public class UserMessageLayout extends TopEventScrollView {
                 if (pd==null)
                     return;
                 mEditMessage.setText(pd.userMessage);
-                mEditMessage.setFocusable(false);
+                setEditTextEditable(mEditMessage,false);
 
                 mMessageLayout.setVisibility(VISIBLE);
                 mEditLayout.setVisibility(GONE);
@@ -156,6 +157,8 @@ public class UserMessageLayout extends TopEventScrollView {
         }
         scrollTo(0,0);
     }
+
+
 
     public void initshow2(Userinfo ui){
         mUserName.setText(ui.userName);

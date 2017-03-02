@@ -103,6 +103,7 @@ public class LeftDrawLayout extends ListView {
                     ListViewItemData id = mData.get(i-1);
                     Intent intent = new Intent(mContext, id.activity);
 //                    mContext.startActivity(intent);
+                    Toast.makeText(mContext,"正在建设中……",Toast.LENGTH_SHORT).show();
                 }
             }
         });

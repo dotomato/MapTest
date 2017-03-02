@@ -9,6 +9,7 @@ import android.graphics.Rect;
 import android.support.design.widget.FloatingActionButton;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -343,7 +344,10 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
 
     @Override
     public void onBackPressed() {
-        if (lmode==MODE_MAP)
+        DrawerLayout dl = (DrawerLayout)findViewById(R.id.activity_main);
+        if(dl.isDrawerOpen(mLeftDrawerLayout))
+            dl.closeDrawer(mLeftDrawerLayout);
+        else if (lmode==MODE_MAP)
             super.onBackPressed();
         else
             switchShowMode(MODE_MAP,300);

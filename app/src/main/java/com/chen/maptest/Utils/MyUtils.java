@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.widget.EditText;
 
 import com.chen.maptest.GlobalVar;
 import com.chen.maptest.MyModel.Userinfo;
@@ -58,5 +59,15 @@ public class MyUtils {
         Gson gson = new Gson();
         String st = gson.toJson(obj);
         return (T)gson.fromJson(st,obj.getClass());
+    }
+
+    public static void setEditTextEditable(EditText editText, boolean value){
+        if(value){
+            editText.setFocusableInTouchMode(true);
+            editText.requestFocus();
+        }else{
+            editText.setFocusableInTouchMode(false);
+            editText.clearFocus();
+        }
     }
 }
