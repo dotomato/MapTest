@@ -31,6 +31,7 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
 
 
     private final static String TAG = "MainActivity";
+    private static final boolean SHOULD_CUR = false;
 
     private OnceRunner mSelectHelper;
 
@@ -202,7 +203,11 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
 
 
     public void MyCameraChangeFinish() {
-        setCurLatlng(GlobalVar.curLatlng);
+        if (SHOULD_CUR)
+            GlobalVar.curLatlng=getCurLatlng();
+        else
+            GlobalVar.curLatlng=getViewCenterLatlng();
+
         mSelectHelper.start();
     }
 

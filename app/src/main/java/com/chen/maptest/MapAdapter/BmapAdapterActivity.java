@@ -105,9 +105,13 @@ public class BmapAdapterActivity extends AppCompatActivity implements
     }
 
     public MyLatlng getCurLatlng(){
+        return gpsLocation==null?new MyLatlng(-1,-1):new MyLatlng(gpsLocation.getLatitude(),gpsLocation.getLongitude());
+    }
+
+    public MyLatlng getViewCenterLatlng(){
         int a = mMapView.getWidth();
         int b = mMapView.getBottom();
-        return new MyLatlng(mProjection.fromScreenLocation(new Point(a/2,b/2)));
+        return mProjection==null?new MyLatlng(-1,-1):new MyLatlng(mProjection.fromScreenLocation(new Point(a/2,b/2))) ;
     }
 
     public void rmAllMarker(){
@@ -129,22 +133,6 @@ public class BmapAdapterActivity extends AppCompatActivity implements
     }
 
 
-    public void setCurLatlng(MyLatlng var){
-        double v1,v2;
-        if (gpsLocation==null){
-            v1=-1;
-            v2=-2;
-        } else{
-            v1=gpsLocation.getLatitude();
-            v2=gpsLocation.getLongitude();
-        }
-        if (var==null) {
-            var = new MyLatlng(v1, v2);
-        } else {
-            var.latitude=v1;
-            var.longitude=v2;
-        }
-    }
 
 
     private final static String TAG = "AmapAdapterActivity";
