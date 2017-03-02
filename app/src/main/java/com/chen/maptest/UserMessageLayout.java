@@ -8,8 +8,10 @@ import android.graphics.Outline;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AlertDialog;
+import android.text.Editable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +23,9 @@ import android.widget.Space;
 import android.widget.TextView;
 
 
+import com.chen.maptest.MapAdapter.BmapAdapterActivity;
+import com.chen.maptest.MyServer.MyAction1;
+import com.chen.maptest.MyServer.Myserver;
 import com.chen.maptest.MyView.OutlineProvider;
 import com.chen.maptest.MyView.TopEventScrollView;
 
@@ -32,6 +37,7 @@ import java.util.Date;
 
 import butterknife.ButterKnife;
 
+import butterknife.OnClick;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -60,9 +66,6 @@ public class UserMessageLayout extends TopEventScrollView {
 
     @BindView(R.id.userdescript)
     public TextView mUserDescirpt;
-
-    @BindView(R.id.usermessage)
-    public TextView mUserMessage;
 
     @BindView(R.id.space)
     public Space mSpace;
@@ -111,7 +114,6 @@ public class UserMessageLayout extends TopEventScrollView {
         ButterKnife.bind(this);
 
         OutlineProvider.setOutline(mUserIcon,OutlineProvider.SHAPE_OVAL);
-        OutlineProvider.setOutline(mBack,OutlineProvider.SHAPE_RECT);
     }
 
     public void setUserIcon(String var){
@@ -136,25 +138,17 @@ public class UserMessageLayout extends TopEventScrollView {
     public void initshow(int mode, PointData pd){
         mPointData = pd;
 
-        mUserDescirpt.setText(pd.userID);
         switch (mode) {
             case MainActivity.MODE_EDIT:
-
-                mEditMessage.setVisibility(VISIBLE);
                 mEditMessage.setText("");
-
-                mUserMessage.setVisibility(GONE);
+                mEditMessage.setFocusable(true);
 
                 mMessageLayout.setVisibility(GONE);
                 mEditLayout.setVisibility(VISIBLE);
                 break;
             case MainActivity.MODE_MESSAGE:
-//                new ImageDelegate(mUserIcon).setSrc("test src").doit();
-
-                mEditMessage.setVisibility(GONE);
-
-                mUserMessage.setText(pd.userMessage);
-                mUserMessage.setVisibility(VISIBLE);
+                mEditMessage.setText(pd.userMessage);
+                mEditMessage.setFocusable(false);
 
                 mMessageLayout.setVisibility(VISIBLE);
                 mEditLayout.setVisibility(GONE);
@@ -195,10 +189,6 @@ public class UserMessageLayout extends TopEventScrollView {
         return mSpace.getHeight();
     }
 
-    public PointData getPD(){
-        mPointData.userMessage = mEditMessage.getText().toString();
-        return mPointData;
-    }
 
     ExitCallback mExitCallback=null;
     interface ExitCallback{
@@ -229,6 +219,23 @@ public class UserMessageLayout extends TopEventScrollView {
                 .setNeutralButton("取消", null)
                 .show();//在按键响应事件中显示此对话框
     }
+
+    public NewPointData getNewPointData(){
+        MainActivity.MyLatlng l = GlobalVar.curLatlng;
+
+        NewPointData npd = new NewPointData();
+        PointData pd = new PointData();
+
+        pd.latitude = l.latitude;
+        pd.longitude = l.longitude;
+        pd.userID = GlobalVar.mUserinfo.userID;
+        pd.userMessage = mEditMessage.getText().toString();
+
+        npd.pointData = pd;
+        return npd;
+    }
+
+
 
 
 }

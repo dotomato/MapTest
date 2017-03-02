@@ -47,4 +47,6 @@ public class MyUtils {
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         context.startActivityForResult(Intent.createChooser(intent, "选择头像"), requesrCode);
     }
+
+
 }

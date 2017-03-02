@@ -8,7 +8,6 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ScrollView;
 
 import com.chen.maptest.MapAdapter.BmapAdapterActivity;
@@ -24,6 +23,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
 import com.chen.maptest.MyModel.*;
+import com.chen.maptest.Utils.OnceRunner;
 
 import java.util.UUID;
 
@@ -32,7 +32,7 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
 
     private final static String TAG = "MainActivity";
 
-    private SelectHelper mSelectHelper;
+    private OnceRunner mSelectHelper;
 
     @BindView(R.id.user_message_layout)
     public UserMessageLayout mUserMessageLayout;
@@ -54,17 +54,24 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
 
         mapView = getMapView();
 
+        initGlobalVar();
+
         initLayout();
 
         initUserinfo();
 
         Myserver.apiTest();
 
-        mSelectHelper = new SelectHelper();
+        mSelectHelper = new OnceRunner() {
+            @Override
+            protected void call() {
+                selectArea();
+            }
+        };
+        mSelectHelper.setInternal(1000);
         new Thread(mSelectHelper).start();
 
         setMapAdaterCallback(this);
-
 
         switchShowMode(MODE_MAP,300);
     }
@@ -73,6 +80,11 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
     protected void onResume(){
         super.onResume();
         initUserView();
+    }
+
+    private void initGlobalVar(){
+        GlobalVar.curLatlng = new MyLatlng(-1,-1);
+        GlobalVar.mUserinfo = new Userinfo();
     }
 
     private void initLayout(){
@@ -190,7 +202,8 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
 
 
     public void MyCameraChangeFinish() {
-        mSelectHelper.call();
+        setCurLatlng(GlobalVar.curLatlng);
+        mSelectHelper.start();
     }
 
     final static int MODE_MAP = 0;
@@ -255,15 +268,7 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
 
     @OnClick(R.id.sendbutton)
     public void newPoint(){
-        MyLatlng l = getCurLatlng();
-
-        NewPointData npd = new NewPointData();
-        PointData pd = mUserMessageLayout.getPD();
-
-        pd.latitude = l.latitude;
-        pd.longitude = l.longitude;
-
-        npd.pointData = pd;
+        NewPointData npd = mUserMessageLayout.getNewPointData();
 
         Myserver.getApi().newPoint(npd)
                 .subscribeOn(Schedulers.io())
@@ -301,42 +306,6 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
                     }
                 });
     }
-
-
-    private class SelectHelper implements Runnable {
-
-        private int mStatue;
-        private static final int FINISH=0;
-        private static final int RUN=1;
-        private static final int STOP=2;
-
-        @Override
-        public void run() {
-            while(true){
-                if (mStatue==RUN) {
-                    selectArea();
-                    mStatue = FINISH;
-                }
-                if (mStatue==STOP){
-                    break;
-                }
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        public void call() {
-            this.mStatue = RUN;
-        }
-
-        public void stop(){
-            this.mStatue = STOP;
-        }
-    }
-
 
     @Override
     public void onBackPressed() {

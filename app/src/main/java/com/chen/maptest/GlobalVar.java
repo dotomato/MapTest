@@ -9,4 +9,5 @@ import com.chen.maptest.MyModel.Userinfo;
 
 public class GlobalVar {
     static public Userinfo mUserinfo;
+    static public MainActivity.MyLatlng curLatlng;
 }

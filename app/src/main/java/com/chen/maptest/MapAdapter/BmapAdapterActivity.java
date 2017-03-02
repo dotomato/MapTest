@@ -129,6 +129,22 @@ public class BmapAdapterActivity extends AppCompatActivity implements
     }
 
 
+    public void setCurLatlng(MyLatlng var){
+        double v1,v2;
+        if (gpsLocation==null){
+            v1=-1;
+            v2=-2;
+        } else{
+            v1=gpsLocation.getLatitude();
+            v2=gpsLocation.getLongitude();
+        }
+        if (var==null) {
+            var = new MyLatlng(v1, v2);
+        } else {
+            var.latitude=v1;
+            var.longitude=v2;
+        }
+    }
 
 
     private final static String TAG = "AmapAdapterActivity";
@@ -321,4 +337,5 @@ public class BmapAdapterActivity extends AppCompatActivity implements
             MapStatusUpdateFactory.newLatLngZoom(new LatLng(amapLocation.getLatitude(), amapLocation.getLongitude()),18);
         bMap.animateMapStatus(mCameraUpdate,500);
     }
+
 }
