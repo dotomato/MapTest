@@ -1,0 +1,36 @@
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:match="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/album"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0099cc"
+    tools:context="com.chen.maptest.AlbumActivity">
+
+    <com.roger.match.library.MatchTextView
+        android:id="@+id/Title"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_marginBottom="16dp"
+        android:layout_marginTop="16dp"
+        match:layout_constraintBottom_toBottomOf="parent"
+        match:layout_constraintLeft_toLeftOf="parent"
+        match:layout_constraintRight_toRightOf="parent"
+        match:layout_constraintTop_toTopOf="parent"
+        match:text="ROAD MAP"
+        match:textColor="#ffffffff"
+        match:textSize="12sp" />
+
+    <com.roger.match.library.MatchTextView
+        android:layout_width="wrap_content"
+        android:layout_height="20dp"
+        android:layout_marginTop="0dp"
+        match:layout_constraintLeft_toLeftOf="parent"
+        match:layout_constraintRight_toRightOf="parent"
+        match:layout_constraintTop_toBottomOf="@+id/Title"
+        match:text="with you We wont be lonely"
+        match:textColor="#ffffffff"
+        match:textSize="6sp" />
+
+
+</android.support.constraint.ConstraintLayout>

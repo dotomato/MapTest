@@ -32,16 +32,16 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <!--<service android:name="com.amap.api.location.APSService" />-->
+        <!-- <service android:name="com.amap.api.location.APSService" /> -->
 
         <service
             android:name="com.baidu.location.f"
             android:enabled="true"
             android:process=":remote" />
 
-        <!--<meta-data-->
-            <!--android:name="com.amap.api.v2.apikey"-->
-            <!--android:value="436ede7d149ab1c37f9a82f2027b9238" />-->
+        <!-- <meta-data -->
+        <!-- android:name="com.amap.api.v2.apikey" -->
+        <!-- android:value="436ede7d149ab1c37f9a82f2027b9238" /> -->
 
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
@@ -50,6 +50,15 @@
         <activity
             android:name=".MainActivity"
             android:windowSoftInputMode="adjustPan|stateHidden">
+        </activity>
+
+        <activity android:name=".UserinfoActivity" />
+
+        <activity
+            android:name="com.yalantis.ucrop.UCropActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme" />
+        <activity android:name=".AlbumActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -57,12 +66,6 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".UserinfoActivity"></activity>
-
-        <activity
-            android:name="com.yalantis.ucrop.UCropActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"/>
     </application>
 
 </manifest>
