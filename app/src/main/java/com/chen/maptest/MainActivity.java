@@ -1,5 +1,6 @@
 package com.chen.maptest;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -32,11 +33,14 @@ import com.chen.maptest.Utils.OnceRunner;
 
 import java.util.UUID;
 
-public class MainActivity extends BmapAdapterActivity implements MapAdaterCallback {
+public class MainActivity extends BmapAdapterActivity implements MapAdaterCallback, UserMessageLayout.NewPointFinish {
 
 
     private final static String TAG = "MainActivity";
     private static final boolean SHOULD_CUR = false;
+
+
+    static public final int SELECT_ALBUM_IMG = 0;
 
     private OnceRunner mSelectHelper;
 
@@ -133,6 +137,8 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
                 mapView.dispatchTouchEvent(ev);
             }
         });
+
+        mUserMessageLayout.setNewPointFinishCallback(this);
 //        drawerLayoutinit();
     }
 
@@ -300,23 +306,6 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
         }
     }
 
-    @OnClick(R.id.sendbutton)
-    public void newPoint(){
-        NewPointData npd = mUserMessageLayout.getNewPointData();
-
-        Myserver.getApi().newPoint(npd)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new MyAction1<NewPointResult>() {
-                    @Override
-                    public void call() {
-                        Log.d(TAG, "newPoint result: " + mVar.statue + " " + mVar.pointData.pointID);
-                        selectArea();
-                        switchShowMode_force(MODE_MAP,300);
-                    }
-                });
-    }
-
     private void selectArea(){
         SelectAreaData sad = new SelectAreaData();
         MyLatlng lt = getLeftTopLatlng();
@@ -364,5 +353,23 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
         switchShowMode(MODE_EDIT,300);
         mUserMessageLayout.initshow(MODE_EDIT,null);
         mUserMessageLayout.initshow2(GlobalVar.mUserinfo);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode != Activity.RESULT_OK)
+            return;
+        switch (requestCode){
+            case SELECT_ALBUM_IMG:
+                mUserMessageLayout.ResultCallback(requestCode,resultCode,data);
+                break;
+        }
+    }
+
+    @Override
+    public void NPFcall() {
+        selectArea();
+        switchShowMode_force(MODE_MAP,300);
     }
 }

@@ -164,7 +164,7 @@ public class MyPullZoomScrollView extends ScrollView {
     }
 
     protected void smoothScrollToTop() {
-        mScalingRunnable.startAnimation(200L);
+        mScalingRunnable.startAnimation(100L);
     }
 
     private static final Interpolator sInterpolator = new Interpolator() {
@@ -239,5 +239,13 @@ public class MyPullZoomScrollView extends ScrollView {
 
     public void setOnPullZoomListener(OnPullZoomListener onPullZoomListener) {
         this.onPullZoomListener = onPullZoomListener;
+    }
+
+    @Override
+    protected void onScrollChanged(int l, int t, int oldl, int oldt) {
+        super.onScrollChanged(l, t, oldl, oldt);
+        if (mAlphaView==null)
+            return;
+        mAlphaView.setY(t/2);
     }
 }

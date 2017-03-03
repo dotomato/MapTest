@@ -22,7 +22,7 @@
                     android:id="@+id/viewpager"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
-                    app:layout_constraintBottom_toTopOf="@+id/back"
+                    app:layout_constraintBottom_toBottomOf="@+id/back"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintRight_toRightOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
@@ -33,6 +33,7 @@
                     android:id="@+id/back"
                     android:layout_width="0dp"
                     android:layout_height="50dp"
+                    android:alpha="0.5"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintRight_toRightOf="parent"
@@ -138,6 +139,18 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="#FFFFFFFF">
+
+                    <Button
+                        android:id="@+id/addimgbutton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:backgroundTint="@android:color/background_light"
+                        android:text="封面图片"
+                        android:textColor="@color/colorPrimaryDark"
+                        android:textSize="14sp"
+                        android:layout_marginRight="4dp"
+                        app:layout_constraintRight_toLeftOf="@+id/sendbutton"
+                        app:layout_constraintTop_toTopOf="parent" />
 
                     <Button
                         android:id="@+id/sendbutton"

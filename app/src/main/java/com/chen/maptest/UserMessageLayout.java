@@ -1,38 +1,47 @@
 package com.chen.maptest;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
-import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Scroller;
 import android.widget.Space;
 import android.widget.TextView;
 
 
+import com.bumptech.glide.Glide;
+import com.chen.maptest.MyServer.MyAction1;
+import com.chen.maptest.MyServer.Myserver;
+import com.chen.maptest.MyUpyun.MyUpyunManager;
 import com.chen.maptest.MyView.FixedScroller;
 import com.chen.maptest.MyView.OutlineProvider;
 import com.chen.maptest.MyView.MyPullZoomScrollView;
 
 import com.chen.maptest.MyModel.*;
 import com.chen.maptest.MyView.QuickPageAdapter;
+import com.chen.maptest.Utils.MyUtils;
 import com.chen.maptest.Utils.UserIconWarp;
+import com.google.gson.Gson;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -43,7 +52,14 @@ import java.util.List;
 import butterknife.ButterKnife;
 
 import butterknife.BindView;
+import butterknife.OnClick;
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 
+import static com.chen.maptest.Utils.MyUtils.pickFromGallery;
 import static com.chen.maptest.Utils.MyUtils.setEditTextEditable;
 
 /**
@@ -51,7 +67,7 @@ import static com.chen.maptest.Utils.MyUtils.setEditTextEditable;
  * Copyright *
  */
 
-public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoomScrollView.OnPullZoomListener {
+public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoomScrollView.OnPullZoomListener, MyUpyunManager.UploadProgress {
 
     private final static String TAG = "UserMessageLayout";
 
@@ -92,10 +108,16 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
     @BindView(R.id.viewpager)
     public ViewPager mViewpager;
 
+    @BindView(R.id.addimgbutton)
+    public Button mAddimgButton;
+
     private PointData mPointData;
     private Context mContext;
     private int mMode;
     private List<View> viewList;
+    private boolean hasAlbumUpload;
+    private Uri mAlbumImageUri;
+    private String mAlbumImageURL;
 
     public UserMessageLayout(Context context) {
         super(context);
@@ -111,6 +133,27 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
         super(context, attrs, defStyleAttr);
         init(context);
     }
+
+    @Override
+    public void onProgress(float progress) {
+
+    }
+
+    @Override
+    public void onComplete(boolean isSuccess, String url) {
+        mAlbumImageURL = url;
+        uploadnoewpoint();
+    }
+
+    public interface NewPointFinish{
+        void NPFcall();
+    }
+
+    public void setNewPointFinishCallback(NewPointFinish npf) {
+        this.mNewPointFinishCallback = npf;
+    }
+
+    private NewPointFinish mNewPointFinishCallback =null;
 
     private void init(Context context){
         mContext = context;
@@ -132,12 +175,12 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
         mViewpager.setAdapter(new QuickPageAdapter<>(viewList));
 
         try{
-        Field mScroller;
-        mScroller = ViewPager.class.getDeclaredField("mScroller");
-        mScroller.setAccessible(true);
-        Interpolator sInterpolator = new AccelerateDecelerateInterpolator();
-        FixedScroller scroller = new FixedScroller(mContext,sInterpolator);
-        mScroller.set(mViewpager,scroller);
+            Field mScroller;
+            mScroller = ViewPager.class.getDeclaredField("mScroller");
+            mScroller.setAccessible(true);
+            Interpolator sInterpolator = new AccelerateDecelerateInterpolator();
+            FixedScroller scroller = new FixedScroller(mContext,sInterpolator);
+            mScroller.set(mViewpager,scroller);
         } catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException ignored) {
         }
 
@@ -157,21 +200,36 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
 
         switch (mode) {
             case MainActivity.MODE_EDIT:
+                hasAlbumUpload=false;
                 mEditMessage.setText("");
                 setEditTextEditable(mEditMessage,true);
 
                 mMessageLayout.setVisibility(GONE);
                 mEditLayout.setVisibility(VISIBLE);
 
+                mImg1.setVisibility(INVISIBLE);
                 break;
             case MainActivity.MODE_MESSAGE:
                 if (pd==null)
                     return;
-                mEditMessage.setText(pd.userMessage);
-                setEditTextEditable(mEditMessage,false);
+                Gson gson = new Gson();
+                MessageJson mj = gson.fromJson(pd.userMessage,MessageJson.class);
+
+                if (mj.ver==100) {
+                    mEditMessage.setText(mj.text);
+                    setEditTextEditable(mEditMessage, false);
+                    if (!mj.albumURL.equals("no_img")) {
+                        Glide.with(mContext).load(mj.albumURL).into(mImg1);
+                        mImg1.setVisibility(VISIBLE);
+                    } else {
+                        mImg1.setVisibility(INVISIBLE);
+                    }
+                }
 
                 mMessageLayout.setVisibility(VISIBLE);
                 mEditLayout.setVisibility(GONE);
+
+
 
                 DateFormat time =  SimpleDateFormat.getDateTimeInstance();
                 String datatime = time.format(new Date(pd.pointTime*1000));
@@ -248,7 +306,7 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
 
 
     public void tryExit(){
-        if (TextUtils.isEmpty(mEditMessage.getText())){
+        if (TextUtils.isEmpty(mEditMessage.getText()) && !hasAlbumUpload){
             if (mExitCallback!=null)
                 mExitCallback.call();
             return;
@@ -271,7 +329,52 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
                 .show();//在按键响应事件中显示此对话框
     }
 
-    public NewPointData getNewPointData(){
+    @OnClick(R.id.addimgbutton)
+    public void addimg(){
+        pickFromGallery((Activity) mContext,MainActivity.SELECT_ALBUM_IMG);
+    }
+
+    public void ResultCallback(int requestCode, int resultCode, Intent data){
+        switch (requestCode){
+            case MainActivity.SELECT_ALBUM_IMG:
+
+                Observable.just(data.getData())
+                        .map(new Func1<Uri, File>() {
+                            @Override
+                            public File call(Uri uri) {
+                                File outfile = new File(mContext.getCacheDir(), "UserAlbum.jpeg");
+                                Bitmap bm = MyUtils.getBitmapSmall(uri.getPath());
+                                MyUtils.saveBitmap(outfile,bm);
+                                return outfile;
+                            }
+                        })
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Action1<File>() {
+                            @Override
+                            public void call(File file) {
+                                hasAlbumUpload=true;
+                                mAlbumImageUri = Uri.fromFile(file);
+                                mImg1.setImageURI(mAlbumImageUri);
+                                mImg1.setVisibility(VISIBLE);
+                                mViewpager.setCurrentItem(0,false);
+                                mViewpager.setCurrentItem(1,true);
+                            }
+                        });
+                break;
+        }
+    }
+
+    @OnClick(R.id.sendbutton)
+    public void newPoint(){
+        if (hasAlbumUpload){
+            MyUpyunManager.getIns().upload_image(mAlbumImageUri,this);
+        } else
+            uploadnoewpoint();
+
+    }
+
+    private void uploadnoewpoint(){
         MainActivity.MyLatlng l = GlobalVar.viewLatlng;
 
         NewPointData npd = new NewPointData();
@@ -280,10 +383,32 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
         pd.latitude = l.latitude;
         pd.longitude = l.longitude;
         pd.userID = GlobalVar.mUserinfo.userID;
-        pd.userMessage = mEditMessage.getText().toString();
+
+        MessageJson mj= new MessageJson();
+        mj.ver=100;
+        mj.text = mEditMessage.getText().toString();
+        if (hasAlbumUpload){
+            mj.albumURL=mAlbumImageURL;
+        } else {
+            mj.albumURL="no_img";
+        }
+
+        Gson gson = new Gson();
+        pd.userMessage = gson.toJson(mj);
 
         npd.pointData = pd;
-        return npd;
+
+        Myserver.getApi().newPoint(npd)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new MyAction1<NewPointResult>() {
+                    @Override
+                    public void call() {
+                        Log.d(TAG, "newPoint result: " + mVar.statue + " " + mVar.pointData.pointID);
+                        if (mNewPointFinishCallback !=null)
+                            mNewPointFinishCallback.NPFcall();
+                    }
+                });
     }
 
 }
