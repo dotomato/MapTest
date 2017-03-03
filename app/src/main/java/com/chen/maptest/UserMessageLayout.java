@@ -44,6 +44,7 @@ import com.google.gson.Gson;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -221,6 +222,12 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
                     if (!mj.albumURL.equals("no_img")) {
                         Glide.with(mContext).load(mj.albumURL).into(mImg1);
                         mImg1.setVisibility(VISIBLE);
+                        postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                mViewpager.setCurrentItem(1,true);
+                            }
+                        },1000);
                     } else {
                         mImg1.setVisibility(INVISIBLE);
                     }
@@ -233,15 +240,14 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
 
                 DateFormat time =  SimpleDateFormat.getDateTimeInstance();
                 String datatime = time.format(new Date(pd.pointTime*1000));
-                mTimeText.setText(datatime);
 
-                postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        mViewpager.setCurrentItem(1,true);
-                    }
-                },1000);
+                DecimalFormat decimalFormat=new DecimalFormat(".00");
+                String la=decimalFormat.format(pd.latitude);
+                String lo=decimalFormat.format(pd.longitude);
+                mTimeText.setText("经度:"+la+"   纬度:"+lo+"\n"+datatime);
+
                 break;
+
         }
         scrollTo(0,0);
     }
@@ -331,7 +337,7 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
 
     @OnClick(R.id.addimgbutton)
     public void addimg(){
-        pickFromGallery((Activity) mContext,MainActivity.SELECT_ALBUM_IMG);
+        pickFromGallery((Activity) mContext,MainActivity.SELECT_ALBUM_IMG, "选择封面");
     }
 
     public void ResultCallback(int requestCode, int resultCode, Intent data){
@@ -343,7 +349,7 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
                             @Override
                             public File call(Uri uri) {
                                 File outfile = new File(mContext.getCacheDir(), "UserAlbum.jpeg");
-                                Bitmap bm = MyUtils.getBitmapSmall(uri.getPath());
+                                Bitmap bm = MyUtils.getBitmapSmall(uri.getPath(), 1080 * 720);
                                 MyUtils.saveBitmap(outfile,bm);
                                 return outfile;
                             }
@@ -355,6 +361,7 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
                             public void call(File file) {
                                 hasAlbumUpload=true;
                                 mAlbumImageUri = Uri.fromFile(file);
+                                mImg1.setImageURI(null);
                                 mImg1.setImageURI(mAlbumImageUri);
                                 mImg1.setVisibility(VISIBLE);
                                 mViewpager.setCurrentItem(0,false);

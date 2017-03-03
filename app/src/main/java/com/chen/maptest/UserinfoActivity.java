@@ -194,7 +194,7 @@ public class UserinfoActivity extends AppCompatActivity implements Toolbar.OnMen
 
     @OnClick(R.id.usericon)
     public void usericonClick(){
-        MyUtils.pickFromGallery(this,ALBUMREQ);
+        MyUtils.pickFromGallery(this,ALBUMREQ, "选择头像");
     }
 
 

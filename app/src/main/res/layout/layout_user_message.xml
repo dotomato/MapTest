@@ -126,6 +126,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:text="2017-02-23 在 国科大的一条小溪旁"
+                        android:gravity="center"
                         android:textColor="@android:color/darker_gray"
                         android:textSize="14sp"
                         app:layout_constraintLeft_toLeftOf="parent"

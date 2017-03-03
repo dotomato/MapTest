@@ -10,7 +10,7 @@
     <com.roger.match.library.MatchTextView
         android:id="@+id/Title"
         android:layout_width="wrap_content"
-        android:layout_height="30dp"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         android:layout_marginTop="16dp"
         match:layout_constraintBottom_toBottomOf="parent"
@@ -19,18 +19,18 @@
         match:layout_constraintTop_toTopOf="parent"
         match:text="ROAD MAP"
         match:textColor="#ffffffff"
-        match:textSize="12sp" />
+        match:textSize="16sp"
+        match:layout_constraintVertical_bias="0.39" />
 
     <com.roger.match.library.MatchTextView
         android:layout_width="wrap_content"
-        android:layout_height="20dp"
-        android:layout_marginTop="0dp"
+        android:layout_height="wrap_content"
         match:layout_constraintLeft_toLeftOf="parent"
         match:layout_constraintRight_toRightOf="parent"
         match:layout_constraintTop_toBottomOf="@+id/Title"
         match:text="with you We wont be lonely"
         match:textColor="#ffffffff"
-        match:textSize="6sp" />
+        match:textSize="5sp" />
 
 
 </android.support.constraint.ConstraintLayout>

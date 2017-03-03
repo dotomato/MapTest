@@ -10,12 +10,9 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.widget.EditText;
 
-import com.chen.maptest.GlobalVar;
-import com.chen.maptest.MyModel.Userinfo;
 import com.google.gson.Gson;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -51,12 +48,12 @@ public class MyUtils {
         return fullname;
     }
 
-    public static void pickFromGallery(Activity context,int requesrCode) {
+    public static void pickFromGallery(Activity context, int requesrCode, String title) {
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
-        context.startActivityForResult(Intent.createChooser(intent, "选择头像"), requesrCode);
+        context.startActivityForResult(Intent.createChooser(intent, title), requesrCode);
     }
 
 
@@ -76,7 +73,7 @@ public class MyUtils {
         }
     }
 
-    public static Bitmap getBitmapSmall(String localImagePath) {
+    public static Bitmap getBitmapSmall(String localImagePath, int maxNumOfPixels) {
 
         Bitmap temBitmap = null;
 
@@ -89,7 +86,7 @@ public class MyUtils {
             // 加载获取图片的宽高
             BitmapFactory.decodeFile(localImagePath, outOptions);
 
-            outOptions.inSampleSize = computeSampleSize(outOptions, -1, 1080 * 720);
+            outOptions.inSampleSize = computeSampleSize(outOptions, -1, maxNumOfPixels);
             ;
             // 重新设置该属性为false，加载图片返回
             outOptions.inJustDecodeBounds = false;
