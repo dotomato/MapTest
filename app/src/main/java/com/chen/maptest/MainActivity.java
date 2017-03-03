@@ -14,14 +14,12 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.ScrollView;
 import android.widget.Toast;
 
 import com.chen.maptest.MapAdapter.BmapAdapterActivity;
 import com.chen.maptest.MapAdapter.MapAdaterCallback;
 import com.chen.maptest.MyServer.MyAction1;
 import com.chen.maptest.MyServer.Myserver;
-import com.chen.maptest.MyView.MyPullZoomScrollView;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -51,8 +49,8 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
     @BindView(R.id.leftDrawer)
     public LeftDrawLayout mLeftDrawerLayout;
 
-    @BindView(R.id.space)
-    public View mSpace;
+    @BindView(R.id.viewpager)
+    public View mUMHeader;
 
     private View mapView;
 
@@ -283,21 +281,21 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
                 mapView.animate().y(0).setDuration(mDuration).start();
                 mUserMessageLayout.animate().y(dh).setDuration(mDuration).start();
                 mFloatingActionButton.show();
-                mSpace.setVisibility(View.INVISIBLE);
+                mUMHeader.setVisibility(View.INVISIBLE);
                 break;
             case MODE_MESSAGE:
                 spaceHeight = mUserMessageLayout.getSpaceHeight();
                 mapView.animate().y(-(dh-spaceHeight)/2).setDuration(mDuration).start();
                 mUserMessageLayout.animate().y(0).setDuration(mDuration).start();
                 mFloatingActionButton.hide();
-                mSpace.setVisibility(View.VISIBLE);
+                mUMHeader.setVisibility(View.VISIBLE);
                 break;
             case MODE_EDIT:
                 spaceHeight = mUserMessageLayout.getSpaceHeight();
                 mapView.animate().y(-(dh-spaceHeight)/2).setDuration(mDuration).start();
                 mUserMessageLayout.animate().y(0).setDuration(mDuration).start();
                 mFloatingActionButton.hide();
-                mSpace.setVisibility(View.VISIBLE);
+                mUMHeader.setVisibility(View.VISIBLE);
                 break;
         }
     }

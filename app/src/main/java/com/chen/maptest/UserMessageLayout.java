@@ -5,26 +5,40 @@ import android.content.DialogInterface;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.Interpolator;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Scroller;
+import android.widget.Space;
 import android.widget.TextView;
 
 
+import com.chen.maptest.MyView.FixedScroller;
 import com.chen.maptest.MyView.OutlineProvider;
 import com.chen.maptest.MyView.MyPullZoomScrollView;
 
 import com.chen.maptest.MyModel.*;
+import com.chen.maptest.MyView.QuickPageAdapter;
 import com.chen.maptest.Utils.UserIconWarp;
 
+import java.lang.reflect.Field;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import butterknife.ButterKnife;
 
@@ -53,8 +67,9 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
     @BindView(R.id.userdescript)
     public TextView mUserDescirpt;
 
-    @BindView(R.id.space)
-    public ImageView mSpace;
+    public Space mSpace;
+
+    public ImageView mImg1;
 
     @BindView(R.id.sendbutton)
     public Button mSendButton;
@@ -74,9 +89,13 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
     @BindView(R.id.zoomview)
     public ViewGroup zoomview;
 
+    @BindView(R.id.viewpager)
+    public ViewPager mViewpager;
+
     private PointData mPointData;
     private Context mContext;
     private int mMode;
+    private List<View> viewList;
 
     public UserMessageLayout(Context context) {
         super(context);
@@ -103,15 +122,38 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
         super.onFinishInflate();
         ButterKnife.bind(this);
 
+        LayoutInflater inflater=LayoutInflater.from(mContext);
+        mSpace = (Space) inflater.inflate(R.layout.ump_space, null);
+        mImg1 = (ImageView) inflater.inflate(R.layout.ump_img1,null);
+
+        viewList = new ArrayList<>();// 将要分页显示的View装入数组中
+        viewList.add(mSpace);
+        viewList.add(mImg1);
+        mViewpager.setAdapter(new QuickPageAdapter<>(viewList));
+
+        try{
+        Field mScroller;
+        mScroller = ViewPager.class.getDeclaredField("mScroller");
+        mScroller.setAccessible(true);
+        Interpolator sInterpolator = new AccelerateDecelerateInterpolator();
+        FixedScroller scroller = new FixedScroller(mContext,sInterpolator);
+        mScroller.set(mViewpager,scroller);
+        } catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException ignored) {
+        }
+
+
         OutlineProvider.setOutline(mUserIcon,OutlineProvider.SHAPE_OVAL);
         setZoomView(zoomview);
-        setAlphaView(mSpace);
+        setAlphaView(mViewpager);
         setOnPullZoomListener(this);
     }
+
+
 
     public void initshow(int mode,@Nullable PointData pd){
         mPointData = pd;
         mMode = mode;
+        mViewpager.setCurrentItem(0,false);
 
         switch (mode) {
             case MainActivity.MODE_EDIT:
@@ -120,6 +162,7 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
 
                 mMessageLayout.setVisibility(GONE);
                 mEditLayout.setVisibility(VISIBLE);
+
                 break;
             case MainActivity.MODE_MESSAGE:
                 if (pd==null)
@@ -133,6 +176,13 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
                 DateFormat time =  SimpleDateFormat.getDateTimeInstance();
                 String datatime = time.format(new Date(pd.pointTime*1000));
                 mTimeText.setText(datatime);
+
+                postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mViewpager.setCurrentItem(1,true);
+                    }
+                },1000);
                 break;
         }
         scrollTo(0,0);
