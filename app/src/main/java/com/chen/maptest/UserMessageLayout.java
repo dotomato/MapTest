@@ -2,8 +2,6 @@ package com.chen.maptest;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
@@ -15,12 +13,11 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Space;
 import android.widget.TextView;
 
 
 import com.chen.maptest.MyView.OutlineProvider;
-import com.chen.maptest.MyView.TopEventScrollView;
+import com.chen.maptest.MyView.MyPullZoomScrollView;
 
 import com.chen.maptest.MyModel.*;
 import com.chen.maptest.Utils.UserIconWarp;
@@ -31,12 +28,6 @@ import java.util.Date;
 
 import butterknife.ButterKnife;
 
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
-
 import butterknife.BindView;
 
 import static com.chen.maptest.Utils.MyUtils.setEditTextEditable;
@@ -46,7 +37,7 @@ import static com.chen.maptest.Utils.MyUtils.setEditTextEditable;
  * Copyright *
  */
 
-public class UserMessageLayout extends TopEventScrollView {
+public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoomScrollView.OnPullZoomListener {
 
     private final static String TAG = "UserMessageLayout";
 
@@ -63,7 +54,7 @@ public class UserMessageLayout extends TopEventScrollView {
     public TextView mUserDescirpt;
 
     @BindView(R.id.space)
-    public Space mSpace;
+    public ImageView mSpace;
 
     @BindView(R.id.sendbutton)
     public Button mSendButton;
@@ -80,8 +71,12 @@ public class UserMessageLayout extends TopEventScrollView {
     @BindView(R.id.editlayout)
     public ViewGroup mEditLayout;
 
+    @BindView(R.id.zoomview)
+    public ViewGroup zoomview;
+
     private PointData mPointData;
     private Context mContext;
+    private int mMode;
 
     public UserMessageLayout(Context context) {
         super(context);
@@ -109,29 +104,14 @@ public class UserMessageLayout extends TopEventScrollView {
         ButterKnife.bind(this);
 
         OutlineProvider.setOutline(mUserIcon,OutlineProvider.SHAPE_OVAL);
-    }
-
-    public void setUserIcon(String var){
-        Observable.just(var)
-                .map(new Func1<String, Bitmap>(){
-
-                    @Override
-                    public Bitmap call(String s) {
-                        return BitmapFactory.decodeFile(s);
-                    }
-                })
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Bitmap>() {
-                    @Override
-                    public void call(Bitmap bitmap) {
-                        mUserIcon.setImageBitmap(bitmap);
-                    }
-                });
+        setZoomView(zoomview);
+        setAlphaView(mSpace);
+        setOnPullZoomListener(this);
     }
 
     public void initshow(int mode,@Nullable PointData pd){
         mPointData = pd;
+        mMode = mode;
 
         switch (mode) {
             case MainActivity.MODE_EDIT:
@@ -177,6 +157,23 @@ public class UserMessageLayout extends TopEventScrollView {
     }
 
     SpaceTouchEventCallback mSpaceTouchEventCallback=null;
+
+    private int lastY;
+    @Override
+    public void onPullZooming(int newScrollValue) {
+        lastY = newScrollValue;
+    }
+
+    @Override
+    public void onPullZoomEnd() {
+        if (lastY<-200) {
+            if (mMode==MainActivity.MODE_EDIT)
+                tryExit();
+            else if (mExitCallback!=null)
+                mExitCallback.call();
+        }
+    }
+
     interface SpaceTouchEventCallback{
         void onSpaceTouchEvent(MotionEvent ev);
     }
@@ -190,16 +187,20 @@ public class UserMessageLayout extends TopEventScrollView {
     }
 
 
+    public void setExitCallback(ExitCallback mExitCallback) {
+        this.mExitCallback = mExitCallback;
+    }
+
     ExitCallback mExitCallback=null;
     interface ExitCallback{
         void call();
     }
 
-    public void tryExit(ExitCallback var){
-        mExitCallback = var;
+
+    public void tryExit(){
         if (TextUtils.isEmpty(mEditMessage.getText())){
-            if (var!=null)
-                var.call();
+            if (mExitCallback!=null)
+                mExitCallback.call();
             return;
         }
         new AlertDialog.Builder(mContext).setMessage("要保存已输入的内容吗？")
@@ -234,8 +235,5 @@ public class UserMessageLayout extends TopEventScrollView {
         npd.pointData = pd;
         return npd;
     }
-
-
-
 
 }

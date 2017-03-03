@@ -21,7 +21,7 @@ import com.chen.maptest.MapAdapter.BmapAdapterActivity;
 import com.chen.maptest.MapAdapter.MapAdaterCallback;
 import com.chen.maptest.MyServer.MyAction1;
 import com.chen.maptest.MyServer.Myserver;
-import com.chen.maptest.MyView.TopEventScrollView;
+import com.chen.maptest.MyView.MyPullZoomScrollView;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -50,6 +50,9 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
 
     @BindView(R.id.leftDrawer)
     public LeftDrawLayout mLeftDrawerLayout;
+
+    @BindView(R.id.space)
+    public View mSpace;
 
     private View mapView;
 
@@ -117,10 +120,10 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
     }
 
     private void initLayout(){
-        mUserMessageLayout.setOverScrollCallback(new TopEventScrollView.OverScrollCallback() {
+        mUserMessageLayout.setExitCallback(new UserMessageLayout.ExitCallback() {
             @Override
-            public void onOverScroll(ScrollView scrollView) {
-                switchShowMode(MODE_MAP,300);
+            public void call() {
+                switchShowMode_force(MODE_MAP,300);
             }
         });
 
@@ -252,12 +255,7 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
         mMode = mode;
         mDuration = duration;
         if (lmode==MODE_EDIT) {
-            mUserMessageLayout.tryExit(new UserMessageLayout.ExitCallback() {
-                @Override
-                public void call() {
-                    _switchShowMode();
-                }
-            });
+            mUserMessageLayout.tryExit();
         } else {
             _switchShowMode();
         }
@@ -285,18 +283,21 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
                 mapView.animate().y(0).setDuration(mDuration).start();
                 mUserMessageLayout.animate().y(dh).setDuration(mDuration).start();
                 mFloatingActionButton.show();
+                mSpace.setVisibility(View.INVISIBLE);
                 break;
             case MODE_MESSAGE:
                 spaceHeight = mUserMessageLayout.getSpaceHeight();
                 mapView.animate().y(-(dh-spaceHeight)/2).setDuration(mDuration).start();
                 mUserMessageLayout.animate().y(0).setDuration(mDuration).start();
                 mFloatingActionButton.hide();
+                mSpace.setVisibility(View.VISIBLE);
                 break;
             case MODE_EDIT:
                 spaceHeight = mUserMessageLayout.getSpaceHeight();
                 mapView.animate().y(-(dh-spaceHeight)/2).setDuration(mDuration).start();
                 mUserMessageLayout.animate().y(0).setDuration(mDuration).start();
                 mFloatingActionButton.hide();
+                mSpace.setVisibility(View.VISIBLE);
                 break;
         }
     }

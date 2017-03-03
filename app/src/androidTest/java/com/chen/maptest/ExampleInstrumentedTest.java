@@ -25,12 +25,4 @@ public class ExampleInstrumentedTest {
 
         assertEquals("com.chen.maptest", appContext.getPackageName());
     }
-
-    @Test
-    public void getUserIconPath() throws Exception {
-        // Context of the app under test.
-        Context appContext = InstrumentationRegistry.getTargetContext();
-
-        assertEquals("com.chen.maptest", UserIconWarp.pathWarp(appContext,"no_icon"));
-    }
 }
