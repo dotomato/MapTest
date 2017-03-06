@@ -6,7 +6,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.graphics.Rect;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
@@ -30,6 +33,7 @@ import rx.schedulers.Schedulers;
 
 import com.chen.maptest.MyModel.*;
 import com.chen.maptest.Utils.OnceRunner;
+import com.jaeger.library.StatusBarUtil;
 
 import java.util.UUID;
 
@@ -66,6 +70,8 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ButterKnife.bind(this);
+
+        StatusBarUtil.setColorForDrawerLayout(this,(DrawerLayout) findViewById(R.id.activity_main), Color.WHITE,0);
 
         mapView = getMapView();
 
@@ -107,6 +113,7 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
         },ifilter);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     protected void onResume(){
         super.onResume();

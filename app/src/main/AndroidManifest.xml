@@ -49,11 +49,8 @@
 
         <activity
             android:name=".MainActivity"
-            android:windowSoftInputMode="adjustPan|stateHidden">
-        </activity>
-
+            android:windowSoftInputMode="adjustPan|stateHidden"></activity>
         <activity android:name=".UserinfoActivity" />
-
         <activity
             android:name="com.yalantis.ucrop.UCropActivity"
             android:screenOrientation="portrait"
@@ -65,7 +62,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
     </application>
 
 </manifest>
