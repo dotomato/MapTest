@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<EditText xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/msgedittext"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@null"
+    android:gravity="top"
+    android:hint="你在这里的所闻、所想……"
+    android:lineSpacingExtra="12sp"
+    android:minLines="4"
+    android:textColor="@android:color/white"
+    android:textSize="16sp"
+    android:shadowColor="@android:color/black"
+    android:shadowRadius="10"
+    android:shadowDx="2"
+    android:shadowDy="2">
+
+</EditText>

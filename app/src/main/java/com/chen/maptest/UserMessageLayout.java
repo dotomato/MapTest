@@ -32,6 +32,8 @@ import com.chen.maptest.MyServer.MyAction1;
 import com.chen.maptest.MyServer.Myserver;
 import com.chen.maptest.MyUpyun.MyUpyunManager;
 import com.chen.maptest.MyView.FixedScroller;
+import com.chen.maptest.MyView.MyBlurImageView;
+import com.chen.maptest.MyView.MyTimeShow;
 import com.chen.maptest.MyView.OutlineProvider;
 import com.chen.maptest.MyView.MyPullZoomScrollView;
 
@@ -47,6 +49,7 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -84,18 +87,17 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
     @BindView(R.id.userdescript)
     public TextView mUserDescirpt;
 
+    @BindView(R.id.space)
     public Space mSpace;
 
-    public ImageView mImg1;
+    @BindView(R.id.blurimg)
+    public MyBlurImageView mBlurImg;
 
     @BindView(R.id.sendbutton)
     public Button mSendButton;
 
     @BindView(R.id.time)
     public TextView mTimeText;
-
-    @BindView(R.id.usereditmessage)
-    public EditText mEditMessage;
 
     @BindView(R.id.messagelayout)
     public ViewGroup mMessageLayout;
@@ -111,6 +113,11 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
 
     @BindView(R.id.addimgbutton)
     public Button mAddimgButton;
+
+    @BindView(R.id.timeshow)
+    public MyTimeShow mMyTimeShow;
+
+    private EditText mMsgEdittext;
 
     private PointData mPointData;
     private Context mContext;
@@ -167,12 +174,10 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
         ButterKnife.bind(this);
 
         LayoutInflater inflater=LayoutInflater.from(mContext);
-        mSpace = (Space) inflater.inflate(R.layout.ump_space, null);
-        mImg1 = (ImageView) inflater.inflate(R.layout.ump_img1,null);
+        mMsgEdittext  = (EditText) inflater.inflate(R.layout.ump_msgedittext, null);
 
         viewList = new ArrayList<>();// 将要分页显示的View装入数组中
-        viewList.add(mSpace);
-        viewList.add(mImg1);
+        viewList.add(mMsgEdittext);
         mViewpager.setAdapter(new QuickPageAdapter<>(viewList));
 
         try{
@@ -188,8 +193,11 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
 
         OutlineProvider.setOutline(mUserIcon,OutlineProvider.SHAPE_OVAL);
         setZoomView(zoomview);
-        setAlphaView(mViewpager);
+//        setAlphaView(mViewpager);
         setOnPullZoomListener(this);
+
+        if (!mBlurImg.isInEditMode())
+            mBlurImg.setSrc(R.drawable.imgtest);
     }
 
 
@@ -202,13 +210,15 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
         switch (mode) {
             case MainActivity.MODE_EDIT:
                 hasAlbumUpload=false;
-                mEditMessage.setText("");
-                setEditTextEditable(mEditMessage,true);
+                mMsgEdittext.setText("");
+                setEditTextEditable(mMsgEdittext,true);
 
                 mMessageLayout.setVisibility(GONE);
                 mEditLayout.setVisibility(VISIBLE);
 
-                mImg1.setVisibility(INVISIBLE);
+                mMyTimeShow.setTime(Calendar.getInstance().getTime());
+
+//                mImg1.setVisibility(INVISIBLE);
                 break;
             case MainActivity.MODE_MESSAGE:
                 if (pd==null)
@@ -217,11 +227,11 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
                 MessageJson mj = gson.fromJson(pd.userMessage,MessageJson.class);
 
                 if (mj.ver==100) {
-                    mEditMessage.setText(mj.text);
-                    setEditTextEditable(mEditMessage, false);
+                    mMsgEdittext.setText(mj.text);
+                    setEditTextEditable(mMsgEdittext, false);
                     if (!mj.albumURL.equals("no_img")) {
-                        Glide.with(mContext).load(mj.albumURL).into(mImg1);
-                        mImg1.setVisibility(VISIBLE);
+//                        Glide.with(mContext).load(mj.albumURL).into(mImg1);
+//                        mImg1.setVisibility(VISIBLE);
                         postDelayed(new Runnable() {
                             @Override
                             public void run() {
@@ -229,22 +239,19 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
                             }
                         },1000);
                     } else {
-                        mImg1.setVisibility(INVISIBLE);
+//                        mImg1.setVisibility(INVISIBLE);
                     }
                 }
 
                 mMessageLayout.setVisibility(VISIBLE);
                 mEditLayout.setVisibility(GONE);
 
-
-
-                DateFormat time =  SimpleDateFormat.getDateTimeInstance();
-                String datatime = time.format(new Date(pd.pointTime*1000));
+                mMyTimeShow.setTime(new Date(pd.pointTime*1000));
 
                 DecimalFormat decimalFormat=new DecimalFormat(".00");
                 String la=decimalFormat.format(pd.latitude);
                 String lo=decimalFormat.format(pd.longitude);
-                mTimeText.setText("经度:"+la+"   纬度:"+lo+"\n"+datatime);
+                mTimeText.setText("经度:"+la+"   纬度:"+lo);
 
                 break;
 
@@ -312,7 +319,7 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
 
 
     public void tryExit(){
-        if (TextUtils.isEmpty(mEditMessage.getText()) && !hasAlbumUpload){
+        if (TextUtils.isEmpty(mMsgEdittext.getText()) && !hasAlbumUpload){
             if (mExitCallback!=null)
                 mExitCallback.call();
             return;
@@ -361,11 +368,11 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
                             public void call(File file) {
                                 hasAlbumUpload=true;
                                 mAlbumImageUri = Uri.fromFile(file);
-                                mImg1.setImageURI(null);
-                                mImg1.setImageURI(mAlbumImageUri);
-                                mImg1.setVisibility(VISIBLE);
-                                mViewpager.setCurrentItem(0,false);
-                                mViewpager.setCurrentItem(1,true);
+//                                mImg1.setImageURI(null);
+//                                mImg1.setImageURI(mAlbumImageUri);
+//                                mImg1.setVisibility(VISIBLE);
+//                                mViewpager.setCurrentItem(0,false);
+//                                mViewpager.setCurrentItem(1,true);
                             }
                         });
                 break;
@@ -393,7 +400,7 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
 
         MessageJson mj= new MessageJson();
         mj.ver=100;
-        mj.text = mEditMessage.getText().toString();
+        mj.text = mMsgEdittext.getText().toString();
         if (hasAlbumUpload){
             mj.albumURL=mAlbumImageURL;
         } else {

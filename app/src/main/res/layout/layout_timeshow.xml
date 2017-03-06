@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.chen.maptest.MyView.MyTimeShow
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="125dp"
+    android:layout_height="100dp"
+    android:background="#FF333333">
+
+    <TextView
+        android:id="@+id/show_month"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="6dp"
+        android:layout_marginTop="0dp"
+        android:text="7"
+        android:textColor="@android:color/white"
+        android:textSize="50dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/show1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="月"
+        android:textColor="@android:color/white"
+        android:textSize="25dp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/show_month"
+        app:layout_constraintLeft_toRightOf="@+id/show_month" />
+
+    <TextView
+        android:id="@+id/show_day"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="26"
+        android:textColor="@android:color/white"
+        android:textSize="50dp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/show1"
+        app:layout_constraintLeft_toRightOf="@+id/show1" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="0dp"
+        android:layout_height="5dp"
+        app:layout_constraintLeft_toLeftOf="@+id/show_month"
+        app:layout_constraintRight_toRightOf="@+id/show_day"
+        app:layout_constraintTop_toBottomOf="@+id/show_month"
+        app:srcCompat="@android:color/white" />
+
+    <TextView
+        android:id="@+id/show_year"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:text="2016"
+        android:textColor="@android:color/white"
+        android:textSize="20dp"
+        app:layout_constraintLeft_toLeftOf="@+id/show_month"
+        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+
+    <TextView
+        android:id="@+id/show_week"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:shadowColor="@android:color/black"
+        android:shadowDx="2"
+        android:shadowDy="2"
+        android:shadowRadius="10"
+        android:text="星期三"
+        android:textColor="@android:color/white"
+        android:textSize="20dp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/show_year"
+        app:layout_constraintRight_toRightOf="@+id/show_day" />
+</com.chen.maptest.MyView.MyTimeShow>
