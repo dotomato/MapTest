@@ -1,8 +1,11 @@
 package com.chen.maptest.MyView;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.constraint.ConstraintLayout;
 import android.util.AttributeSet;
+import android.util.TypedValue;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.amap.api.maps.model.Text;
@@ -25,6 +28,8 @@ public class MyTimeShow extends ConstraintLayout {
     private TextView showmonth;
     private TextView showday;
     private TextView showweek;
+    private TextView show1;
+    private ImageView timebar;
 
     private Context mContext;
     public MyTimeShow(Context context) {
@@ -53,13 +58,26 @@ public class MyTimeShow extends ConstraintLayout {
         showmonth = (TextView) findViewById(R.id.show_month);
         showday = (TextView) findViewById(R.id.show_day);
         showweek = (TextView) findViewById(R.id.show_week);
+        show1 = (TextView)findViewById(R.id.show1);
+        timebar = (ImageView)findViewById(R.id.timebar);
+
+        OutlineProvider.setOutline(timebar,OutlineProvider.SHAPE_RECT);
+
+        if (isInEditMode())
+            setBackgroundColor(Color.rgb(50,50,50));
+
+//        showyear.setTextSize(TypedValue.COMPLEX_UNIT_DIP,20);
+//        showmonth.setTextSize(TypedValue.COMPLEX_UNIT_DIP,50);
+//        showday.setTextSize(TypedValue.COMPLEX_UNIT_DIP,50);
+//        showweek.setTextSize(TypedValue.COMPLEX_UNIT_DIP,20);
+//        show1.setTextSize(TypedValue.COMPLEX_UNIT_DIP,25);
     }
 
     public void setTime(Date date){
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
+        int month = calendar.get(Calendar.MONTH)+1;
         int day = calendar.get(Calendar.DAY_OF_MONTH);
         String tw="";
         switch (calendar.get(Calendar.DAY_OF_WEEK)){
@@ -73,8 +91,8 @@ public class MyTimeShow extends ConstraintLayout {
         }
 
         showyear.setText(String.valueOf(year));
-        showmonth.setText(String.valueOf(month));
-        showday.setText(String.valueOf(day));
-        showyear.setText("星期"+tw);
+        showmonth.setText(String.format("%02d",month));
+        showday.setText(String.format("%02d",day));
+        showweek.setText("星期"+tw);
     }
 }
