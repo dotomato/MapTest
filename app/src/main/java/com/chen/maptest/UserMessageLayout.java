@@ -21,6 +21,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.Button;
 import android.widget.EditText;
@@ -237,8 +238,15 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
         UserIconWarp.just(mContext,ui.userIcon,mUserIcon);
     }
 
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        if (mMode==MainActivity.MODE_MESSAGE)
+            return true;
+        return super.onInterceptTouchEvent(ev);
+    }
+
     private float lx=-1;
-    private float ly=-1;
+    float nx=0;
     float dx;
     @Override
     public boolean onTouchEvent(@NonNull MotionEvent ev){
@@ -250,27 +258,29 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
         switch (ev.getAction()){
             case MotionEvent.ACTION_DOWN:
                 lx = ev.getX();
-                ly = ev.getY();
                 break;
             case MotionEvent.ACTION_MOVE:
-                if (lx==-1 ||ly ==-1){
+                if (lx==-1){
                     lx = ev.getX();
-                    ly = ev.getY();
                     break;
                 }
                 dx = ev.getX()-lx;
+                nx += dx;
+                lx = ev.getX();
+                updateXview();
                 break;
             case MotionEvent.ACTION_UP:
                 lx = -1;
-                ly = -1;
+                DecelerateInterpolator dp = new DecelerateInterpolator();
+
                 break;
         }
         return super.onTouchEvent(ev);
     }
 
     private void updateXview(){
-        mMsgEdittext.setTranslationX(dx);
-        mMyTimeShow.setTranslationX(dx);
+        mMsgEdittext.setTranslationX(nx);
+        mMyTimeShow.setTranslationX(nx);
     }
 
     SpaceTouchEventCallback mSpaceTouchEventCallback=null;
