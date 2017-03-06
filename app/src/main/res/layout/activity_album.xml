@@ -31,16 +31,4 @@
         <!--match:text="with you We wont be lonely"-->
         <!--match:textColor="#ffffffff"-->
         <!--match:textSize="5sp" />-->
-
-
-    <ImageView
-        android:id="@+id/imgtest"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:scaleType="centerCrop"
-        match:layout_constraintBottom_toBottomOf="parent"
-        match:layout_constraintLeft_toLeftOf="parent"
-        match:layout_constraintRight_toRightOf="parent"
-        match:layout_constraintTop_toTopOf="parent"
-        match:srcCompat="@drawable/imgtest" />
 </android.support.constraint.ConstraintLayout>

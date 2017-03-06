@@ -27,8 +27,6 @@ public class AlbumActivity extends AppCompatActivity {
     @BindView(R.id.album)
     public ViewGroup mAlbum;
 
-    @BindView(R.id.imgtest)
-    public ImageView mImgtest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

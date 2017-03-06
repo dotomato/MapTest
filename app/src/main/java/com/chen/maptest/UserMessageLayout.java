@@ -5,8 +5,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.view.ViewPager;
@@ -23,6 +25,7 @@ import android.view.animation.Interpolator;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Scroller;
 import android.widget.Space;
 import android.widget.TextView;
 
@@ -57,6 +60,8 @@ import butterknife.ButterKnife;
 
 import butterknife.BindView;
 import butterknife.OnClick;
+import jp.wasabeef.glide.transformations.BlurTransformation;
+import jp.wasabeef.glide.transformations.ColorFilterTransformation;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -108,24 +113,21 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
     @BindView(R.id.zoomview)
     public ViewGroup zoomview;
 
-    @BindView(R.id.viewpager)
-    public ViewPager mViewpager;
-
     @BindView(R.id.addimgbutton)
     public Button mAddimgButton;
 
     @BindView(R.id.timeshow)
     public MyTimeShow mMyTimeShow;
 
-    private EditText mMsgEdittext;
+    @BindView(R.id.msgedittext)
+    public EditText mMsgEdittext;
 
-    private PointData mPointData;
     private Context mContext;
     private int mMode;
-    private List<View> viewList;
     private boolean hasAlbumUpload;
     private Uri mAlbumImageUri;
     private String mAlbumImageURL;
+
 
     public UserMessageLayout(Context context) {
         super(context);
@@ -173,40 +175,15 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
         super.onFinishInflate();
         ButterKnife.bind(this);
 
-        LayoutInflater inflater=LayoutInflater.from(mContext);
-        mMsgEdittext  = (EditText) inflater.inflate(R.layout.ump_msgedittext, null);
-
-        viewList = new ArrayList<>();// 将要分页显示的View装入数组中
-        viewList.add(mMsgEdittext);
-        mViewpager.setAdapter(new QuickPageAdapter<>(viewList));
-
-        try{
-            Field mScroller;
-            mScroller = ViewPager.class.getDeclaredField("mScroller");
-            mScroller.setAccessible(true);
-            Interpolator sInterpolator = new AccelerateDecelerateInterpolator();
-            FixedScroller scroller = new FixedScroller(mContext,sInterpolator);
-            mScroller.set(mViewpager,scroller);
-        } catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException ignored) {
-        }
-
-
         OutlineProvider.setOutline(mUserIcon,OutlineProvider.SHAPE_OVAL);
         setZoomView(zoomview);
 //        setAlphaView(mViewpager);
         setOnPullZoomListener(this);
-
-        if (!mBlurImg.isInEditMode())
-            mBlurImg.setSrc(R.drawable.imgtest);
+        mMsgEdittext.getPaint().setFakeBoldText(true);
     }
 
-
-
     public void initshow(int mode,@Nullable PointData pd){
-        mPointData = pd;
         mMode = mode;
-        mViewpager.setCurrentItem(0,false);
-
         switch (mode) {
             case MainActivity.MODE_EDIT:
                 hasAlbumUpload=false;
@@ -218,7 +195,7 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
 
                 mMyTimeShow.setTime(Calendar.getInstance().getTime());
 
-//                mImg1.setVisibility(INVISIBLE);
+                mBlurImg.setSrc(R.drawable.default_album);
                 break;
             case MainActivity.MODE_MESSAGE:
                 if (pd==null)
@@ -230,16 +207,9 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
                     mMsgEdittext.setText(mj.text);
                     setEditTextEditable(mMsgEdittext, false);
                     if (!mj.albumURL.equals("no_img")) {
-//                        Glide.with(mContext).load(mj.albumURL).into(mImg1);
-//                        mImg1.setVisibility(VISIBLE);
-                        postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                mViewpager.setCurrentItem(1,true);
-                            }
-                        },1000);
+                        mBlurImg.setSrc(mj.albumURL);
                     } else {
-//                        mImg1.setVisibility(INVISIBLE);
+                        mBlurImg.setSrc(R.drawable.default_album);
                     }
                 }
 
@@ -267,14 +237,40 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
         UserIconWarp.just(mContext,ui.userIcon,mUserIcon);
     }
 
+    private float lx=-1;
+    private float ly=-1;
+    float dx;
     @Override
-    public boolean onTouchEvent(MotionEvent ev){
+    public boolean onTouchEvent(@NonNull MotionEvent ev){
         if (ev.getY()<mSpace.getHeight()-getScrollY() ) {
             if (mSpaceTouchEventCallback != null)
                 mSpaceTouchEventCallback.onSpaceTouchEvent(ev);
             return true;
         }
+        switch (ev.getAction()){
+            case MotionEvent.ACTION_DOWN:
+                lx = ev.getX();
+                ly = ev.getY();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                if (lx==-1 ||ly ==-1){
+                    lx = ev.getX();
+                    ly = ev.getY();
+                    break;
+                }
+                dx = ev.getX()-lx;
+                break;
+            case MotionEvent.ACTION_UP:
+                lx = -1;
+                ly = -1;
+                break;
+        }
         return super.onTouchEvent(ev);
+    }
+
+    private void updateXview(){
+        mMsgEdittext.setTranslationX(dx);
+        mMyTimeShow.setTranslationX(dx);
     }
 
     SpaceTouchEventCallback mSpaceTouchEventCallback=null;
@@ -287,7 +283,7 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
 
     @Override
     public void onPullZoomEnd() {
-        if (lastY<-200) {
+        if (lastY<-100) {
             if (mMode==MainActivity.MODE_EDIT)
                 tryExit();
             else if (mExitCallback!=null)
@@ -368,11 +364,7 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
                             public void call(File file) {
                                 hasAlbumUpload=true;
                                 mAlbumImageUri = Uri.fromFile(file);
-//                                mImg1.setImageURI(null);
-//                                mImg1.setImageURI(mAlbumImageUri);
-//                                mImg1.setVisibility(VISIBLE);
-//                                mViewpager.setCurrentItem(0,false);
-//                                mViewpager.setCurrentItem(1,true);
+                                mBlurImg.setSrc(mAlbumImageUri);
                             }
                         });
                 break;
@@ -424,5 +416,4 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
                     }
                 });
     }
-
 }

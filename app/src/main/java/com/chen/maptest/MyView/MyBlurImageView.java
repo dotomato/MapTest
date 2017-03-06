@@ -2,6 +2,7 @@ package com.chen.maptest.MyView;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.widget.ImageView;
@@ -49,6 +50,12 @@ public class MyBlurImageView extends ImageView {
     }
 
     public void setSrc(String res){
+        BlurTransformation bt = new BlurTransformation(mContext,mRadis,mDownSample);
+        ColorFilterTransformation ct = new ColorFilterTransformation(mContext, Color.argb(128,50,50,50));
+        Glide.with(mContext).load(res).centerCrop().bitmapTransform(bt,ct).into(this);
+    }
+
+    public void setSrc(Uri res){
         BlurTransformation bt = new BlurTransformation(mContext,mRadis,mDownSample);
         ColorFilterTransformation ct = new ColorFilterTransformation(mContext, Color.argb(128,50,50,50));
         Glide.with(mContext).load(res).centerCrop().bitmapTransform(bt,ct).into(this);

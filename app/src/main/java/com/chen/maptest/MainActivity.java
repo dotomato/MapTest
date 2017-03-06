@@ -53,9 +53,6 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
     @BindView(R.id.leftDrawer)
     public LeftDrawLayout mLeftDrawerLayout;
 
-    @BindView(R.id.viewpager)
-    public View mUMHeader;
-
     private View mapView;
 
     private ActionBarDrawerToggle mDrawerToggle;
@@ -287,21 +284,18 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
                 mapView.animate().y(0).setDuration(mDuration).start();
                 mUserMessageLayout.animate().y(dh).setDuration(mDuration).start();
                 mFloatingActionButton.show();
-                mUMHeader.setVisibility(View.INVISIBLE);
                 break;
             case MODE_MESSAGE:
                 spaceHeight = mUserMessageLayout.getSpaceHeight();
                 mapView.animate().y(-(dh-spaceHeight)/2).setDuration(mDuration).start();
                 mUserMessageLayout.animate().y(0).setDuration(mDuration).start();
                 mFloatingActionButton.hide();
-                mUMHeader.setVisibility(View.VISIBLE);
                 break;
             case MODE_EDIT:
                 spaceHeight = mUserMessageLayout.getSpaceHeight();
                 mapView.animate().y(-(dh-spaceHeight)/2).setDuration(mDuration).start();
                 mUserMessageLayout.animate().y(0).setDuration(mDuration).start();
                 mFloatingActionButton.hide();
-                mUMHeader.setVisibility(View.VISIBLE);
                 break;
         }
     }
