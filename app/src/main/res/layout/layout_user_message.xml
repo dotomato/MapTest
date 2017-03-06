@@ -91,6 +91,16 @@
                 android:background="#FFFFFFFF"
                 android:layout_height="480dp">
 
+                <ImageView
+                    android:id="@+id/noblurimg"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:scaleType="centerCrop"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
                 <com.chen.maptest.MyView.MyBlurImageView
                     android:id="@+id/blurimg"
                     android:layout_width="0dp"
@@ -101,6 +111,8 @@
                     app:layout_constraintRight_toRightOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
+
+
                 <android.support.v4.view.ViewPager
                     android:id="@+id/viewpager"
                     android:layout_width="0dp"
@@ -109,6 +121,16 @@
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintRight_toRightOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
+
+                <include
+                    layout="@layout/layout_timeshow"
+                    android:id="@+id/timeshow"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    android:layout_marginTop="22dp"
+                    android:layout_height="100dp"
+                    android:layout_width="120dp" />
+
 
                 <include
                     layout="@layout/layout_inner_edge"

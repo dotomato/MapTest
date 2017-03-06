@@ -26,6 +26,7 @@ import android.widget.Space;
 import android.widget.TextView;
 
 
+import com.bumptech.glide.Glide;
 import com.chen.maptest.MyServer.MyAction1;
 import com.chen.maptest.MyServer.Myserver;
 import com.chen.maptest.MyUpyun.MyUpyunManager;
@@ -42,9 +43,11 @@ import com.google.gson.Gson;
 
 import java.io.File;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.zip.Inflater;
 
 import butterknife.ButterKnife;
@@ -87,6 +90,9 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
     @BindView(R.id.blurimg)
     public MyBlurImageView mBlurImg;
 
+    @BindView(R.id.noblurimg)
+    public ImageView mNoBlurImg;
+
     @BindView(R.id.sendbutton)
     public Button mSendButton;
 
@@ -108,6 +114,7 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
     @BindView(R.id.viewpager)
     public ViewPager mViewPager;
 
+    @BindView(R.id.timeshow)
     public MyTimeShow mMyTimeShow;
 
     public EditText mMsgEdittext;
@@ -170,10 +177,14 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
         ButterKnife.bind(this);
 
         View view1 = LayoutInflater.from(mContext).inflate(R.layout.ump_msgshow,null,false);
+        View view2 = LayoutInflater.from(mContext).inflate(R.layout.ump_showspace,null,false);
         mMsgEdittext = (EditText)view1.findViewById(R.id.msgedittext);
-        mMyTimeShow = (MyTimeShow)view1.findViewById(R.id.timeshow);
+
+        viewlist =new ArrayList<>();
         viewlist.add(view1);
-        QuickPageAdapter<View> ada = new QuickPageAdapter(viewlist);
+        viewlist.add(view2);
+        mViewPager.setAdapter(new QuickPageAdapter<>(viewlist));
+        mViewPager.setPageTransformer(false,new ParallaxPagerTransformer());
 
         OutlineProvider.setOutline(mUserIcon,OutlineProvider.SHAPE_OVAL);
         setZoomView(zoomview);
@@ -196,6 +207,7 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
                 mMyTimeShow.setTime(Calendar.getInstance().getTime());
 
                 mBlurImg.setSrc(R.drawable.default_album);
+                Glide.with(mContext).load(R.drawable.default_album).into(mNoBlurImg);
                 break;
             case MainActivity.MODE_MESSAGE:
                 if (pd==null)
@@ -208,8 +220,10 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
                     setEditTextEditable(mMsgEdittext, false);
                     if (!mj.albumURL.equals("no_img")) {
                         mBlurImg.setSrc(mj.albumURL);
+                        Glide.with(mContext).load(mj.albumURL).into(mNoBlurImg);
                     } else {
                         mBlurImg.setSrc(R.drawable.default_album);
+                        Glide.with(mContext).load(R.drawable.default_album).into(mNoBlurImg);
                     }
                 }
 
@@ -239,8 +253,8 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        if (mMode==MainActivity.MODE_MESSAGE)
-            return true;
+//        if (mMode==MainActivity.MODE_MESSAGE)
+//            return true;
         return super.onInterceptTouchEvent(ev);
     }
 
@@ -339,7 +353,7 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
                         .map(new Func1<Uri, File>() {
                             @Override
                             public File call(Uri uri) {
-                                File outfile = new File(mContext.getCacheDir(), "UserAlbum.jpeg");
+                                File outfile = new File(mContext.getCacheDir(), "UserAlbum"+UUID.randomUUID().toString()+".jpeg");
                                 Bitmap bm = MyUtils.getBitmapSmall(uri.getPath(), 1080 * 720);
                                 MyUtils.saveBitmap(outfile,bm);
                                 return outfile;
@@ -352,7 +366,9 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
                             public void call(File file) {
                                 hasAlbumUpload=true;
                                 mAlbumImageUri = Uri.fromFile(file);
+                                clearAlbumImgUri();
                                 mBlurImg.setSrc(mAlbumImageUri);
+                                Glide.with(mContext).load(mAlbumImageUri).into(mNoBlurImg);
                             }
                         });
                 break;
@@ -366,6 +382,11 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
         } else
             uploadnoewpoint();
 
+    }
+
+    private void clearAlbumImgUri(){
+        mBlurImg.setImageURI(null);
+        mNoBlurImg.setImageURI(null);
     }
 
     private void uploadnoewpoint(){
@@ -403,5 +424,23 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
                             mNewPointFinishCallback.NPFcall();
                     }
                 });
+    }
+
+    class ParallaxPagerTransformer implements ViewPager.PageTransformer {
+        private float speed = 0.6f;
+
+        public ParallaxPagerTransformer() {
+        }
+
+        @Override
+        public void transformPage(View view, float position) {
+            if (view.equals(viewlist.get(0))){
+                if (position > -1 && position < 1) {
+                    float width = view.getWidth();
+                    mMyTimeShow.setTranslationX((position * width * speed));
+                    mBlurImg.setAlpha(1+position);
+                }
+            }
+        }
     }
 }

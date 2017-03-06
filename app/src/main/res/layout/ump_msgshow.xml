@@ -5,27 +5,31 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <include
-        layout="@layout/ump_msgedittext"
+
+    <EditText
         android:id="@+id/msgedittext"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
         android:layout_marginLeft="32dp"
         android:layout_marginTop="32dp"
-        android:layout_marginRight="8dp"
+        android:layout_marginRight="120dp"
         android:layout_marginBottom="32dp"
-        app:layout_constraintRight_toLeftOf="@+id/timeshow" />
+        android:background="@null"
+        android:gravity="top"
+        android:hint="你在这里的所闻、所想……"
+        android:lineSpacingExtra="18dp"
+        android:maxLines="12"
+        android:textColor="@android:color/white"
+        android:textColorHint="#77FFFFFF"
+        android:textSize="14dp"
+        android:shadowColor="@android:color/black"
+        android:shadowRadius="10"
+        android:shadowDx="2"
+        android:shadowDy="2" />
 
-    <include
-        layout="@layout/layout_timeshow"
-        android:id="@+id/timeshow"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginTop="22dp"
-        android:layout_height="100dp"
-        android:layout_width="120dp" />
 
 </android.support.constraint.ConstraintLayout>
