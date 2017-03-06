@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
@@ -20,22 +19,16 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.DecelerateInterpolator;
-import android.view.animation.Interpolator;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Scroller;
 import android.widget.Space;
 import android.widget.TextView;
 
 
-import com.bumptech.glide.Glide;
 import com.chen.maptest.MyServer.MyAction1;
 import com.chen.maptest.MyServer.Myserver;
 import com.chen.maptest.MyUpyun.MyUpyunManager;
-import com.chen.maptest.MyView.FixedScroller;
 import com.chen.maptest.MyView.MyBlurImageView;
 import com.chen.maptest.MyView.MyTimeShow;
 import com.chen.maptest.MyView.OutlineProvider;
@@ -48,21 +41,16 @@ import com.chen.maptest.Utils.UserIconWarp;
 import com.google.gson.Gson;
 
 import java.io.File;
-import java.lang.reflect.Field;
-import java.text.DateFormat;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.zip.Inflater;
 
 import butterknife.ButterKnife;
 
 import butterknife.BindView;
 import butterknife.OnClick;
-import jp.wasabeef.glide.transformations.BlurTransformation;
-import jp.wasabeef.glide.transformations.ColorFilterTransformation;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -117,17 +105,22 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
     @BindView(R.id.addimgbutton)
     public Button mAddimgButton;
 
-    @BindView(R.id.timeshow)
+    @BindView(R.id.viewpager)
+    public ViewPager mViewPager;
+
     public MyTimeShow mMyTimeShow;
 
-    @BindView(R.id.msgedittext)
     public EditText mMsgEdittext;
+
+
 
     private Context mContext;
     private int mMode;
     private boolean hasAlbumUpload;
     private Uri mAlbumImageUri;
     private String mAlbumImageURL;
+
+    private List<View> viewlist;
 
 
     public UserMessageLayout(Context context) {
@@ -175,6 +168,12 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
     protected void onFinishInflate(){
         super.onFinishInflate();
         ButterKnife.bind(this);
+
+        View view1 = LayoutInflater.from(mContext).inflate(R.layout.ump_msgshow,null,false);
+        mMsgEdittext = (EditText)view1.findViewById(R.id.msgedittext);
+        mMyTimeShow = (MyTimeShow)view1.findViewById(R.id.timeshow);
+        viewlist.add(view1);
+        QuickPageAdapter<View> ada = new QuickPageAdapter(viewlist);
 
         OutlineProvider.setOutline(mUserIcon,OutlineProvider.SHAPE_OVAL);
         setZoomView(zoomview);
@@ -245,9 +244,8 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
         return super.onInterceptTouchEvent(ev);
     }
 
-    private float lx=-1;
-    float nx=0;
-    float dx;
+    final float x1 = 0;
+    final float x2 = -600;
     @Override
     public boolean onTouchEvent(@NonNull MotionEvent ev){
         if (ev.getY()<mSpace.getHeight()-getScrollY() ) {
@@ -255,33 +253,13 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
                 mSpaceTouchEventCallback.onSpaceTouchEvent(ev);
             return true;
         }
-        switch (ev.getAction()){
-            case MotionEvent.ACTION_DOWN:
-                lx = ev.getX();
-                break;
-            case MotionEvent.ACTION_MOVE:
-                if (lx==-1){
-                    lx = ev.getX();
-                    break;
-                }
-                dx = ev.getX()-lx;
-                nx += dx;
-                lx = ev.getX();
-                updateXview();
-                break;
-            case MotionEvent.ACTION_UP:
-                lx = -1;
-                DecelerateInterpolator dp = new DecelerateInterpolator();
-
-                break;
-        }
         return super.onTouchEvent(ev);
     }
 
     private void updateXview(){
-        mMsgEdittext.setTranslationX(nx);
-        mMyTimeShow.setTranslationX(nx);
+//        mMsgEdittext.setTranslationX(nx);//        mMyTimeShow.setTranslationX(nx);
     }
+
 
     SpaceTouchEventCallback mSpaceTouchEventCallback=null;
 

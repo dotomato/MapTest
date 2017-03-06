@@ -101,28 +101,14 @@
                     app:layout_constraintRight_toRightOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <include
-                    layout="@layout/ump_msgedittext"
-                    android:id="@+id/msgedittext"
+                <android.support.v4.view.ViewPager
+                    android:id="@+id/viewpager"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
-                    app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    android:layout_marginLeft="32dp"
-                    android:layout_marginTop="32dp"
-                    android:layout_marginRight="8dp"
-                    android:layout_marginBottom="32dp"
-                    app:layout_constraintRight_toLeftOf="@+id/timeshow" />
-
-                <include
-                    layout="@layout/layout_timeshow"
-                    android:id="@+id/timeshow"
-                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintRight_toRightOf="parent"
-                    android:layout_marginTop="22dp"
-                    android:layout_height="100dp"
-                    android:layout_width="120dp" />
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <include
                     layout="@layout/layout_inner_edge"
