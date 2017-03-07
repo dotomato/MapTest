@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:imagecontrol="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -17,12 +17,12 @@
         android:layout_marginLeft="32dp"
         android:layout_marginTop="32dp"
         android:layout_marginRight="120dp"
-        android:layout_marginBottom="32dp"
+        android:layout_marginBottom="80dp"
         android:background="@null"
         android:gravity="top"
         android:hint="你在这里的所闻、所想……"
         android:lineSpacingExtra="18dp"
-        android:maxLines="12"
+        android:maxLines="11"
         android:textColor="@android:color/white"
         android:textColorHint="#77FFFFFF"
         android:textSize="14dp"
@@ -30,6 +30,68 @@
         android:shadowRadius="10"
         android:shadowDx="2"
         android:shadowDy="2" />
+
+    <ImageView
+        android:id="@+id/namebar"
+        android:layout_width="70dp"
+        android:layout_height="2dp"
+        android:layout_marginRight="4dp"
+        android:elevation="6dp"
+        app:layout_constraintRight_toLeftOf="@+id/usericon"
+        app:layout_constraintTop_toBottomOf="@+id/msgedittext"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:srcCompat="@android:color/white" />
+
+    <com.chen.maptest.MyView.RoundImageView
+        android:id="@+id/usericon"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginBottom="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginRight="4dp"
+        android:elevation="6dp"
+        android:scaleType="fitXY"
+        android:src="@drawable/usericon"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/msgedittext"
+        app:layout_constraintRight_toLeftOf="@+id/username"
+        imagecontrol:border_outside_color="#FFEEEEEE"
+        imagecontrol:border_thickness="3dp" />
+
+    <TextView
+        android:id="@+id/username"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="24dp"
+        android:text="周玲美"
+        android:maxLines="1"
+        android:textColor="@android:color/white"
+        android:textSize="12dp"
+        android:textStyle="bold"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/usericon"
+        android:shadowColor="@android:color/black"
+        android:shadowRadius="10"
+        android:shadowDx="2"
+        android:shadowDy="2" />
+
+    <TextView
+        android:id="@+id/userdescript"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="left"
+        android:text="中国南极科考站科学家"
+        android:textColor="@android:color/white"
+        android:textSize="12dp"
+        android:maxLines="1"
+        app:layout_constraintBottom_toBottomOf="@+id/usericon"
+        app:layout_constraintRight_toRightOf="@+id/username"
+        app:layout_constraintLeft_toLeftOf="@+id/username"
+        app:layout_constraintVertical_bias="0.0"
+        android:shadowColor="@android:color/black"
+        android:shadowRadius="10"
+        android:shadowDx="2"
+        android:shadowDy="2"/>
 
 
 </android.support.constraint.ConstraintLayout>

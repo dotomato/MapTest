@@ -72,16 +72,12 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
 
     private final static String TAG = "UserMessageLayout";
 
-    @BindView(R.id.back)
-    public ImageView mBack;
+    public ImageView mNameBar;
 
-    @BindView(R.id.usericon)
     public ImageView mUserIcon;
 
-    @BindView(R.id.username)
     public TextView mUserName;
 
-    @BindView(R.id.userdescript)
     public TextView mUserDescirpt;
 
     @BindView(R.id.space)
@@ -179,6 +175,10 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
         View view1 = LayoutInflater.from(mContext).inflate(R.layout.ump_msgshow,null,false);
         View view2 = LayoutInflater.from(mContext).inflate(R.layout.ump_showspace,null,false);
         mMsgEdittext = (EditText)view1.findViewById(R.id.msgedittext);
+        mUserName = (TextView)view1.findViewById(R.id.username);
+        mUserDescirpt = (TextView)view1.findViewById(R.id.userdescript);
+        mNameBar = (ImageView)view1.findViewById(R.id.namebar);
+        mUserIcon = (ImageView)view1.findViewById(R.id.usericon);
 
         viewlist =new ArrayList<>();
         viewlist.add(view1);
@@ -186,11 +186,11 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
         mViewPager.setAdapter(new QuickPageAdapter<>(viewlist));
         mViewPager.setPageTransformer(false,new ParallaxPagerTransformer());
 
+        OutlineProvider.setOutline(mNameBar,OutlineProvider.SHAPE_OVAL);
         OutlineProvider.setOutline(mUserIcon,OutlineProvider.SHAPE_OVAL);
-        setZoomView(zoomview);
-//        setAlphaView(mViewpager);
-        setOnPullZoomListener(this);
         mMsgEdittext.getPaint().setFakeBoldText(true);
+        setZoomView(zoomview);
+        setOnPullZoomListener(this);
     }
 
     public void initshow(int mode,@Nullable PointData pd){

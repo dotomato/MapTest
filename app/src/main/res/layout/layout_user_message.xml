@@ -13,78 +13,17 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <android.support.constraint.ConstraintLayout
+            <FrameLayout
                 android:id="@+id/zoomview"
                 android:layout_width="match_parent"
                 android:layout_height="180dp">
 
                 <Space
                     android:id="@+id/space"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    app:layout_constraintBottom_toTopOf="@+id/back"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
 
-
-                <ImageView
-                    android:id="@+id/back"
-                    android:layout_width="0dp"
-                    android:layout_height="30dp"
-                    android:alpha="1"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:srcCompat="@color/colorPrimary" />
-
-                <com.chen.maptest.MyView.RoundImageView
-                    android:id="@+id/usericon"
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
-                    android:layout_marginBottom="8dp"
-                    android:layout_marginLeft="8dp"
-                    android:elevation="9dp"
-                    android:scaleType="fitXY"
-                    android:src="@drawable/usericon"
-                    app:layout_constraintBottom_toBottomOf="@+id/back"
-                    app:layout_constraintLeft_toLeftOf="@+id/back"
-                    imagecontrol:border_outside_color="#FFEEEEEE"
-                    imagecontrol:border_thickness="3dp"
-                    android:layout_marginStart="8dp" />
-
-                <TextView
-                    android:id="@+id/username"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="12dp"
-                    android:elevation="7dp"
-                    android:text="周玲美"
-                    android:textColor="@android:color/white"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    app:layout_constraintBottom_toBottomOf="@+id/back"
-                    app:layout_constraintLeft_toRightOf="@+id/usericon"
-                    app:layout_constraintTop_toTopOf="@+id/back"
-                    android:layout_marginStart="12dp" />
-
-                <TextView
-                    android:id="@+id/userdescript"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="12dp"
-                    android:elevation="12dp"
-                    android:gravity="left"
-                    android:text="中国南极科考站科学家"
-                    android:textColor="@android:color/white"
-                    android:textSize="16sp"
-                    app:layout_constraintBottom_toBottomOf="@+id/username"
-                    app:layout_constraintLeft_toRightOf="@+id/username"
-                    app:layout_constraintVertical_bias="0.0"
-                    android:layout_marginStart="12dp" />
-
-
-            </android.support.constraint.ConstraintLayout>
+            </FrameLayout>
 
             <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
