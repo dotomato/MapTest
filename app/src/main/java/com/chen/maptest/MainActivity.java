@@ -33,7 +33,8 @@ import com.chen.maptest.Utils.OnceRunner;
 
 import java.util.UUID;
 
-public class MainActivity extends BmapAdapterActivity implements MapAdaterCallback, UserMessageLayout.NewPointFinish {
+public class MainActivity extends BmapAdapterActivity implements
+        MapAdaterCallback, UserMessageLayout.NewPointFinish, UserMessageLayout.ScrollCallback {
 
 
     private final static String TAG = "MainActivity";
@@ -58,6 +59,8 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
     private ActionBarDrawerToggle mDrawerToggle;
 
     private boolean shouldInitonResume = false;
+    private int WindowHeight;
+    private int spaceHeight;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,11 +116,6 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
         }
     }
 
-    private void initGlobalVar(){
-//        GlobalVar.viewLatlng = new MyLatlng(-1,-1);
-//        GlobalVar.mUserinfo = new Userinfo();
-    }
-
     private void initLayout(){
         mUserMessageLayout.setExitCallback(new UserMessageLayout.ExitCallback() {
             @Override
@@ -136,7 +134,7 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
         });
 
         mUserMessageLayout.setNewPointFinishCallback(this);
-//        drawerLayoutinit();
+        mUserMessageLayout.setScrollCallback(this);
     }
 
     private void initUserinfo(){
@@ -185,14 +183,9 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
 
 
     private void initUserView(){
-//        if (GlobalVar.mUserinfo==null)
-//            return;
         mLeftDrawerLayout.initUserView();
     }
 
-    private void drawerLayoutinit(){
-
-    }
 
     @Override
     protected void onDestroy() {
@@ -271,10 +264,12 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
     private void _switchShowMode(){
         lmode=mMode;
 
+
         Rect frame = new Rect();
         getWindow().getDecorView().getWindowVisibleDisplayFrame(frame);
-        int dh = frame.height();
-        int spaceHeight;
+        WindowHeight = frame.height();
+
+        spaceHeight = mUserMessageLayout.getSpaceHeight();
 
         mapView.clearAnimation();
         mUserMessageLayout.clearAnimation();
@@ -282,18 +277,16 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
         switch (mMode){
             case MODE_MAP:
                 mapView.animate().y(0).setDuration(mDuration).start();
-                mUserMessageLayout.animate().y(dh).setDuration(mDuration).start();
+                mUserMessageLayout.animate().y(WindowHeight).setDuration(mDuration).start();
                 mFloatingActionButton.show();
                 break;
             case MODE_MESSAGE:
-                spaceHeight = mUserMessageLayout.getSpaceHeight();
-                mapView.animate().y(-(dh-spaceHeight)/2).setDuration(mDuration).start();
+                mapView.animate().y(-(WindowHeight-spaceHeight)/2).setDuration(mDuration).start();
                 mUserMessageLayout.animate().y(0).setDuration(mDuration).start();
                 mFloatingActionButton.hide();
                 break;
             case MODE_EDIT:
-                spaceHeight = mUserMessageLayout.getSpaceHeight();
-                mapView.animate().y(-(dh-spaceHeight)/2).setDuration(mDuration).start();
+                mapView.animate().y(-(WindowHeight-spaceHeight)/2).setDuration(mDuration).start();
                 mUserMessageLayout.animate().y(0).setDuration(mDuration).start();
                 mFloatingActionButton.hide();
                 break;
@@ -365,5 +358,10 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
     public void NPFcall() {
         selectArea();
         switchShowMode_force(MODE_MAP,300);
+    }
+
+    @Override
+    public void callback(int t) {
+        mapView.setTranslationY(-t/2-(WindowHeight - spaceHeight)/2);
     }
 }

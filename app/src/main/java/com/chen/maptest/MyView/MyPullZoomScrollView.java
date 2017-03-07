@@ -103,6 +103,8 @@ public class MyPullZoomScrollView extends ScrollView {
             return super.onTouchEvent(event);
         }
 
+        Log.d("MyouTouchEvent",event.toString());
+
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 mLastMotionY = event.getY();
@@ -115,11 +117,13 @@ public class MyPullZoomScrollView extends ScrollView {
                 mLastMotionY = event.getY();
                 if (getScrollY()==0) {
                     ScrollValue = ScrollValue - mDiffMotionY / FRICTION;
-                    newScrollValue = Math.round(ScrollValue);
                     isZooming = ScrollValue<0;
-                    pullEvent();
-                    if (isZooming)
+                    Log.d("MyouTouchEvent",isZooming+"");
+                    if (isZooming) {
+                        newScrollValue = Math.round(ScrollValue);
+                        pullEvent();
                         return true;
+                    }
                 }
                 break;
 
@@ -133,6 +137,7 @@ public class MyPullZoomScrollView extends ScrollView {
                         onPullZoomListener.onPullZoomEnd();
                     }
                     isZooming = false;
+                    return true;
                 }
                 break;
         }
@@ -192,31 +197,31 @@ public class MyPullZoomScrollView extends ScrollView {
         }
 
         public void run() {
-            if (mZoomView != null) {
-                float f2;
-                ViewGroup.LayoutParams localLayoutParams;
-                if ((!mIsFinished) && (mScale > 1.0D)) {
-                    float f1 = ((float) SystemClock.currentThreadTimeMillis() - (float) mStartTime) / (float) mDuration;
-                    f2 = mScale - (mScale - 1.0F) * sInterpolator.getInterpolation(f1);
-                    localLayoutParams = mZoomView.getLayoutParams();
-                    if (f2 > 1.0F) {
-                        localLayoutParams.height = ((int) (f2 * mHeaderHeight));
-                        mZoomView.setLayoutParams(localLayoutParams);
-                        post(this);
-                        final int ALPHAY = mHeaderHeight - localLayoutParams.height;
-                        if (mAlphaView!=null) {
-                            final float k = 1.0f/(ALPHAY1-ALPHAY2);
-                            final float b = -k*ALPHAY2;
-                            float a = ALPHAY*k+b;
-                            if (a>1) a=1;
-                            if (a<0) a=0;
-                            mAlphaView.setAlpha(a);
-                        }
-                        return;
-                    }
-                    mIsFinished = true;
-                }
+            if (mZoomView==null)
+                return;
+
+            float f1 = ((float) SystemClock.currentThreadTimeMillis() - (float) mStartTime) / (float) mDuration;
+            if (f1>1)
+                mIsFinished=true;
+
+            float f2 = mScale - (mScale - 1.0F) * sInterpolator.getInterpolation(f1);
+            ViewGroup.LayoutParams  localLayoutParams = mZoomView.getLayoutParams();
+
+            localLayoutParams.height = ((int) (f2 * mHeaderHeight));
+            mZoomView.setLayoutParams(localLayoutParams);
+
+            final int ALPHAY = mHeaderHeight - localLayoutParams.height;
+            if (mAlphaView!=null) {
+                final float k = 1.0f/(ALPHAY1-ALPHAY2);
+                final float b = -k*ALPHAY2;
+                float a = ALPHAY*k+b;
+                if (a>1) a=1;
+                if (a<0) a=0;
+                mAlphaView.setAlpha(a);
             }
+
+            if (!mIsFinished)
+                post(this);
         }
 
         public void startAnimation(long paramLong) {

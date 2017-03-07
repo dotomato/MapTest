@@ -10,6 +10,7 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
@@ -21,7 +22,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Space;
 import android.widget.TextView;
 
@@ -92,9 +95,6 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
     @BindView(R.id.sendbutton)
     public Button mSendButton;
 
-    @BindView(R.id.time)
-    public TextView mTimeText;
-
     @BindView(R.id.messagelayout)
     public ViewGroup mMessageLayout;
 
@@ -112,6 +112,9 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
 
     @BindView(R.id.timeshow)
     public MyTimeShow mMyTimeShow;
+
+    @BindView(R.id.msgmain)
+    public ViewGroup mMsgMain;
 
     public EditText mMsgEdittext;
 
@@ -152,6 +155,8 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
         uploadnoewpoint();
     }
 
+
+
     public interface NewPointFinish{
         void NPFcall();
     }
@@ -166,6 +171,17 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
         mContext = context;
     }
 
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) zoomview.getLayoutParams();
+        lp.height = (b-t) - mMsgMain.getLayoutParams().height;
+        if (lp.height<0)
+            lp.height=0;
+        zoomview.setLayoutParams(lp);
+        setZoomView(zoomview);
+        super.onLayout(changed,l,t,r,b);
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onFinishInflate(){
@@ -175,10 +191,10 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
         View view1 = LayoutInflater.from(mContext).inflate(R.layout.ump_msgshow,null,false);
         View view2 = LayoutInflater.from(mContext).inflate(R.layout.ump_showspace,null,false);
         mMsgEdittext = (EditText)view1.findViewById(R.id.msgedittext);
-        mUserName = (TextView)view1.findViewById(R.id.username);
-        mUserDescirpt = (TextView)view1.findViewById(R.id.userdescript);
-        mNameBar = (ImageView)view1.findViewById(R.id.namebar);
-        mUserIcon = (ImageView)view1.findViewById(R.id.usericon);
+
+        mUserName = (TextView)findViewById(R.id.username);
+        mUserDescirpt = (TextView)findViewById(R.id.userdescript);
+        mUserIcon = (ImageView)findViewById(R.id.usericon);
 
         viewlist =new ArrayList<>();
         viewlist.add(view1);
@@ -186,10 +202,9 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
         mViewPager.setAdapter(new QuickPageAdapter<>(viewlist));
         mViewPager.setPageTransformer(false,new ParallaxPagerTransformer());
 
-        OutlineProvider.setOutline(mNameBar,OutlineProvider.SHAPE_OVAL);
         OutlineProvider.setOutline(mUserIcon,OutlineProvider.SHAPE_OVAL);
         mMsgEdittext.getPaint().setFakeBoldText(true);
-        setZoomView(zoomview);
+        mUserName.getPaint().setFakeBoldText(true);
         setOnPullZoomListener(this);
     }
 
@@ -235,7 +250,7 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
                 DecimalFormat decimalFormat=new DecimalFormat(".00");
                 String la=decimalFormat.format(pd.latitude);
                 String lo=decimalFormat.format(pd.longitude);
-                mTimeText.setText("经度:"+la+"   纬度:"+lo);
+//                mTimeText.setText("经度:"+la+"   纬度:"+lo);
 
                 break;
 
@@ -258,8 +273,6 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
         return super.onInterceptTouchEvent(ev);
     }
 
-    final float x1 = 0;
-    final float x2 = -600;
     @Override
     public boolean onTouchEvent(@NonNull MotionEvent ev){
         if (ev.getY()<mSpace.getHeight()-getScrollY() ) {
@@ -268,10 +281,6 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
             return true;
         }
         return super.onTouchEvent(ev);
-    }
-
-    private void updateXview(){
-//        mMsgEdittext.setTranslationX(nx);//        mMyTimeShow.setTranslationX(nx);
     }
 
 
@@ -442,5 +451,21 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
                 }
             }
         }
+    }
+
+    @Override
+    protected void onScrollChanged(int l, int t, int oldl, int oldt) {
+        super.onScrollChanged(l, t, oldl, oldt);
+        if (mScrollCallback!=null)
+            mScrollCallback.callback(t);
+    }
+
+
+    public interface ScrollCallback {
+        void callback(int t);
+    }
+    private ScrollCallback mScrollCallback=null;
+    public void setScrollCallback(ScrollCallback scrollCallback) {
+        this.mScrollCallback = scrollCallback;
     }
 }

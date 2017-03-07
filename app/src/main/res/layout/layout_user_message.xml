@@ -26,6 +26,7 @@
             </FrameLayout>
 
             <android.support.constraint.ConstraintLayout
+                android:id="@+id/msgmain"
                 android:layout_width="match_parent"
                 android:background="#FFFFFFFF"
                 android:layout_height="480dp">
@@ -94,18 +95,42 @@
                     android:layout_height="match_parent"
                     android:background="#FFFFFFFF">
 
-                    <TextView
-                        android:id="@+id/time"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="2017-02-23 在 国科大的一条小溪旁"
-                        android:gravity="center"
-                        android:textColor="@android:color/darker_gray"
-                        android:textSize="14sp"
-                        app:layout_constraintLeft_toLeftOf="parent"
-                        app:layout_constraintRight_toRightOf="parent"
+                    <com.chen.maptest.MyView.RoundImageView
+                        android:id="@+id/usericon"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginLeft="12dp"
+                        android:elevation="6dp"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/usericon"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent"/>
+                        app:layout_constraintLeft_toLeftOf="parent" />
+
+                    <TextView
+                        android:id="@+id/username"
+                        android:layout_width="200dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="12dp"
+                        android:text="周玲美"
+                        android:gravity="right"
+                        android:maxLines="1"
+                        android:textColor="@android:color/black"
+                        android:textSize="12dp"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toTopOf="@+id/usericon"/>
+
+                    <TextView
+                        android:id="@+id/userdescript"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:text="中国南极科考站科学家"
+                        android:textColor="#FF444444"
+                        android:textSize="12dp"
+                        android:maxLines="1"
+                        app:layout_constraintBottom_toBottomOf="@+id/usericon"
+                        app:layout_constraintRight_toRightOf="@+id/username"
+                        app:layout_constraintLeft_toLeftOf="@+id/username"/>
 
                 </android.support.constraint.ConstraintLayout>
 
