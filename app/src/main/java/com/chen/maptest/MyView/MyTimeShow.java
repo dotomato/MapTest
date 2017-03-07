@@ -4,18 +4,13 @@ import android.content.Context;
 import android.graphics.Color;
 import android.support.constraint.ConstraintLayout;
 import android.util.AttributeSet;
-import android.util.TypedValue;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.amap.api.maps.model.Text;
 import com.chen.maptest.R;
 
 import java.util.Calendar;
 import java.util.Date;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 /**
  * Created by chen on 17-3-6.

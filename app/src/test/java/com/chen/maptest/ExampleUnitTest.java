@@ -1,7 +1,5 @@
 package com.chen.maptest;
 
-import android.provider.Settings;
-
 import org.junit.Test;
 
 import java.text.DateFormat;

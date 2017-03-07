@@ -10,7 +10,6 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
-import android.support.constraint.ConstraintLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
@@ -22,7 +21,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Space;
@@ -33,6 +31,7 @@ import com.bumptech.glide.Glide;
 import com.chen.maptest.MyServer.MyAction1;
 import com.chen.maptest.MyServer.Myserver;
 import com.chen.maptest.MyUpyun.MyUpyunManager;
+import com.chen.maptest.MyView.InnerEdge;
 import com.chen.maptest.MyView.MyBlurImageView;
 import com.chen.maptest.MyView.MyTimeShow;
 import com.chen.maptest.MyView.OutlineProvider;
@@ -51,7 +50,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import java.util.zip.Inflater;
 
 import butterknife.ButterKnife;
 
@@ -115,6 +113,12 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
 
     @BindView(R.id.msgmain)
     public ViewGroup mMsgMain;
+
+    @BindView(R.id.inneredge)
+    public InnerEdge mInnerEdge;
+
+    @BindView(R.id.locationdes)
+    public TextView mLocationDes;
 
     public EditText mMsgEdittext;
 
@@ -208,8 +212,10 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
         setOnPullZoomListener(this);
     }
 
-    public void initshow(int mode,@Nullable PointData pd){
+    public void initShow(int mode, @Nullable PointData pd){
         mMode = mode;
+        mViewPager.setCurrentItem(0,false);
+        scrollTo(0,0);
         switch (mode) {
             case MainActivity.MODE_EDIT:
                 hasAlbumUpload=false;
@@ -227,6 +233,7 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
             case MainActivity.MODE_MESSAGE:
                 if (pd==null)
                     return;
+
                 Gson gson = new Gson();
                 MessageJson mj = gson.fromJson(pd.userMessage,MessageJson.class);
 
@@ -250,17 +257,16 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
                 DecimalFormat decimalFormat=new DecimalFormat(".00");
                 String la=decimalFormat.format(pd.latitude);
                 String lo=decimalFormat.format(pd.longitude);
-//                mTimeText.setText("经度:"+la+"   纬度:"+lo);
+                mLocationDes.setText("经度:"+la+"   纬度:"+lo);
 
                 break;
 
         }
-        scrollTo(0,0);
     }
 
 
 
-    public void initshow2(Userinfo ui){
+    public void initShow2(Userinfo ui){
         mUserName.setText(ui.userName);
         mUserDescirpt.setText(ui.userDes);
         UserIconWarp.just(mContext,ui.userIcon,mUserIcon);
@@ -435,11 +441,9 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
                 });
     }
 
-    class ParallaxPagerTransformer implements ViewPager.PageTransformer {
-        private float speed = 0.6f;
-
-        public ParallaxPagerTransformer() {
-        }
+    private class ParallaxPagerTransformer implements ViewPager.PageTransformer {
+        private final float speed = 0.6f;
+        private final float scale = 0.05f;
 
         @Override
         public void transformPage(View view, float position) {
@@ -448,6 +452,9 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
                     float width = view.getWidth();
                     mMyTimeShow.setTranslationX((position * width * speed));
                     mBlurImg.setAlpha(1+position);
+                    mInnerEdge.setShadowAlpha(1+position);
+                    mNoBlurImg.setScaleX(1-position*scale);
+                    mNoBlurImg.setScaleY(1-position*scale);
                 }
             }
         }

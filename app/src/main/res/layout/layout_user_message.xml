@@ -41,6 +41,29 @@
                     app:layout_constraintRight_toRightOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
+
+                <ImageView
+                    android:id="@+id/locationbackground"
+                    android:layout_width="0dp"
+                    android:layout_height="50dp"
+                    android:src="#3000"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"/>
+
+                <TextView
+                    android:id="@+id/locationdes"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_marginBottom="10dp"
+                    android:textColor="@android:color/white"
+                    android:gravity="center"
+                    app:layout_constraintBottom_toBottomOf="@+id/locationbackground"
+                    app:layout_constraintRight_toRightOf="@+id/locationbackground"
+                    app:layout_constraintLeft_toLeftOf="@+id/locationbackground"
+                    app:layout_constraintTop_toTopOf="@+id/locationbackground"
+                    android:text="经度：56.32 纬度：54.15" />
+
                 <com.chen.maptest.MyView.MyBlurImageView
                     android:id="@+id/blurimg"
                     android:layout_width="0dp"
@@ -70,7 +93,6 @@
                     android:layout_marginTop="22dp"
                     android:layout_height="100dp"
                     android:layout_width="120dp" />
-
 
                 <include
                     layout="@layout/layout_inner_edge"

@@ -1,7 +1,5 @@
 package com.chen.maptest;
 
-import android.graphics.Matrix;
-
 import com.chen.maptest.MyModel.Userinfo;
 
 /**

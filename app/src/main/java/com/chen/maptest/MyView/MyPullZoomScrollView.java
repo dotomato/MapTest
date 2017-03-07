@@ -1,7 +1,6 @@
 package com.chen.maptest.MyView;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
@@ -12,9 +11,6 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.animation.Interpolator;
 import android.widget.ScrollView;
-
-import com.chen.maptest.R;
-import com.chen.maptest.Utils.MyUtils;
 
 /**
  * Created by chen on 17-2-18.

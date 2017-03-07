@@ -15,6 +15,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.chen.maptest.MapAdapter.BmapAdapterActivity;
@@ -29,6 +30,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
 import com.chen.maptest.MyModel.*;
+import com.chen.maptest.MyView.MyMapIcon;
 import com.chen.maptest.Utils.OnceRunner;
 
 import java.util.UUID;
@@ -53,6 +55,12 @@ public class MainActivity extends BmapAdapterActivity implements
 
     @BindView(R.id.leftDrawer)
     public LeftDrawLayout mLeftDrawerLayout;
+
+    @BindView(R.id.upview)
+    public ViewGroup mUpView;
+
+    @BindView(R.id.mymapicon)
+    public MyMapIcon mMyMapIcon;
 
     private View mapView;
 
@@ -128,7 +136,7 @@ public class MainActivity extends BmapAdapterActivity implements
         mUserMessageLayout.setSpaceTouchEventCallback(new UserMessageLayout.SpaceTouchEventCallback() {
             @Override
             public void onSpaceTouchEvent(MotionEvent ev) {
-                ev.offsetLocation(0,-mapView.getY());
+                ev.offsetLocation(0,-mUpView.getY());
                 mapView.dispatchTouchEvent(ev);
             }
         });
@@ -193,8 +201,18 @@ public class MainActivity extends BmapAdapterActivity implements
         mSelectHelper.stop();
     }
 
+    private boolean mCameraMovefinish = true;
     public void MyTouch(MotionEvent motionEvent) {
-
+        switch (motionEvent.getAction()){
+            case MotionEvent.ACTION_DOWN:
+            case MotionEvent.ACTION_MOVE:
+                mMyMapIcon.switchAni(MyMapIcon.ANI_UP);
+                break;
+            case MotionEvent.ACTION_UP:
+                if (mCameraMovefinish)
+                    mMyMapIcon.switchAni(MyMapIcon.ANI_DOWN);
+                break;
+        }
     }
 
     public void MyMarkerClick(PointSimpleData psd) {
@@ -208,7 +226,7 @@ public class MainActivity extends BmapAdapterActivity implements
                     @Override
                     public void call() {
                         switchShowMode(MODE_MESSAGE,300);
-                        mUserMessageLayout.initshow(MODE_MESSAGE,mVar.pointData);
+                        mUserMessageLayout.initShow(MODE_MESSAGE,mVar.pointData);
                     }
                 });
 
@@ -220,15 +238,21 @@ public class MainActivity extends BmapAdapterActivity implements
                 .subscribe(new MyAction1<UserIDResult>() {
                     @Override
                     public void call() {
-                        mUserMessageLayout.initshow2(mVar.userinfo);
+                        mUserMessageLayout.initShow2(mVar.userinfo);
                     }
                 });
     }
 
+    public void MyCameraChangeStart() {
+        mCameraMovefinish = false;
+        mMyMapIcon.switchAni(MyMapIcon.ANI_UP);
+    }
+
 
     public void MyCameraChangeFinish() {
+        mCameraMovefinish = true;
         GlobalVar.viewLatlng = getViewLatlng();
-
+        mMyMapIcon.switchAni(MyMapIcon.ANI_DOWN);
         mSelectHelper.start();
     }
 
@@ -264,29 +288,31 @@ public class MainActivity extends BmapAdapterActivity implements
     private void _switchShowMode(){
         lmode=mMode;
 
-
         Rect frame = new Rect();
         getWindow().getDecorView().getWindowVisibleDisplayFrame(frame);
         WindowHeight = frame.height();
 
         spaceHeight = mUserMessageLayout.getSpaceHeight();
 
-        mapView.clearAnimation();
+        mUpView.clearAnimation();
         mUserMessageLayout.clearAnimation();
 
         switch (mMode){
             case MODE_MAP:
-                mapView.animate().y(0).setDuration(mDuration).start();
+                mMyMapIcon.switchIcon(MyMapIcon.ICON_ARROW);
+                mUpView.animate().y(0).setDuration(mDuration).start();
                 mUserMessageLayout.animate().y(WindowHeight).setDuration(mDuration).start();
                 mFloatingActionButton.show();
                 break;
             case MODE_MESSAGE:
-                mapView.animate().y(-(WindowHeight-spaceHeight)/2).setDuration(mDuration).start();
+                mMyMapIcon.switchIcon(MyMapIcon.ICON_ARROW);
+                mUpView.animate().y(-(WindowHeight-spaceHeight)/2).setDuration(mDuration).start();
                 mUserMessageLayout.animate().y(0).setDuration(mDuration).start();
                 mFloatingActionButton.hide();
                 break;
             case MODE_EDIT:
-                mapView.animate().y(-(WindowHeight-spaceHeight)/2).setDuration(mDuration).start();
+                mMyMapIcon.switchIcon(MyMapIcon.ICON_FLAG);
+                mUpView.animate().y(-(WindowHeight-spaceHeight)/2).setDuration(mDuration).start();
                 mUserMessageLayout.animate().y(0).setDuration(mDuration).start();
                 mFloatingActionButton.hide();
                 break;
@@ -338,8 +364,8 @@ public class MainActivity extends BmapAdapterActivity implements
         }
 
         switchShowMode(MODE_EDIT,300);
-        mUserMessageLayout.initshow(MODE_EDIT,null);
-        mUserMessageLayout.initshow2(GlobalVar.mUserinfo);
+        mUserMessageLayout.initShow(MODE_EDIT,null);
+        mUserMessageLayout.initShow2(GlobalVar.mUserinfo);
     }
 
     @Override
@@ -362,6 +388,6 @@ public class MainActivity extends BmapAdapterActivity implements
 
     @Override
     public void callback(int t) {
-        mapView.setTranslationY(-t/2-(WindowHeight - spaceHeight)/2);
+        mUpView.setTranslationY(-t/2-(WindowHeight - spaceHeight)/2);
     }
 }

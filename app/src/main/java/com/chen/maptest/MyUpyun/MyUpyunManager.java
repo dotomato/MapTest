@@ -2,7 +2,6 @@ package com.chen.maptest.MyUpyun;
 
 import android.net.Uri;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;

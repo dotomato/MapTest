@@ -2,7 +2,9 @@ package com.chen.maptest.MapAdapter;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -33,7 +35,6 @@ import com.baidu.mapapi.model.LatLng;
 import java.util.HashMap;
 
 
-import com.chen.maptest.GlobalVar;
 import com.chen.maptest.MyModel.*;
 import com.chen.maptest.R;
 
@@ -229,8 +230,15 @@ public class BmapAdapterActivity extends AppCompatActivity implements
         PSDMap = new HashMap<>();
 
         mMarkerOption= new MarkerOptions();
-        mBitmapDescriptor = BitmapDescriptorFactory.fromBitmap(BitmapFactory
-                .decodeResource(getResources(),R.drawable.press_xingxing_small));
+
+
+        float scale = 0.5f;
+        Matrix scaleMatrix = new Matrix();
+        scaleMatrix.postScale(scale, scale);
+        Bitmap b0 = BitmapFactory
+                .decodeResource(getResources(),R.drawable.map_msg_icon);
+        Bitmap b1 = Bitmap.createBitmap(b0, 0, 0, b0.getWidth(), b0.getHeight(), scaleMatrix, true);
+        mBitmapDescriptor = BitmapDescriptorFactory.fromBitmap(b1);
 
 
         mlocationClient = new LocationClient(getApplicationContext());
@@ -289,7 +297,8 @@ public class BmapAdapterActivity extends AppCompatActivity implements
 
     @Override
     public void onMapStatusChangeStart(MapStatus mapStatus) {
-
+        if (mMapAdaterCallback!=null)
+            mMapAdaterCallback.MyCameraChangeStart();
     }
 
     @Override

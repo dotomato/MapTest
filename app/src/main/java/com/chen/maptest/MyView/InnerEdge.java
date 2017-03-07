@@ -1,7 +1,7 @@
 package com.chen.maptest.MyView;
 
 import android.content.Context;
-import android.graphics.Color;
+import android.os.Build;
 import android.support.constraint.ConstraintLayout;
 import android.util.AttributeSet;
 import android.widget.ImageView;
@@ -20,6 +20,8 @@ public class InnerEdge extends ConstraintLayout {
     private ImageView edge2;
     private ImageView edge3;
     private ImageView edge4;
+
+    private float mElevation;
     public InnerEdge(Context context) {
         super(context);
         init(context);
@@ -52,5 +54,19 @@ public class InnerEdge extends ConstraintLayout {
         OutlineProvider.setOutline(edge2,OutlineProvider.SHAPE_RECT);
         OutlineProvider.setOutline(edge3,OutlineProvider.SHAPE_RECT);
         OutlineProvider.setOutline(edge4,OutlineProvider.SHAPE_RECT);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            mElevation = edge1.getElevation();
+        }
+    }
+
+    public void setShadowAlpha(float a){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            float elevation = mElevation*a;
+            edge1.setElevation(elevation);
+            edge2.setElevation(elevation);
+            edge3.setElevation(elevation);
+            edge4.setElevation(elevation);
+        }
     }
 }

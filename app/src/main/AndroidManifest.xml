@@ -48,7 +48,7 @@
             android:value="0GwEEEMpSNLb1dInCcO0dVhz9HiNiImH" />
 
         <activity
-            android:name=".MainActivity"
+            android:name="com.chen.maptest.MainActivity"
             android:windowSoftInputMode="adjustPan|stateHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -57,14 +57,14 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".UserinfoActivity" />
+        <activity android:name="com.chen.maptest.UserinfoActivity" />
 
         <activity
             android:name="com.yalantis.ucrop.UCropActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
 
-        <activity android:name=".AlbumActivity">
+        <activity android:name="com.chen.maptest.AlbumActivity">
 
         </activity>
 

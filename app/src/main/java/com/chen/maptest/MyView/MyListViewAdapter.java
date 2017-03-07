@@ -14,9 +14,6 @@ import com.chen.maptest.R;
 
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
 /**
  * Created by chen on 17-2-25.
  * Copyright *
