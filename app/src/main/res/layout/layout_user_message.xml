@@ -25,11 +25,11 @@
 
             </FrameLayout>
 
-            <android.support.constraint.ConstraintLayout
+            <com.chen.maptest.MyView.FixRadioConstraintLayout
                 android:id="@+id/msgmain"
                 android:layout_width="match_parent"
                 android:background="#FFFFFFFF"
-                android:layout_height="480dp">
+                android:layout_height="200dp">
 
                 <ImageView
                     android:id="@+id/noblurimg"
@@ -105,7 +105,7 @@
                     app:layout_constraintLeft_toLeftOf="parent"/>
 
 
-            </android.support.constraint.ConstraintLayout>
+            </com.chen.maptest.MyView.FixRadioConstraintLayout>
 
             <FrameLayout
                 android:layout_width="match_parent"

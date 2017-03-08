@@ -4,17 +4,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -39,9 +36,9 @@ import com.chen.maptest.MyView.MyPullZoomScrollView;
 
 import com.chen.maptest.MyModel.*;
 import com.chen.maptest.MyView.QuickPageAdapter;
-import com.chen.maptest.Utils.MyUtils;
 import com.chen.maptest.Utils.UserIconWarp;
 import com.google.gson.Gson;
+import com.yalantis.ucrop.UCrop;
 
 import java.io.File;
 import java.text.DecimalFormat;
@@ -55,10 +52,7 @@ import butterknife.ButterKnife;
 
 import butterknife.BindView;
 import butterknife.OnClick;
-import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 import static com.chen.maptest.Utils.MyUtils.pickFromGallery;
@@ -73,12 +67,16 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
 
     private final static String TAG = "UserMessageLayout";
 
-    public ImageView mNameBar;
 
+    static public final int SELECT_ALBUM_IMG = 0;
+
+    @BindView(R.id.usericon)
     public ImageView mUserIcon;
 
+    @BindView(R.id.username)
     public TextView mUserName;
 
+    @BindView(R.id.userdescript)
     public TextView mUserDescirpt;
 
     @BindView(R.id.space)
@@ -122,8 +120,6 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
 
     public EditText mMsgEdittext;
 
-
-
     private Context mContext;
     private int mMode;
     private boolean hasAlbumUpload;
@@ -148,42 +144,8 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
         init(context);
     }
 
-    @Override
-    public void onProgress(float progress) {
-
-    }
-
-    @Override
-    public void onComplete(boolean isSuccess, String url) {
-        mAlbumImageURL = url;
-        uploadnoewpoint();
-    }
-
-
-
-    public interface NewPointFinish{
-        void NPFcall();
-    }
-
-    public void setNewPointFinishCallback(NewPointFinish npf) {
-        this.mNewPointFinishCallback = npf;
-    }
-
-    private NewPointFinish mNewPointFinishCallback =null;
-
     private void init(Context context){
         mContext = context;
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) zoomview.getLayoutParams();
-        lp.height = (b-t) - mMsgMain.getLayoutParams().height;
-        if (lp.height<0)
-            lp.height=0;
-        zoomview.setLayoutParams(lp);
-        setZoomView(zoomview);
-        super.onLayout(changed,l,t,r,b);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -196,29 +158,49 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
         View view2 = LayoutInflater.from(mContext).inflate(R.layout.ump_showspace,null,false);
         mMsgEdittext = (EditText)view1.findViewById(R.id.msgedittext);
 
-        mUserName = (TextView)findViewById(R.id.username);
-        mUserDescirpt = (TextView)findViewById(R.id.userdescript);
-        mUserIcon = (ImageView)findViewById(R.id.usericon);
-
         viewlist =new ArrayList<>();
         viewlist.add(view1);
         viewlist.add(view2);
         mViewPager.setAdapter(new QuickPageAdapter<>(viewlist));
-        mViewPager.setPageTransformer(false,new ParallaxPagerTransformer());
+        mViewPager.setPageTransformer(false,new ParallaxPagerTransformer());    //实现消息文字和时间滑动不同步
 
+        //设置显示效果
         OutlineProvider.setOutline(mUserIcon,OutlineProvider.SHAPE_OVAL);
         mMsgEdittext.getPaint().setFakeBoldText(true);
         mUserName.getPaint().setFakeBoldText(true);
+
+        //下拉放大效果
         setOnPullZoomListener(this);
     }
 
-    public void initShow(int mode, @Nullable PointData pd){
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec,heightMeasureSpec);
+
+        //设置zoomview刚好与MsgMain的高度填满屏幕
+        int h = MeasureSpec.getSize(heightMeasureSpec);
+        LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) zoomview.getLayoutParams();
+        lp.height = (h) - mMsgMain.getHeight();
+        if (lp.height<0)
+            lp.height=0;
+        zoomview.setLayoutParams(lp);
+        setZoomView(zoomview); //设置zoomview时必须先设置好其LayoutParams，所以在这里设置
+
+        initShow(MainActivity.MODE_MESSAGE,null);
+    }
+
+    //显示消息主体、获取图片
+    public void initShow(int mode, PointData pd){
         mMode = mode;
         mViewPager.setCurrentItem(0,false);
         scrollTo(0,0);
         switch (mode) {
             case MainActivity.MODE_EDIT:
+                //用户填写数据初始化
                 hasAlbumUpload=false;
+                mAlbumImageUri=null;
+                mAlbumImageURL=null;
+
                 mMsgEdittext.setText("");
                 setEditTextEditable(mMsgEdittext,true);
 
@@ -231,9 +213,6 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
                 Glide.with(mContext).load(R.drawable.default_album).into(mNoBlurImg);
                 break;
             case MainActivity.MODE_MESSAGE:
-                if (pd==null)
-                    return;
-
                 Gson gson = new Gson();
                 MessageJson mj = gson.fromJson(pd.userMessage,MessageJson.class);
 
@@ -258,7 +237,6 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
                 String la=decimalFormat.format(pd.latitude);
                 String lo=decimalFormat.format(pd.longitude);
                 mLocationDes.setText("经度:"+la+"   纬度:"+lo);
-
                 break;
 
         }
@@ -273,25 +251,18 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
     }
 
     @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-//        if (mMode==MainActivity.MODE_MESSAGE)
-//            return true;
-        return super.onInterceptTouchEvent(ev);
-    }
-
-    @Override
     public boolean onTouchEvent(@NonNull MotionEvent ev){
+        //在这里判断是否属于Space区间，然后回调
         if (ev.getY()<mSpace.getHeight()-getScrollY() ) {
-            if (mSpaceTouchEventCallback != null)
-                mSpaceTouchEventCallback.onSpaceTouchEvent(ev);
+            if (mSpaceTouchCallback != null)
+                mSpaceTouchCallback.spaceTouchcallback(ev);
             return true;
         }
         return super.onTouchEvent(ev);
     }
 
 
-    SpaceTouchEventCallback mSpaceTouchEventCallback=null;
-
+    //根据下拉超过的距离判断是否收起
     private int lastY;
     @Override
     public void onPullZooming(int newScrollValue) {
@@ -304,15 +275,15 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
             if (mMode==MainActivity.MODE_EDIT)
                 tryExit();
             else if (mExitCallback!=null)
-                mExitCallback.call();
+                mExitCallback.exitCallback();
         }
     }
 
-    interface SpaceTouchEventCallback{
-        void onSpaceTouchEvent(MotionEvent ev);
-    }
-    public void setSpaceTouchEventCallback(SpaceTouchEventCallback var){
-        mSpaceTouchEventCallback=var;
+    @Override
+    protected void onScrollChanged(int l, int t, int oldl, int oldt) {
+        super.onScrollChanged(l, t, oldl, oldt);
+        if (mScrollCallback!=null)
+            mScrollCallback.scrollCallback(t);
     }
 
 
@@ -321,20 +292,13 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
     }
 
 
-    public void setExitCallback(ExitCallback mExitCallback) {
-        this.mExitCallback = mExitCallback;
-    }
 
-    ExitCallback mExitCallback=null;
-    interface ExitCallback{
-        void call();
-    }
 
 
     public void tryExit(){
         if (TextUtils.isEmpty(mMsgEdittext.getText()) && !hasAlbumUpload){
             if (mExitCallback!=null)
-                mExitCallback.call();
+                mExitCallback.exitCallback();
             return;
         }
         new AlertDialog.Builder(mContext).setMessage("要保存已输入的内容吗？")
@@ -343,13 +307,13 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
                     public void onClick(DialogInterface dialog, int which) {
                         //TODO 保存已输入的内容
                         if (mExitCallback!=null)
-                            mExitCallback.call();
+                            mExitCallback.exitCallback();
                     }})
                 .setNegativeButton("不保存",new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         if (mExitCallback!=null)
-                            mExitCallback.call();
+                            mExitCallback.exitCallback();
                     }})
                 .setNeutralButton("取消", null)
                 .show();//在按键响应事件中显示此对话框
@@ -357,35 +321,35 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
 
     @OnClick(R.id.addimgbutton)
     public void addimg(){
-        pickFromGallery((Activity) mContext,MainActivity.SELECT_ALBUM_IMG, "选择封面");
+        pickFromGallery((Activity) mContext,SELECT_ALBUM_IMG, "选择封面");
     }
 
+
+    //接收从Activity传过来的Result,已经进行过resultCode==RESULT_OK判断了
     public void ResultCallback(int requestCode, int resultCode, Intent data){
         switch (requestCode){
-            case MainActivity.SELECT_ALBUM_IMG:
 
-                Observable.just(data.getData())
-                        .map(new Func1<Uri, File>() {
-                            @Override
-                            public File call(Uri uri) {
-                                File outfile = new File(mContext.getCacheDir(), "UserAlbum"+UUID.randomUUID().toString()+".jpeg");
-                                Bitmap bm = MyUtils.getBitmapSmall(uri.getPath(), 1080 * 720);
-                                MyUtils.saveBitmap(outfile,bm);
-                                return outfile;
-                            }
-                        })
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Action1<File>() {
-                            @Override
-                            public void call(File file) {
-                                hasAlbumUpload=true;
-                                mAlbumImageUri = Uri.fromFile(file);
-                                clearAlbumImgUri();
-                                mBlurImg.setSrc(mAlbumImageUri);
-                                Glide.with(mContext).load(mAlbumImageUri).into(mNoBlurImg);
-                            }
-                        });
+            case SELECT_ALBUM_IMG:
+                if (data != null) {
+                    Uri imageUri = data.getData();
+                    Uri mDestinationUri = Uri.fromFile(new File(mContext.getCacheDir(), "UserAlbum"+UUID.randomUUID().toString()+".jpeg"));
+
+                    UCrop.Options options = new UCrop.Options();
+                    options.setCircleDimmedLayer(true);
+
+                    UCrop.of(imageUri, mDestinationUri)
+                            .withAspectRatio(3, 4)
+                            .withMaxResultSize(1080, 1440)
+                            .withOptions(options)
+                            .start((Activity) mContext);
+                }
+                break;
+
+            case UCrop.REQUEST_CROP:
+                hasAlbumUpload=true;
+                mAlbumImageUri = UCrop.getOutput(data);
+                mBlurImg.setSrc(mAlbumImageUri);
+                Glide.with(mContext).load(mAlbumImageUri).into(mNoBlurImg);
                 break;
         }
     }
@@ -396,12 +360,16 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
             MyUpyunManager.getIns().upload_image(mAlbumImageUri,this);
         } else
             uploadnoewpoint();
-
     }
 
-    private void clearAlbumImgUri(){
-        mBlurImg.setImageURI(null);
-        mNoBlurImg.setImageURI(null);
+    //Upyun的回调
+    @Override
+    public void onProgress(float progress) {    }
+
+    @Override
+    public void onComplete(boolean isSuccess, String url) {
+        mAlbumImageURL = url;
+        uploadnoewpoint();
     }
 
     private void uploadnoewpoint(){
@@ -434,12 +402,13 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
                 .subscribe(new MyAction1<NewPointResult>() {
                     @Override
                     public void call() {
-                        Log.d(TAG, "newPoint result: " + mVar.statue + " " + mVar.pointData.pointID);
-                        if (mNewPointFinishCallback !=null)
-                            mNewPointFinishCallback.NPFcall();
+                        if (mNewPointFinishCallbackCallback !=null)
+                            mNewPointFinishCallbackCallback.newPointFinishCallback();
                     }
                 });
     }
+
+
 
     private class ParallaxPagerTransformer implements ViewPager.PageTransformer {
         private final float speed = 0.6f;
@@ -460,16 +429,41 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
         }
     }
 
-    @Override
-    protected void onScrollChanged(int l, int t, int oldl, int oldt) {
-        super.onScrollChanged(l, t, oldl, oldt);
-        if (mScrollCallback!=null)
-            mScrollCallback.callback(t);
+
+    //空白区域回调
+    interface SpaceTouchCallback {
+        void spaceTouchcallback(MotionEvent ev);
+    }
+    public void setSpaceTouchCallback(SpaceTouchCallback var){
+        mSpaceTouchCallback =var;
+    }
+    SpaceTouchCallback mSpaceTouchCallback =null;
+
+
+
+    //退出回调
+    interface ExitCallback{
+        void exitCallback();
+    }
+    public void setExitCallback(ExitCallback mExitCallback) {
+        this.mExitCallback = mExitCallback;
+    }
+    ExitCallback mExitCallback=null;
+
+
+
+    public interface NewPointFinishCallback {
+        void newPointFinishCallback();
+    }
+    private NewPointFinishCallback mNewPointFinishCallbackCallback =null;
+    public void callback(NewPointFinishCallback npf) {
+        this.mNewPointFinishCallbackCallback = npf;
     }
 
 
+
     public interface ScrollCallback {
-        void callback(int t);
+        void scrollCallback(int t);
     }
     private ScrollCallback mScrollCallback=null;
     public void setScrollCallback(ScrollCallback scrollCallback) {

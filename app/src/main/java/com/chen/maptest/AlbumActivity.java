@@ -23,7 +23,7 @@ public class AlbumActivity extends AppCompatActivity {
 
 //        Observable.create(new Observable.OnSubscribe<Object>() {
 //            @Override
-//            public void call(Subscriber<? super Object> subscriber) {
+//            public void spaceTouchcallback(Subscriber<? super Object> subscriber) {
 //                Glide.get(AlbumActivity.this).clearDiskCache();
 //                subscriber.onNext(null);
 //            }
@@ -31,7 +31,7 @@ public class AlbumActivity extends AppCompatActivity {
 //        .observeOn(AndroidSchedulers.mainThread())
 //        .subscribe(new Action1<Object>() {
 //            @Override
-//            public void call(Object o) {
+//            public void spaceTouchcallback(Object o) {
 //                Glide.get(AlbumActivity.this).clearMemory();
 //                BitmapPool bp = Glide.get(AlbumActivity.this).getBitmapPool();
 //                BlurTransformation bt = new BlurTransformation(AlbumActivity.this,bp,4,16);

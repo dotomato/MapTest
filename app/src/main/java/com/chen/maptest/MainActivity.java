@@ -32,18 +32,21 @@ import rx.schedulers.Schedulers;
 import com.chen.maptest.MyModel.*;
 import com.chen.maptest.MyView.MyMapIcon;
 import com.chen.maptest.Utils.OnceRunner;
+import com.yalantis.ucrop.UCrop;
 
 import java.util.UUID;
 
 public class MainActivity extends BmapAdapterActivity implements
-        MapAdaterCallback, UserMessageLayout.NewPointFinish, UserMessageLayout.ScrollCallback {
+        MapAdaterCallback {
 
 
     private final static String TAG = "MainActivity";
-    private static final boolean SHOULD_CUR = false;
 
+    public final static int MODE_MAP = 0;
+    public final static int MODE_MESSAGE = 1;
+    public final static int MODE_EDIT = 2;
 
-    static public final int SELECT_ALBUM_IMG = 0;
+    private final boolean SHOULD_CUR = false;
 
     private OnceRunner mSelectHelper;
 
@@ -83,14 +86,7 @@ public class MainActivity extends BmapAdapterActivity implements
 
         initUserinfo();
 
-        mSelectHelper = new OnceRunner() {
-            @Override
-            protected void call() {
-                selectArea();
-            }
-        };
-        mSelectHelper.setInternal(1000);
-        new Thread(mSelectHelper).start();
+        initSelectHelper();
 
         setMapAdaterCallback(this);
 
@@ -99,61 +95,45 @@ public class MainActivity extends BmapAdapterActivity implements
         switchShowMode(MODE_MAP,300);
     }
 
-    private void setBoardcastReceiver() {
-        IntentFilter ifilter = new IntentFilter();
-        ifilter.addAction(GlobalConst.UPDATE_USERINFO_VIEW);
-
-        LocalBroadcastManager.getInstance(this).registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                switch (intent.getAction()){
-                    case GlobalConst.UPDATE_USERINFO_VIEW:
-                        shouldInitonResume=true;
-                        break;
-                }
-            }
-        },ifilter);
-    }
-
-    @Override
-    protected void onResume(){
-        super.onResume();
-        if (shouldInitonResume) {
-            initUserView();
-            shouldInitonResume = false;
-        }
-    }
-
     private void initLayout(){
         mUserMessageLayout.setExitCallback(new UserMessageLayout.ExitCallback() {
             @Override
-            public void call() {
+            public void exitCallback() {
                 switchShowMode_force(MODE_MAP,300);
             }
         });
 
 
-        mUserMessageLayout.setSpaceTouchEventCallback(new UserMessageLayout.SpaceTouchEventCallback() {
+        mUserMessageLayout.setSpaceTouchCallback(new UserMessageLayout.SpaceTouchCallback() {
             @Override
-            public void onSpaceTouchEvent(MotionEvent ev) {
+            public void spaceTouchcallback(MotionEvent ev) {
                 ev.offsetLocation(0,-mUpView.getY());
                 mapView.dispatchTouchEvent(ev);
             }
         });
 
-        mUserMessageLayout.setNewPointFinishCallback(this);
-        mUserMessageLayout.setScrollCallback(this);
+        mUserMessageLayout.callback(new UserMessageLayout.NewPointFinishCallback() {
+            @Override
+            public void newPointFinishCallback() {
+                selectArea();
+                switchShowMode_force(MODE_MAP,300);
+            }
+        });
+
+        mUserMessageLayout.setScrollCallback(new UserMessageLayout.ScrollCallback() {
+            @Override
+            public void scrollCallback(int t) {
+                mUpView.setTranslationY(-t/2-(WindowHeight - spaceHeight)/2);
+            }
+        });
     }
 
     private void initUserinfo(){
         SharedPreferences pref = getSharedPreferences("data",MODE_PRIVATE);
         String userID = pref.getString("userID",null);
         if (userID==null) {
-            userID = genUserID();
-
-
             UserID nuid = new UserID();
-            nuid.userID=userID;
+            nuid.userID="please give me a new ID!";
             Myserver.getApi().newuser(nuid)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -185,15 +165,46 @@ public class MainActivity extends BmapAdapterActivity implements
         }
     }
 
-    private String genUserID(){
-        return UUID.randomUUID().toString();
-    }
-
-
     private void initUserView(){
         mLeftDrawerLayout.initUserView();
     }
 
+
+    private void initSelectHelper(){
+        mSelectHelper = new OnceRunner() {
+            @Override
+            protected void call() {
+                selectArea();
+            }
+        };
+        mSelectHelper.setInternal(1000);
+        new Thread(mSelectHelper).start();
+    }
+
+    private void setBoardcastReceiver() {
+        IntentFilter ifilter = new IntentFilter();
+        ifilter.addAction(GlobalConst.UPDATE_USERINFO_VIEW);
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                switch (intent.getAction()){
+                    case GlobalConst.UPDATE_USERINFO_VIEW:
+                        shouldInitonResume=true;
+                        break;
+                }
+            }
+        },ifilter);
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+        if (shouldInitonResume) {
+            initUserView();
+            shouldInitonResume = false;
+        }
+    }
 
     @Override
     protected void onDestroy() {
@@ -262,9 +273,6 @@ public class MainActivity extends BmapAdapterActivity implements
     }
 
 
-    final static int MODE_MAP = 0;
-    final static int MODE_MESSAGE = 1;
-    final static int MODE_EDIT = 2;
 
     int lmode=-1;
     int mMode;
@@ -374,20 +382,10 @@ public class MainActivity extends BmapAdapterActivity implements
         if (resultCode != Activity.RESULT_OK)
             return;
         switch (requestCode){
-            case SELECT_ALBUM_IMG:
+            case UserMessageLayout.SELECT_ALBUM_IMG:
+            case UCrop.REQUEST_CROP:
                 mUserMessageLayout.ResultCallback(requestCode,resultCode,data);
                 break;
         }
-    }
-
-    @Override
-    public void NPFcall() {
-        selectArea();
-        switchShowMode_force(MODE_MAP,300);
-    }
-
-    @Override
-    public void callback(int t) {
-        mUpView.setTranslationY(-t/2-(WindowHeight - spaceHeight)/2);
     }
 }

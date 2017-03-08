@@ -25,7 +25,7 @@ public class MyPullZoomScrollView extends ScrollView {
     private static final float ALPHAY1 = -50f;
     private static final float ALPHAY2 = -200f;
 
-    protected ViewGroup mZoomView;
+    private ViewGroup mZoomView;
 
     public void setAlphaView(View mAlphaView) {
         this.mAlphaView = mAlphaView;
