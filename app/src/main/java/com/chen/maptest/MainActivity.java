@@ -34,8 +34,6 @@ import com.chen.maptest.MyView.MyMapIcon;
 import com.chen.maptest.Utils.OnceRunner;
 import com.yalantis.ucrop.UCrop;
 
-import java.util.UUID;
-
 public class MainActivity extends BmapAdapterActivity implements
         MapAdaterCallback {
 
@@ -131,34 +129,39 @@ public class MainActivity extends BmapAdapterActivity implements
     private void initUserinfo(){
         SharedPreferences pref = getSharedPreferences("data",MODE_PRIVATE);
         String userID = pref.getString("userID",null);
+        GlobalVar.mUserinfo2 = new Userinfo2();
         if (userID==null) {
-            UserID nuid = new UserID();
-            nuid.userID="please give me a new ID!";
-            Myserver.getApi().newuser(nuid)
+            Userinfo ui = new Userinfo();
+            ui.userDes="please give me a new ID!";
+            Myserver.getApi().newuser(ui)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new MyAction1<UserIDResult>() {
+                    .subscribe(new MyAction1<Userinfo2Result>() {
                         @Override
                         public void call() {
                             SharedPreferences pref = getSharedPreferences("data",MODE_PRIVATE);
                             SharedPreferences.Editor editor = pref.edit();
                             editor.putString("userID", mVar.userinfo.userID);
+                            editor.putString("userID2", mVar.userID2);
                             editor.apply();
 
-                            GlobalVar.mUserinfo = mVar.userinfo;
+                            GlobalVar.mUserinfo2.userinfo = mVar.userinfo;
+                            GlobalVar.mUserinfo2.userID2 = mVar.userID2;
                             initUserView();
                         }
                     });
         } else {
-            UserID nuid = new UserID();
-            nuid.userID=userID;
-            Myserver.getApi().getuser(nuid)
+            Userinfo ui = new Userinfo();
+            ui.userID=userID;
+            Myserver.getApi().getuser(ui)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new MyAction1<UserIDResult>() {
+                    .subscribe(new MyAction1<UserinfoResult>() {
                         @Override
                         public void call() {
-                            GlobalVar.mUserinfo = mVar.userinfo;
+                            SharedPreferences pref = getSharedPreferences("data",MODE_PRIVATE);
+                            GlobalVar.mUserinfo2.userinfo = mVar.userinfo;
+                            GlobalVar.mUserinfo2.userID2 = pref.getString("userID2",null);
                             initUserView();
                         }
                     });
@@ -228,12 +231,12 @@ public class MainActivity extends BmapAdapterActivity implements
 
     public void MyMarkerClick(PointSimpleData psd) {
         gotoLocation2(new MyLatlng(psd.latitude,psd.longitude));
-        GetPointData gpd = new GetPointData();
+        PointData gpd = new PointData();
         gpd.pointID=psd.pointID;
         Myserver.getApi().getPoint(gpd)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new MyAction1<GetPointResult>() {
+                .subscribe(new MyAction1<PointDataResult>() {
                     @Override
                     public void call() {
                         switchShowMode(MODE_MESSAGE,300);
@@ -241,12 +244,12 @@ public class MainActivity extends BmapAdapterActivity implements
                     }
                 });
 
-        UserID nuid = new UserID();
+        Userinfo nuid = new Userinfo();
         nuid.userID=psd.userID;
         Myserver.getApi().getuser(nuid)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new MyAction1<UserIDResult>() {
+                .subscribe(new MyAction1<UserinfoResult>() {
                     @Override
                     public void call() {
                         mUserMessageLayout.initShow2(mVar.userinfo);
@@ -364,7 +367,7 @@ public class MainActivity extends BmapAdapterActivity implements
 
     @OnClick(R.id.floatingActionButton)
     public void floatingClick(){
-        if (GlobalVar.mUserinfo==null
+        if (GlobalVar.mUserinfo2==null
                 || (SHOULD_CUR && GlobalVar.viewLatlng==null)
                 || (!SHOULD_CUR && GlobalVar.gpsLatlng==null)){
             Toast.makeText(this,"还没有连上网络",Toast.LENGTH_SHORT).show();
@@ -373,7 +376,7 @@ public class MainActivity extends BmapAdapterActivity implements
 
         switchShowMode(MODE_EDIT,300);
         mUserMessageLayout.initShow(MODE_EDIT,null);
-        mUserMessageLayout.initShow2(GlobalVar.mUserinfo);
+        mUserMessageLayout.initShow2(GlobalVar.mUserinfo2.userinfo);
     }
 
     @Override

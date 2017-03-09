@@ -5,6 +5,6 @@ package com.chen.maptest.MyModel;
  * Copyright *
  */
 
-public class GetPointResult extends BaseResult{
+public class PointDataResult extends BaseResult{
     public PointData pointData;
 }

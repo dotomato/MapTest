@@ -40,12 +40,12 @@ public class MyUpyunManager {
 
     }
 
-    public MyUpyunManager upload_image(Uri imageUri,@Nullable final UploadProgress mUploadProgress) {
+    public MyUpyunManager upload_image(String Space, Uri imageUri,@Nullable final UploadProgress mUploadProgress) {
 
         String KEY = "+DJHGAFPnK18RGVkcz9pURnH+AI=";
 
         final String SPACE = "icon-server";
-        final String savePath = "/MapTest/UserIcon/{year}{mon}{day}/{random32}{.suffix}";
+        final String savePath = "/MapTest/"+Space+"/{year}{mon}{day}/{random32}{.suffix}";
 
         final String HOST = "http://icon-server.b0.upaiyun.com";
 

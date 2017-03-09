@@ -91,7 +91,7 @@ public class LeftDrawLayout extends ListView {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 if (i==0){
-                    if (GlobalVar.mUserinfo != null) {
+                    if (GlobalVar.mUserinfo2 != null) {
                         Intent intent = new Intent(mContext, UserinfoActivity.class);
                         mContext.startActivity(intent);
                     } else {
@@ -108,8 +108,8 @@ public class LeftDrawLayout extends ListView {
     }
 
     public void initUserView(){
-        mUserName.setText(GlobalVar.mUserinfo.userName);
-        mUserDes.setText(GlobalVar.mUserinfo.userDes);
-        UserIconWarp.just(mContext,GlobalVar.mUserinfo.userIcon,mUsericon);
+        mUserName.setText(GlobalVar.mUserinfo2.userinfo.userName);
+        mUserDes.setText(GlobalVar.mUserinfo2.userinfo.userDes);
+        UserIconWarp.just(mContext,GlobalVar.mUserinfo2.userinfo.userIcon,mUsericon);
     }
 }

@@ -290,7 +290,7 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
 
 
     public int getSpaceHeight(){
-        return mSpace.getHeight();
+        return zoomview.getLayoutParams().height;
     }
 
 
@@ -359,7 +359,7 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
     @OnClick(R.id.sendbutton)
     public void newPoint(){
         if (hasAlbumUpload){
-            MyUpyunManager.getIns().upload_image(mAlbumImageUri,this);
+            MyUpyunManager.getIns().upload_image("MessageAlbum",mAlbumImageUri,this);
         } else
             uploadnoewpoint();
     }
@@ -377,12 +377,12 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
     private void uploadnoewpoint(){
         MainActivity.MyLatlng l = GlobalVar.viewLatlng;
 
-        NewPointData npd = new NewPointData();
+        PointData2 pd2 = new PointData2();
         PointData pd = new PointData();
 
         pd.latitude = l.latitude;
         pd.longitude = l.longitude;
-        pd.userID = GlobalVar.mUserinfo.userID;
+        pd.userID = GlobalVar.mUserinfo2.userinfo.userID;
 
         MessageJson mj= new MessageJson();
         mj.ver=100;
@@ -396,12 +396,13 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
         Gson gson = new Gson();
         pd.userMessage = gson.toJson(mj);
 
-        npd.pointData = pd;
+        pd2.pointData = pd;
+        pd2.userID2 = GlobalVar.mUserinfo2.userID2;
 
-        Myserver.getApi().newPoint(npd)
+        Myserver.getApi().newPoint(pd2)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new MyAction1<NewPointResult>() {
+                .subscribe(new MyAction1<PointDataResult>() {
                     @Override
                     public void call() {
                         if (mNewPointFinishCallbackCallback !=null)

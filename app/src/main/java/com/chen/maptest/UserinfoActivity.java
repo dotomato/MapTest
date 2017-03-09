@@ -12,6 +12,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,9 +20,10 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.chen.maptest.MyModel.UserID;
-import com.chen.maptest.MyModel.UserIDResult;
 import com.chen.maptest.MyModel.Userinfo;
+import com.chen.maptest.MyModel.Userinfo2;
+import com.chen.maptest.MyModel.Userinfo2Result;
+import com.chen.maptest.MyModel.UserinfoResult;
 import com.chen.maptest.MyServer.MyAction1;
 import com.chen.maptest.MyServer.Myserver;
 import com.chen.maptest.MyUpyun.MyUpyunManager;
@@ -61,7 +63,7 @@ public class UserinfoActivity extends AppCompatActivity implements Toolbar.OnMen
 
     private Menu mMenu;
 
-    private Userinfo tempUserinfo;
+    private Userinfo2 tempUserinfo2;
 
     private Boolean iconChange;
     private Uri tempIconUri;
@@ -95,8 +97,6 @@ public class UserinfoActivity extends AppCompatActivity implements Toolbar.OnMen
 
         OutlineProvider.setOutline(mUsericon,OutlineProvider.SHAPE_OVAL);
 
-        tempUserinfo = MyUtils.pojoCopy(GlobalVar.mUserinfo);
-
         initUserView();
         iconChange = false;
         change = false;
@@ -118,36 +118,32 @@ public class UserinfoActivity extends AppCompatActivity implements Toolbar.OnMen
         switch (item.getItemId()){
             case R.id.complete:
                 if (iconChange)
-                    MyUpyunManager.getIns().upload_image(tempIconUri,this);
+                    MyUpyunManager.getIns().upload_image("UserIcon",tempIconUri,this);
                 else {
                     updateUserinfo();
                 }
                 break;
             case R.id.useruuid:
-                Toast.makeText(UserinfoActivity.this,"更换了uuid",Toast.LENGTH_SHORT).show();
-                SharedPreferences pref = getSharedPreferences("data",MODE_PRIVATE);
-                String userID = genUserID();
-                SharedPreferences.Editor editor = pref.edit();
-                editor.putString("userID", userID);
-                editor.apply();
-
-                UserID nuid = new UserID();
-                nuid.userID=userID;
+                Userinfo nuid = new Userinfo();
+                nuid.userDes="please give me a new ID!";
                 Myserver.getApi().newuser(nuid)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new MyAction1<UserIDResult>() {
+                        .subscribe(new MyAction1<Userinfo2Result>() {
                             @Override
                             public void call() {
                                 SharedPreferences pref = getSharedPreferences("data",MODE_PRIVATE);
                                 SharedPreferences.Editor editor = pref.edit();
                                 editor.putString("userID", mVar.userinfo.userID);
+                                editor.putString("userID2", mVar.userID2);
                                 editor.apply();
 
-                                GlobalVar.mUserinfo = mVar.userinfo;
+                                GlobalVar.mUserinfo2.userinfo = mVar.userinfo;
+                                GlobalVar.mUserinfo2.userID2 = mVar.userID2;
                                 initUserView();
                                 setMenuComplete(false);
                                 awareUserinfoUpdate();
+                                Toast.makeText(UserinfoActivity.this,"更换了uuid",Toast.LENGTH_SHORT).show();
                             }
                         });
                 break;
@@ -160,13 +156,13 @@ public class UserinfoActivity extends AppCompatActivity implements Toolbar.OnMen
     }
 
     private void updateUserinfo(){
-        Myserver.getApi().updateuser(tempUserinfo)
+        Myserver.getApi().updateuser(tempUserinfo2)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new MyAction1<UserIDResult>() {
+                .subscribe(new MyAction1<UserinfoResult>() {
                     @Override
                     public void call() {
-                        GlobalVar.mUserinfo = mVar.userinfo;
+                        GlobalVar.mUserinfo2.userinfo = mVar.userinfo;
                         awareUserinfoUpdate();
                         UserinfoActivity.this.finish();
                     }
@@ -179,16 +175,14 @@ public class UserinfoActivity extends AppCompatActivity implements Toolbar.OnMen
     }
 
     private void initUserView(){
-        if (GlobalVar.mUserinfo==null)
+        if (GlobalVar.mUserinfo2==null)
             return;
-        mUsername.setText(GlobalVar.mUserinfo.userName);
-        mUserdes.setText(GlobalVar.mUserinfo.userDes);
-        UserIconWarp.just(this,GlobalVar.mUserinfo.userIcon,mUsericon);
-    }
-
-
-    private String genUserID(){
-        return UUID.randomUUID().toString();
+        tempUserinfo2 = MyUtils.pojoCopy(GlobalVar.mUserinfo2);
+        ishuman =false;
+        mUsername.setText(tempUserinfo2.userinfo.userName);
+        mUserdes.setText(tempUserinfo2.userinfo.userDes);
+        ishuman =true;
+        UserIconWarp.just(this, tempUserinfo2.userinfo.userIcon,mUsericon);
     }
 
 
@@ -198,12 +192,15 @@ public class UserinfoActivity extends AppCompatActivity implements Toolbar.OnMen
     }
 
 
+    private boolean ishuman=false;
     @OnTextChanged(value={R.id.userdes,R.id.username})
     public void afterTextChanged(CharSequence s, int start, int before, int count) {
         if (mMenu!=null)
             setMenuComplete(true);
-        tempUserinfo.userName = mUsername.getText().toString();
-        tempUserinfo.userDes = mUserdes.getText().toString();
+        if (!ishuman)
+            return;
+        tempUserinfo2.userinfo.userName = mUsername.getText().toString();
+        tempUserinfo2.userinfo.userDes = mUserdes.getText().toString();
         change=true;
     }
 
@@ -256,7 +253,7 @@ public class UserinfoActivity extends AppCompatActivity implements Toolbar.OnMen
 
     @Override
     public void onComplete(boolean isSuccess,String url) {
-        tempUserinfo.userIcon=url;
+        tempUserinfo2.userinfo.userIcon=url;
         updateUserinfo();
     }
 

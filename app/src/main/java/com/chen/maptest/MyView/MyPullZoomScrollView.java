@@ -99,8 +99,6 @@ public class MyPullZoomScrollView extends ScrollView {
             return super.onTouchEvent(event);
         }
 
-        Log.d("MyouTouchEvent",event.toString());
-
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 mLastMotionY = event.getY();
