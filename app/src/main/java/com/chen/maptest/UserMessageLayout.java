@@ -185,8 +185,6 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
             lp.height=0;
         zoomview.setLayoutParams(lp);
         setZoomView(zoomview); //设置zoomview时必须先设置好其LayoutParams，所以在这里设置
-
-        initShow(MainActivity.MODE_MESSAGE,null);
     }
 
     //显示消息主体、获取图片
@@ -250,12 +248,16 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
         UserIconWarp.just(mContext,ui.userIcon,mUserIcon);
     }
 
+    private boolean spaceInto = false;
     @Override
     public boolean onTouchEvent(@NonNull MotionEvent ev){
         //在这里判断是否属于Space区间，然后回调
-        if (ev.getY()<mSpace.getHeight()-getScrollY() ) {
+        if (spaceInto || ev.getY()<mSpace.getHeight()-getScrollY() ) {
+            spaceInto = true;
             if (mSpaceTouchCallback != null)
                 mSpaceTouchCallback.spaceTouchcallback(ev);
+            if (ev.getAction()==MotionEvent.ACTION_UP)
+                spaceInto=false;
             return true;
         }
         return super.onTouchEvent(ev);

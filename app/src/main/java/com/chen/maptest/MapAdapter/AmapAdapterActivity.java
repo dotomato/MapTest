@@ -221,7 +221,7 @@ public class AmapAdapterActivity extends AppCompatActivity implements
 
         mMarkerOption= new MarkerOptions();
         mBitmapDescriptor = BitmapDescriptorFactory.fromBitmap(BitmapFactory
-                .decodeResource(getResources(),R.drawable.press_xingxing_small));
+                .decodeResource(getResources(),R.drawable.map_msg_icon));
     }
 
     @Override

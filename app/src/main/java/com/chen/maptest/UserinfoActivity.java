@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
@@ -27,6 +29,9 @@ import com.chen.maptest.MyView.OutlineProvider;
 import com.chen.maptest.Utils.MyUtils;
 import com.chen.maptest.Utils.UserIconWarp;
 import com.yalantis.ucrop.UCrop;
+
+import net.steamcrafted.materialiconlib.MaterialDrawableBuilder;
+import net.steamcrafted.materialiconlib.MaterialMenuInflater;
 
 import java.io.File;
 import java.util.UUID;
@@ -73,12 +78,20 @@ public class UserinfoActivity extends AppCompatActivity implements Toolbar.OnMen
 
     private void init(){
         setSupportActionBar(mToolbar);
+
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {tryExit();
             }
         });
         mToolbar.setOnMenuItemClickListener(this);
+
+        Drawable drawable = MaterialDrawableBuilder.with(this)
+                .setIcon(MaterialDrawableBuilder.IconValue.ARROW_LEFT)
+                .setColor(Color.WHITE)
+                .setSizeDp(25)
+                .build();
+        mToolbar.setNavigationIcon(drawable);
 
         OutlineProvider.setOutline(mUsericon,OutlineProvider.SHAPE_OVAL);
 
@@ -91,7 +104,10 @@ public class UserinfoActivity extends AppCompatActivity implements Toolbar.OnMen
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.userinfo_toolbar_menu, menu);
+        MaterialMenuInflater
+                .with(this)
+                .setDefaultColor(Color.WHITE)
+                .inflate(R.menu.userinfo_toolbar_menu, menu);
         mMenu = menu;
         setMenuComplete(false);
         change = false;

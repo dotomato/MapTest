@@ -1,8 +1,10 @@
 package com.chen.maptest.MyView;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +13,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.chen.maptest.R;
+
+import net.steamcrafted.materialiconlib.MaterialDrawableBuilder;
+import net.steamcrafted.materialiconlib.MaterialIconView;
 
 import java.util.List;
 
@@ -25,11 +30,13 @@ public class MyListViewAdapter extends ArrayAdapter<ListViewItemData>{
     private int resourceID;
     private LayoutInflater mLayoutInflater;
     private List<ListViewItemData> mData;
+    private Context mContext;
 
     public MyListViewAdapter(@NonNull Context context, @LayoutRes int resource, @NonNull List<ListViewItemData> objects) {
         super(context, resource, objects);
+        mContext = context;
         resourceID = resource;
-        mLayoutInflater = LayoutInflater.from(context);
+        mLayoutInflater = LayoutInflater.from(mContext);
         mData = objects;
     }
 
@@ -39,7 +46,7 @@ public class MyListViewAdapter extends ArrayAdapter<ListViewItemData>{
         if (convertView==null){
             convertView = mLayoutInflater.inflate(resourceID,null);
             holder = new MyListViewItemHolder();
-            holder.mIcon = (ImageView)convertView.findViewById(R.id.icon);
+            holder.mIcon = (MaterialIconView)convertView.findViewById(R.id.icon);
             holder.mTextView = (TextView)convertView.findViewById(R.id.textView);
             convertView.setTag(holder);
         } else{
@@ -47,12 +54,12 @@ public class MyListViewAdapter extends ArrayAdapter<ListViewItemData>{
         }
         ListViewItemData data= mData.get(position);
         holder.mTextView.setText(data.text);
-        holder.mIcon.setImageResource(data.imageRes);
+        holder.mIcon.setIcon(data.imageRes);
         return convertView;
     }
 
     private class MyListViewItemHolder {
-        ImageView mIcon;
+        MaterialIconView mIcon;
         TextView mTextView;
     }
 

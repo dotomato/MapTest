@@ -4,7 +4,7 @@
     android:id="@+id/album"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0099cc"
+    android:background="@color/colorPrimaryDark"
     tools:context="com.chen.maptest.AlbumActivity">
 
     <com.roger.match.library.MatchTextView

@@ -2,6 +2,8 @@ package com.chen.maptest;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +17,9 @@ import com.chen.maptest.MyView.ListViewItemData;
 import com.chen.maptest.MyView.MyListViewAdapter;
 import com.chen.maptest.MyView.OutlineProvider;
 import com.chen.maptest.Utils.UserIconWarp;
+
+import net.steamcrafted.materialiconlib.MaterialDrawableBuilder;
+import net.steamcrafted.materialiconlib.MaterialIconUtils;
 
 import java.util.ArrayList;
 
@@ -73,11 +78,13 @@ public class LeftDrawLayout extends ListView {
         mUserName = (TextView)mHeader.findViewById(R.id.username);
         mUserDes = (TextView)mHeader.findViewById(R.id.userdes);
 
+        mUserName.getPaint().setFakeBoldText(true);
         OutlineProvider.setOutline(mHeader.findViewById(R.id.usericon),OutlineProvider.SHAPE_OVAL);
 
-        mData.add(new ListViewItemData("私信", MainActivity.class, android.R.drawable.ic_dialog_email));
-        mData.add(new ListViewItemData("回复",MainActivity.class, android.R.drawable.ic_dialog_info));
-        mData.add(new ListViewItemData("我的",MainActivity.class, android.R.drawable.ic_dialog_map));
+
+        mData.add(new ListViewItemData("私信", MainActivity.class, MaterialDrawableBuilder.IconValue.EMAIL_OUTLINE));
+        mData.add(new ListViewItemData("回复",MainActivity.class, MaterialDrawableBuilder.IconValue.COMMENT_PROCESSING_OUTLINE));
+        mData.add(new ListViewItemData("我的",MainActivity.class, MaterialDrawableBuilder.IconValue.ACCOUNT_OUTLINE));
         MyListViewAdapter ia = new MyListViewAdapter(mContext,R.layout.layout_listviewitem,mData);
         setAdapter(ia);
         setOnItemClickListener(new OnItemClickListener() {
