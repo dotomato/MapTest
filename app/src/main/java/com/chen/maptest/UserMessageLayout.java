@@ -375,6 +375,7 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
 
     @OnClick(R.id.sendbutton)
     public void newPoint(){
+        //studing
         mSendButton.setProgress(50);
         if (hasAlbumUpload){
             MyUpyunManager.getIns().upload_image("MessageAlbum",mAlbumImageUri,this);
