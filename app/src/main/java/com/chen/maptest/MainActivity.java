@@ -6,10 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.graphics.Rect;
-import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
@@ -18,6 +15,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.chen.maptest.MapAdapter.BmapAdapterActivity;
@@ -32,19 +30,21 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
 import com.chen.maptest.MyModel.*;
+import com.chen.maptest.MyView.MyMapIcon;
 import com.chen.maptest.Utils.OnceRunner;
-import com.jaeger.library.StatusBarUtil;
+import com.yalantis.ucrop.UCrop;
 
-import java.util.UUID;
-
-public class MainActivity extends BmapAdapterActivity implements MapAdaterCallback, UserMessageLayout.NewPointFinish {
+public class MainActivity extends BmapAdapterActivity implements
+        MapAdaterCallback, DrawerLayout.DrawerListener {
 
 
     private final static String TAG = "MainActivity";
-    private static final boolean SHOULD_CUR = false;
 
+    public final static int MODE_MAP = 0;
+    public final static int MODE_MESSAGE = 1;
+    public final static int MODE_EDIT = 2;
 
-    static public final int SELECT_ALBUM_IMG = 0;
+    private final boolean SHOULD_CUR = false;
 
     private OnceRunner mSelectHelper;
 
@@ -57,21 +57,27 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
     @BindView(R.id.leftDrawer)
     public LeftDrawLayout mLeftDrawerLayout;
 
-    @BindView(R.id.viewpager)
-    public View mUMHeader;
+    @BindView(R.id.upview)
+    public ViewGroup mUpView;
+
+    @BindView(R.id.mymapicon)
+    public MyMapIcon mMyMapIcon;
+
+    @BindView(R.id.activity_main)
+    public DrawerLayout mRootView;
 
     private View mapView;
 
     private ActionBarDrawerToggle mDrawerToggle;
 
     private boolean shouldInitonResume = false;
+    private int WindowHeight;
+    private int spaceHeight;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ButterKnife.bind(this);
-
-        StatusBarUtil.setColorForDrawerLayout(this,(DrawerLayout) findViewById(R.id.activity_main), Color.WHITE,0);
 
         mapView = getMapView();
 
@@ -81,6 +87,98 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
 
         initUserinfo();
 
+        initSelectHelper();
+
+        setMapAdaterCallback(this);
+
+        setBoardcastReceiver();
+
+        switchShowMode(MODE_MAP,300);
+    }
+
+    private void initLayout(){
+        mUserMessageLayout.setExitCallback(new UserMessageLayout.ExitCallback() {
+            @Override
+            public void exitCallback() {
+                switchShowMode_force(MODE_MAP,300);
+            }
+        });
+
+
+        mUserMessageLayout.setSpaceTouchCallback(new UserMessageLayout.SpaceTouchCallback() {
+            @Override
+            public void spaceTouchcallback(MotionEvent ev) {
+                ev.offsetLocation(0,-mUpView.getY());
+                mapView.dispatchTouchEvent(ev);
+            }
+        });
+
+        mUserMessageLayout.callback(new UserMessageLayout.NewPointFinishCallback() {
+            @Override
+            public void newPointFinishCallback() {
+                selectArea();
+                switchShowMode_force(MODE_MAP,300);
+            }
+        });
+
+        mUserMessageLayout.setScrollCallback(new UserMessageLayout.ScrollCallback() {
+            @Override
+            public void scrollCallback(int t) {
+                mUpView.setTranslationY(-t/2-(WindowHeight - spaceHeight)/2);
+            }
+        });
+
+        mRootView.addDrawerListener(this);
+    }
+
+    private void initUserinfo(){
+        SharedPreferences pref = getSharedPreferences("data",MODE_PRIVATE);
+        String userID = pref.getString("userID",null);
+        GlobalVar.mUserinfo2 = new Userinfo2();
+        if (userID==null) {
+            Userinfo ui = new Userinfo();
+            ui.userDes="please give me a new ID!";
+            Myserver.getApi().newuser(ui)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new MyAction1<Userinfo2Result>() {
+                        @Override
+                        public void call() {
+                            SharedPreferences pref = getSharedPreferences("data",MODE_PRIVATE);
+                            SharedPreferences.Editor editor = pref.edit();
+                            editor.putString("userID", mVar.userinfo.userID);
+                            editor.putString("userID2", mVar.userID2);
+                            editor.apply();
+
+                            GlobalVar.mUserinfo2.userinfo = mVar.userinfo;
+                            GlobalVar.mUserinfo2.userID2 = mVar.userID2;
+                            initUserView();
+                        }
+                    });
+        } else {
+            Userinfo ui = new Userinfo();
+            ui.userID=userID;
+            Myserver.getApi().getuser(ui)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new MyAction1<UserinfoResult>() {
+                        @Override
+                        public void call() {
+                            SharedPreferences pref = getSharedPreferences("data",MODE_PRIVATE);
+                            GlobalVar.mUserinfo2.userinfo = mVar.userinfo;
+                            GlobalVar.mUserinfo2.userID2 = pref.getString("userID2",null);
+                            initUserView();
+                        }
+                    });
+        }
+    }
+
+    private void initUserView(){
+        mLeftDrawerLayout.initUserView();
+    }
+
+
+    private void initSelectHelper(){
         mSelectHelper = new OnceRunner() {
             @Override
             protected void call() {
@@ -89,12 +187,6 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
         };
         mSelectHelper.setInternal(1000);
         new Thread(mSelectHelper).start();
-
-        setMapAdaterCallback(this);
-
-        setBoardcastReceiver();
-
-        switchShowMode(MODE_MAP,300);
     }
 
     private void setBoardcastReceiver() {
@@ -113,7 +205,6 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
         },ifilter);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     protected void onResume(){
         super.onResume();
@@ -121,87 +212,6 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
             initUserView();
             shouldInitonResume = false;
         }
-    }
-
-    private void initGlobalVar(){
-//        GlobalVar.viewLatlng = new MyLatlng(-1,-1);
-//        GlobalVar.mUserinfo = new Userinfo();
-    }
-
-    private void initLayout(){
-        mUserMessageLayout.setExitCallback(new UserMessageLayout.ExitCallback() {
-            @Override
-            public void call() {
-                switchShowMode_force(MODE_MAP,300);
-            }
-        });
-
-
-        mUserMessageLayout.setSpaceTouchEventCallback(new UserMessageLayout.SpaceTouchEventCallback() {
-            @Override
-            public void onSpaceTouchEvent(MotionEvent ev) {
-                ev.offsetLocation(0,-mapView.getY());
-                mapView.dispatchTouchEvent(ev);
-            }
-        });
-
-        mUserMessageLayout.setNewPointFinishCallback(this);
-//        drawerLayoutinit();
-    }
-
-    private void initUserinfo(){
-        SharedPreferences pref = getSharedPreferences("data",MODE_PRIVATE);
-        String userID = pref.getString("userID",null);
-        if (userID==null) {
-            userID = genUserID();
-
-
-            UserID nuid = new UserID();
-            nuid.userID=userID;
-            Myserver.getApi().newuser(nuid)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new MyAction1<UserIDResult>() {
-                        @Override
-                        public void call() {
-                            SharedPreferences pref = getSharedPreferences("data",MODE_PRIVATE);
-                            SharedPreferences.Editor editor = pref.edit();
-                            editor.putString("userID", mVar.userinfo.userID);
-                            editor.apply();
-
-                            GlobalVar.mUserinfo = mVar.userinfo;
-                            initUserView();
-                        }
-                    });
-        } else {
-            UserID nuid = new UserID();
-            nuid.userID=userID;
-            Myserver.getApi().getuser(nuid)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new MyAction1<UserIDResult>() {
-                        @Override
-                        public void call() {
-                            GlobalVar.mUserinfo = mVar.userinfo;
-                            initUserView();
-                        }
-                    });
-        }
-    }
-
-    private String genUserID(){
-        return UUID.randomUUID().toString();
-    }
-
-
-    private void initUserView(){
-//        if (GlobalVar.mUserinfo==null)
-//            return;
-        mLeftDrawerLayout.initUserView();
-    }
-
-    private void drawerLayoutinit(){
-
     }
 
     @Override
@@ -216,37 +226,43 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
 
     public void MyMarkerClick(PointSimpleData psd) {
         gotoLocation2(new MyLatlng(psd.latitude,psd.longitude));
-        GetPointData gpd = new GetPointData();
+        PointData gpd = new PointData();
         gpd.pointID=psd.pointID;
         Myserver.getApi().getPoint(gpd)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new MyAction1<GetPointResult>() {
+                .subscribe(new MyAction1<PointDataResult>() {
                     @Override
                     public void call() {
                         switchShowMode(MODE_MESSAGE,300);
-                        mUserMessageLayout.initshow(MODE_MESSAGE,mVar.pointData);
+                        mUserMessageLayout.initShow(MODE_MESSAGE,mVar.pointData);
                     }
                 });
 
-        UserID nuid = new UserID();
+        Userinfo nuid = new Userinfo();
         nuid.userID=psd.userID;
         Myserver.getApi().getuser(nuid)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new MyAction1<UserIDResult>() {
+                .subscribe(new MyAction1<UserinfoResult>() {
                     @Override
                     public void call() {
-                        mUserMessageLayout.initshow2(mVar.userinfo);
+                        mUserMessageLayout.initShow2(mVar.userinfo);
                     }
                 });
+    }
+
+    public void MyCameraChangeStart() {
+        mMyMapIcon.switchAni(MyMapIcon.ANI_UP);
+        Log.d("CameraChange","Start");
     }
 
 
     public void MyCameraChangeFinish() {
         GlobalVar.viewLatlng = getViewLatlng();
-
+        mMyMapIcon.switchAni(MyMapIcon.ANI_DOWN);
         mSelectHelper.start();
+        Log.d("CameraChange","Finish");
     }
 
     @Override
@@ -255,9 +271,6 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
     }
 
 
-    final static int MODE_MAP = 0;
-    final static int MODE_MESSAGE = 1;
-    final static int MODE_EDIT = 2;
 
     int lmode=-1;
     int mMode;
@@ -283,32 +296,31 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
 
         Rect frame = new Rect();
         getWindow().getDecorView().getWindowVisibleDisplayFrame(frame);
-        int dh = frame.height();
-        int spaceHeight;
+        WindowHeight = frame.height();
 
-        mapView.clearAnimation();
+        spaceHeight = mUserMessageLayout.getSpaceHeight();
+
+        mUpView.clearAnimation();
         mUserMessageLayout.clearAnimation();
 
         switch (mMode){
             case MODE_MAP:
-                mapView.animate().y(0).setDuration(mDuration).start();
-                mUserMessageLayout.animate().y(dh).setDuration(mDuration).start();
+                mMyMapIcon.switchIcon(MyMapIcon.ICON_ARROW);
+                mUpView.animate().y(0).setDuration(mDuration).start();
+                mUserMessageLayout.animate().y(WindowHeight).setDuration(mDuration).start();
                 mFloatingActionButton.show();
-                mUMHeader.setVisibility(View.INVISIBLE);
                 break;
             case MODE_MESSAGE:
-                spaceHeight = mUserMessageLayout.getSpaceHeight();
-                mapView.animate().y(-(dh-spaceHeight)/2).setDuration(mDuration).start();
+                mMyMapIcon.switchIcon(MyMapIcon.ICON_ARROW);
+                mUpView.animate().y(-(WindowHeight-spaceHeight)/2).setDuration(mDuration).start();
                 mUserMessageLayout.animate().y(0).setDuration(mDuration).start();
                 mFloatingActionButton.hide();
-                mUMHeader.setVisibility(View.VISIBLE);
                 break;
             case MODE_EDIT:
-                spaceHeight = mUserMessageLayout.getSpaceHeight();
-                mapView.animate().y(-(dh-spaceHeight)/2).setDuration(mDuration).start();
+                mMyMapIcon.switchIcon(MyMapIcon.ICON_FLAG);
+                mUpView.animate().y(-(WindowHeight-spaceHeight)/2).setDuration(mDuration).start();
                 mUserMessageLayout.animate().y(0).setDuration(mDuration).start();
                 mFloatingActionButton.hide();
-                mUMHeader.setVisibility(View.VISIBLE);
                 break;
         }
     }
@@ -350,7 +362,7 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
 
     @OnClick(R.id.floatingActionButton)
     public void floatingClick(){
-        if (GlobalVar.mUserinfo==null
+        if (GlobalVar.mUserinfo2==null
                 || (SHOULD_CUR && GlobalVar.viewLatlng==null)
                 || (!SHOULD_CUR && GlobalVar.gpsLatlng==null)){
             Toast.makeText(this,"还没有连上网络",Toast.LENGTH_SHORT).show();
@@ -358,8 +370,8 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
         }
 
         switchShowMode(MODE_EDIT,300);
-        mUserMessageLayout.initshow(MODE_EDIT,null);
-        mUserMessageLayout.initshow2(GlobalVar.mUserinfo);
+        mUserMessageLayout.initShow(MODE_EDIT,null);
+        mUserMessageLayout.initShow2(GlobalVar.mUserinfo2.userinfo);
     }
 
     @Override
@@ -368,15 +380,29 @@ public class MainActivity extends BmapAdapterActivity implements MapAdaterCallba
         if (resultCode != Activity.RESULT_OK)
             return;
         switch (requestCode){
-            case SELECT_ALBUM_IMG:
+            case UserMessageLayout.SELECT_ALBUM_IMG:
+            case UCrop.REQUEST_CROP:
                 mUserMessageLayout.ResultCallback(requestCode,resultCode,data);
                 break;
         }
     }
 
     @Override
-    public void NPFcall() {
-        selectArea();
-        switchShowMode_force(MODE_MAP,300);
+    public void onDrawerSlide(View drawerView, float slideOffset) {
+        if (mMyMapIcon!=null)
+            mMyMapIcon.switchAni(MyMapIcon.ANI_DOWN);
+    }
+
+    @Override
+    public void onDrawerOpened(View drawerView) {
+    }
+
+    @Override
+    public void onDrawerClosed(View drawerView) {
+    }
+
+    @Override
+    public void onDrawerStateChanged(int newState) {
+
     }
 }

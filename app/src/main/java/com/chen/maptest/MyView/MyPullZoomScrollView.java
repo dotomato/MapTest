@@ -1,7 +1,6 @@
 package com.chen.maptest.MyView;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
@@ -13,9 +12,6 @@ import android.view.ViewGroup;
 import android.view.animation.Interpolator;
 import android.widget.ScrollView;
 
-import com.chen.maptest.R;
-import com.chen.maptest.Utils.MyUtils;
-
 /**
  * Created by chen on 17-2-18.
  * Copyright *
@@ -25,11 +21,11 @@ public class MyPullZoomScrollView extends ScrollView {
 
     private final static String TAG = "MyPullZoomScrollView";
 
-    private static final float FRICTION = 2.0f;
+    private static final float FRICTION = 1.3f;
     private static final float ALPHAY1 = -50f;
     private static final float ALPHAY2 = -200f;
 
-    protected ViewGroup mZoomView;
+    private ViewGroup mZoomView;
 
     public void setAlphaView(View mAlphaView) {
         this.mAlphaView = mAlphaView;
@@ -115,11 +111,12 @@ public class MyPullZoomScrollView extends ScrollView {
                 mLastMotionY = event.getY();
                 if (getScrollY()==0) {
                     ScrollValue = ScrollValue - mDiffMotionY / FRICTION;
-                    newScrollValue = Math.round(ScrollValue);
                     isZooming = ScrollValue<0;
-                    pullEvent();
-                    if (isZooming)
+                    if (isZooming) {
+                        newScrollValue = Math.round(ScrollValue);
+                        pullEvent();
                         return true;
+                    }
                 }
                 break;
 
@@ -133,6 +130,7 @@ public class MyPullZoomScrollView extends ScrollView {
                         onPullZoomListener.onPullZoomEnd();
                     }
                     isZooming = false;
+                    return true;
                 }
                 break;
         }
@@ -140,6 +138,9 @@ public class MyPullZoomScrollView extends ScrollView {
     }
 
     private void pullEvent() {
+
+        if (mScrollCallback!=null)
+            mScrollCallback.scrollCallback(newScrollValue);
         pullHeaderToZoom(newScrollValue);
         if (onPullZoomListener != null) {
             onPullZoomListener.onPullZooming(newScrollValue);
@@ -164,7 +165,7 @@ public class MyPullZoomScrollView extends ScrollView {
     }
 
     protected void smoothScrollToTop() {
-        mScalingRunnable.startAnimation(100L);
+        mScalingRunnable.startAnimation(50L);
     }
 
     private static final Interpolator sInterpolator = new Interpolator() {
@@ -192,31 +193,34 @@ public class MyPullZoomScrollView extends ScrollView {
         }
 
         public void run() {
-            if (mZoomView != null) {
-                float f2;
-                ViewGroup.LayoutParams localLayoutParams;
-                if ((!mIsFinished) && (mScale > 1.0D)) {
-                    float f1 = ((float) SystemClock.currentThreadTimeMillis() - (float) mStartTime) / (float) mDuration;
-                    f2 = mScale - (mScale - 1.0F) * sInterpolator.getInterpolation(f1);
-                    localLayoutParams = mZoomView.getLayoutParams();
-                    if (f2 > 1.0F) {
-                        localLayoutParams.height = ((int) (f2 * mHeaderHeight));
-                        mZoomView.setLayoutParams(localLayoutParams);
-                        post(this);
-                        final int ALPHAY = mHeaderHeight - localLayoutParams.height;
-                        if (mAlphaView!=null) {
-                            final float k = 1.0f/(ALPHAY1-ALPHAY2);
-                            final float b = -k*ALPHAY2;
-                            float a = ALPHAY*k+b;
-                            if (a>1) a=1;
-                            if (a<0) a=0;
-                            mAlphaView.setAlpha(a);
-                        }
-                        return;
-                    }
-                    mIsFinished = true;
-                }
+            if (mZoomView==null)
+                return;
+
+            float f1 = ((float) SystemClock.currentThreadTimeMillis() - (float) mStartTime) / (float) mDuration;
+            if (f1>1)
+                mIsFinished=true;
+
+            float f2 = mScale - (mScale - 1.0F) * sInterpolator.getInterpolation(f1);
+            ViewGroup.LayoutParams  localLayoutParams = mZoomView.getLayoutParams();
+
+            localLayoutParams.height = ((int) (f2 * mHeaderHeight));
+            mZoomView.setLayoutParams(localLayoutParams);
+
+            if (mScrollCallback!=null)
+                mScrollCallback.scrollCallback(mHeaderHeight - localLayoutParams.height);
+
+            final int ALPHAY = mHeaderHeight - localLayoutParams.height;
+            if (mAlphaView!=null) {
+                final float k = 1.0f/(ALPHAY1-ALPHAY2);
+                final float b = -k*ALPHAY2;
+                float a = ALPHAY*k+b;
+                if (a>1) a=1;
+                if (a<0) a=0;
+                mAlphaView.setAlpha(a);
             }
+
+            if (!mIsFinished)
+                post(this);
         }
 
         public void startAnimation(long paramLong) {
@@ -247,5 +251,13 @@ public class MyPullZoomScrollView extends ScrollView {
         if (mAlphaView==null)
             return;
         mAlphaView.setY(t/2);
+    }
+
+    public interface ScrollCallback {
+        void scrollCallback(int t);
+    }
+    protected ScrollCallback mScrollCallback=null;
+    public void setScrollCallback(ScrollCallback scrollCallback) {
+        this.mScrollCallback = scrollCallback;
     }
 }

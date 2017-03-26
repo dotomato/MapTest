@@ -2,12 +2,16 @@ package com.chen.maptest.MapAdapter;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.content.res.AssetManager;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -17,6 +21,7 @@ import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
 import com.baidu.mapapi.SDKInitializer;
 import com.baidu.mapapi.map.BaiduMap;
+import com.baidu.mapapi.map.BaiduMapOptions;
 import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
 import com.baidu.mapapi.map.LogoPosition;
@@ -30,10 +35,14 @@ import com.baidu.mapapi.map.Projection;
 import com.baidu.mapapi.map.UiSettings;
 import com.baidu.mapapi.model.LatLng;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.HashMap;
 
 
-import com.chen.maptest.GlobalVar;
 import com.chen.maptest.MyModel.*;
 import com.chen.maptest.R;
 
@@ -187,11 +196,49 @@ public class BmapAdapterActivity extends AppCompatActivity implements
 
     private void initAmap(){
 
+
+        AssetManager am = getAssets();
+        String path = "file:///android_asset/gray_style.json";
+        File styleFile = new File(getCacheDir(), "gray_style.json");
+        if (styleFile.exists())
+            styleFile.delete();
+
+        try {
+            InputStream is = am.open("gray_style.json");
+            FileOutputStream os = new FileOutputStream(styleFile);
+            byte[] buffer = new byte[1024];
+            int byteCount = 0;
+            while((byteCount=is.read(buffer))!=-1)
+                os.write(buffer,0,byteCount);
+            os.flush();
+            is.close();
+            os.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        String a = styleFile.getAbsolutePath();
+        mMapView.setCustomMapStylePath( styleFile.getAbsolutePath());
+        mMapView.setMapCustomEnable(true);
+
+        mMapView.showScaleControl(false);
+        mMapView.showZoomControls(false);
+
         bMap = mMapView.getMap();
         bMap.setOnMapTouchListener(this);
         bMap.setOnMarkerClickListener(this);
         bMap.setOnMapStatusChangeListener(this);
         bMap.setOnMapLoadedCallback(this);
+
+        BaiduMapOptions bmp = new BaiduMapOptions();
+        bmp.compassEnabled(false);
+        bmp.overlookingGesturesEnabled(true);
+        bmp.rotateGesturesEnabled(false);
+        bmp.scaleControlEnabled(false);
+        bmp.scrollGesturesEnabled(true);
+        bmp.zoomControlsEnabled(false);
+
+
 
         // 设置定位监听
 //        bMap.setLocationSource(this);
@@ -229,8 +276,15 @@ public class BmapAdapterActivity extends AppCompatActivity implements
         PSDMap = new HashMap<>();
 
         mMarkerOption= new MarkerOptions();
-        mBitmapDescriptor = BitmapDescriptorFactory.fromBitmap(BitmapFactory
-                .decodeResource(getResources(),R.drawable.press_xingxing_small));
+
+
+        float scale = 0.5f;
+        Matrix scaleMatrix = new Matrix();
+        scaleMatrix.postScale(scale, scale);
+        Bitmap b0 = BitmapFactory
+                .decodeResource(getResources(),R.drawable.map_msg_icon);
+        Bitmap b1 = Bitmap.createBitmap(b0, 0, 0, b0.getWidth(), b0.getHeight(), scaleMatrix, true);
+        mBitmapDescriptor = BitmapDescriptorFactory.fromBitmap(b1);
 
 
         mlocationClient = new LocationClient(getApplicationContext());
@@ -289,7 +343,8 @@ public class BmapAdapterActivity extends AppCompatActivity implements
 
     @Override
     public void onMapStatusChangeStart(MapStatus mapStatus) {
-
+        if (mMapAdaterCallback!=null)
+            mMapAdaterCallback.MyCameraChangeStart();
     }
 
     @Override

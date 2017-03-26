@@ -17,8 +17,92 @@
         android:layout_height="match_parent">
 
         <!--<com.amap.api.maps.MapView-->
-        <com.baidu.mapapi.map.MapView
-            android:id="@+id/map"
+
+        <FrameLayout
+            android:id="@+id/upview"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.baidu.mapapi.map.MapView
+                android:id="@+id/map"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+
+            <com.chen.maptest.MyView.MyMapIcon
+                android:id="@+id/mymapicon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <net.steamcrafted.materialiconlib.MaterialIconView
+                    android:id="@+id/iconachor"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:scaleType="center"
+                    android:visibility="visible"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:materialIcon="image_filter_tilt_shift"
+                    app:materialIconColor="#3000"
+                    app:materialIconSize="30dp" />
+
+                <net.steamcrafted.materialiconlib.MaterialIconView
+                    android:id="@+id/icondown"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:paddingBottom="23dp"
+                    android:scaleType="center"
+                    android:visibility="visible"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:materialIcon="arrow_down"
+                    app:materialIconColor="@color/colorAccent"
+                    app:materialIconSize="40dp" />
+
+                <net.steamcrafted.materialiconlib.MaterialIconView
+                    android:id="@+id/iconflag"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:paddingBottom="30dp"
+                    android:paddingLeft="30dp"
+                    android:scaleType="center"
+                    android:visibility="visible"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:materialIcon="feather"
+                    app:materialIconColor="@color/colorAccent"
+                    app:materialIconSize="40dp" />
+
+            </com.chen.maptest.MyView.MyMapIcon>
+
+
+
+        </FrameLayout>
+
+
+        <include
+            android:id="@+id/user_message_layout"
+            layout="@layout/layout_user_message"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+
+        <FrameLayout
             android:layout_width="0dp"
             android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -26,26 +110,7 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="1.0" />
-
-        <include
-            layout="@layout/layout_user_message"
-            android:id="@+id/user_message_layout"
-            android:visibility="visible"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
-
-        <FrameLayout
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintVertical_bias="0.0">
 
             <android.support.design.widget.FloatingActionButton
                 android:id="@+id/floatingActionButton"

@@ -37,7 +37,7 @@ public class Myserver {
 
         @Headers({"Content-Type: application/json","Accept: application/json"})
         @POST(VERSION+"/newpoint")
-        Observable<NewPointResult> newPoint(@Body NewPointData var);
+        Observable<PointDataResult> newPoint(@Body PointData2 var);
 
         @Headers({"Content-Type: application/json","Accept: application/json"})
         @POST(VERSION+"/selectarea")
@@ -45,19 +45,19 @@ public class Myserver {
 
         @Headers({"Content-Type: application/json","Accept: application/json"})
         @POST(VERSION+"/getpoint")
-        Observable<GetPointResult> getPoint(@Body GetPointData var);
+        Observable<PointDataResult> getPoint(@Body PointData var);
 
         @Headers({"Content-Type: application/json","Accept: application/json"})
         @POST(VERSION+"/newuser")
-        Observable<UserIDResult> newuser(@Body UserID var);
+        Observable<Userinfo2Result> newuser(@Body Userinfo var);
 
         @Headers({"Content-Type: application/json","Accept: application/json"})
         @POST(VERSION+"/getuser")
-        Observable<UserIDResult> getuser(@Body UserID var);
+        Observable<UserinfoResult> getuser(@Body Userinfo var);
 
         @Headers({"Content-Type: application/json","Accept: application/json"})
         @POST(VERSION+"/updateuser")
-        Observable<UserIDResult> updateuser(@Body Userinfo var);
+        Observable<UserinfoResult> updateuser(@Body Userinfo2 var);
     }
 
 

@@ -3,18 +3,13 @@ package com.chen.maptest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.graphics.Outline;
-import android.os.Build;
-import android.support.annotation.RequiresApi;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewOutlineProvider;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,11 +18,12 @@ import com.chen.maptest.MyView.MyListViewAdapter;
 import com.chen.maptest.MyView.OutlineProvider;
 import com.chen.maptest.Utils.UserIconWarp;
 
+import net.steamcrafted.materialiconlib.MaterialDrawableBuilder;
+import net.steamcrafted.materialiconlib.MaterialIconUtils;
+
 import java.util.ArrayList;
 
-import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnItemClick;
 
 /**
  * Created by chen on 17-2-25.
@@ -82,18 +78,20 @@ public class LeftDrawLayout extends ListView {
         mUserName = (TextView)mHeader.findViewById(R.id.username);
         mUserDes = (TextView)mHeader.findViewById(R.id.userdes);
 
+        mUserName.getPaint().setFakeBoldText(true);
         OutlineProvider.setOutline(mHeader.findViewById(R.id.usericon),OutlineProvider.SHAPE_OVAL);
 
-        mData.add(new ListViewItemData("私信", MainActivity.class, android.R.drawable.ic_dialog_email));
-        mData.add(new ListViewItemData("回复",MainActivity.class, android.R.drawable.ic_dialog_info));
-        mData.add(new ListViewItemData("我的",MainActivity.class, android.R.drawable.ic_dialog_map));
+
+        mData.add(new ListViewItemData("私信", MainActivity.class, MaterialDrawableBuilder.IconValue.EMAIL_OUTLINE));
+        mData.add(new ListViewItemData("回复",MainActivity.class, MaterialDrawableBuilder.IconValue.COMMENT_PROCESSING_OUTLINE));
+        mData.add(new ListViewItemData("我的",MainActivity.class, MaterialDrawableBuilder.IconValue.ACCOUNT_OUTLINE));
         MyListViewAdapter ia = new MyListViewAdapter(mContext,R.layout.layout_listviewitem,mData);
         setAdapter(ia);
         setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 if (i==0){
-                    if (GlobalVar.mUserinfo != null) {
+                    if (GlobalVar.mUserinfo2 != null) {
                         Intent intent = new Intent(mContext, UserinfoActivity.class);
                         mContext.startActivity(intent);
                     } else {
@@ -110,8 +108,8 @@ public class LeftDrawLayout extends ListView {
     }
 
     public void initUserView(){
-        mUserName.setText(GlobalVar.mUserinfo.userName);
-        mUserDes.setText(GlobalVar.mUserinfo.userDes);
-        UserIconWarp.just(mContext,GlobalVar.mUserinfo.userIcon,mUsericon);
+        mUserName.setText(GlobalVar.mUserinfo2.userinfo.userName);
+        mUserDes.setText(GlobalVar.mUserinfo2.userinfo.userDes);
+        UserIconWarp.just(mContext,GlobalVar.mUserinfo2.userinfo.userIcon,mUsericon);
     }
 }

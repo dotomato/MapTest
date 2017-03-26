@@ -1,7 +1,5 @@
 package com.chen.maptest.MyModel;
 
-import java.util.List;
-
 /**
  * Created by chen on 17-2-7.
  * Copyright *

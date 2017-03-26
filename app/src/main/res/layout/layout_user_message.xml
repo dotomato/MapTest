@@ -13,106 +13,103 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <android.support.constraint.ConstraintLayout
+            <FrameLayout
                 android:id="@+id/zoomview"
                 android:layout_width="match_parent"
                 android:layout_height="180dp">
+
+                <Space
+                    android:id="@+id/space"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+            </FrameLayout>
+
+            <com.chen.maptest.MyView.FixRadioConstraintLayout
+                android:id="@+id/msgmain"
+                android:layout_width="match_parent"
+                android:background="#FFFFFFFF"
+                android:layout_height="200dp">
+
+                <ImageView
+                    android:id="@+id/noblurimg"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:scaleType="centerCrop"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+
+                <ImageView
+                    android:id="@+id/locationbackground"
+                    android:layout_width="0dp"
+                    android:layout_height="50dp"
+                    android:src="#3000"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"/>
+
+                <TextView
+                    android:id="@+id/locationdes"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_marginBottom="10dp"
+                    android:textColor="@android:color/white"
+                    android:gravity="center"
+                    app:layout_constraintBottom_toBottomOf="@+id/locationbackground"
+                    app:layout_constraintRight_toRightOf="@+id/locationbackground"
+                    app:layout_constraintLeft_toLeftOf="@+id/locationbackground"
+                    app:layout_constraintTop_toTopOf="@+id/locationbackground"
+                    android:text="经度：56.32 纬度：54.15" />
+
+                <com.chen.maptest.MyView.MyBlurImageView
+                    android:id="@+id/blurimg"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:scaleType="centerCrop"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+
 
                 <android.support.v4.view.ViewPager
                     android:id="@+id/viewpager"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
-                    app:layout_constraintBottom_toBottomOf="@+id/back"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    android:layout_gravity="center" />
-
-
-                <ImageView
-                    android:id="@+id/back"
-                    android:layout_width="0dp"
-                    android:layout_height="30dp"
-                    android:alpha="0.7"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:srcCompat="@color/colorPrimary" />
-
-                <com.chen.maptest.MyView.RoundImageView
-                    android:id="@+id/usericon"
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
-                    android:layout_marginBottom="8dp"
-                    android:layout_marginLeft="8dp"
-                    android:elevation="9dp"
-                    android:scaleType="fitXY"
-                    android:src="@drawable/usericon"
-                    app:layout_constraintBottom_toBottomOf="@+id/back"
-                    app:layout_constraintLeft_toLeftOf="@+id/back"
-                    imagecontrol:border_outside_color="#FFEEEEEE"
-                    imagecontrol:border_thickness="3dp" />
-
-                <TextView
-                    android:id="@+id/username"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="0dp"
-                    android:layout_marginLeft="12dp"
-                    android:layout_marginTop="0dp"
-                    android:elevation="7dp"
-                    android:text="周玲美"
-                    android:textColor="@android:color/white"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    app:layout_constraintBottom_toBottomOf="@+id/back"
-                    app:layout_constraintLeft_toRightOf="@+id/usericon"
-                    app:layout_constraintTop_toTopOf="@+id/back" />
-
-                <TextView
-                    android:id="@+id/userdescript"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="12dp"
-                    android:elevation="12dp"
-                    android:gravity="left"
-                    android:text="中国南极科考站科学家"
-                    android:textColor="@android:color/white"
-                    android:textSize="16sp"
-                    app:layout_constraintBottom_toBottomOf="@+id/username"
-                    app:layout_constraintLeft_toRightOf="@+id/username"
-                    app:layout_constraintVertical_bias="0.0" />
-
-
-            </android.support.constraint.ConstraintLayout>
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="#FFFFFFFF">
-
-                <EditText
-                    android:id="@+id/usereditmessage"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="16dp"
-                    android:layout_marginRight="16dp"
-                    android:layout_marginTop="16dp"
-                    android:background="@null"
-                    android:gravity="top"
-                    android:hint="你在这里的所闻、所想……"
-                    android:lineSpacingExtra="12sp"
-                    android:minLines="4"
-                    android:textSize="16sp"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintRight_toRightOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
-            </FrameLayout>
+                <include
+                    layout="@layout/layout_timeshow"
+                    android:id="@+id/timeshow"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    android:layout_marginTop="22dp"
+                    android:layout_height="100dp"
+                    android:layout_width="120dp" />
+
+                <include
+                    layout="@layout/layout_inner_edge"
+                    android:id="@+id/inneredge"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"/>
+
+
+            </com.chen.maptest.MyView.FixRadioConstraintLayout>
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="300dp">
+                android:layout_height="50dp">
 
                 <android.support.constraint.ConstraintLayout
                     android:id="@+id/messagelayout"
@@ -120,18 +117,42 @@
                     android:layout_height="match_parent"
                     android:background="#FFFFFFFF">
 
+                    <com.chen.maptest.MyView.RoundImageView
+                        android:id="@+id/usericon"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginLeft="12dp"
+                        android:elevation="6dp"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/usericon"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintLeft_toLeftOf="parent" />
+
                     <TextView
-                        android:id="@+id/time"
-                        android:layout_width="wrap_content"
+                        android:id="@+id/username"
+                        android:layout_width="200dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="2017-02-23 在 国科大的一条小溪旁"
-                        android:gravity="center"
-                        android:textColor="@android:color/darker_gray"
-                        android:textSize="14sp"
-                        app:layout_constraintLeft_toLeftOf="parent"
+                        android:layout_marginRight="12dp"
+                        android:text="周玲美"
+                        android:gravity="right"
+                        android:maxLines="1"
+                        android:textColor="@android:color/black"
+                        android:textSize="12dp"
                         app:layout_constraintRight_toRightOf="parent"
-                        app:layout_constraintTop_toBottomOf="parent" />
+                        app:layout_constraintTop_toTopOf="@+id/usericon"/>
+
+                    <TextView
+                        android:id="@+id/userdescript"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:text="中国南极科考站科学家"
+                        android:textColor="#FF444444"
+                        android:textSize="12dp"
+                        android:maxLines="1"
+                        app:layout_constraintBottom_toBottomOf="@+id/usericon"
+                        app:layout_constraintRight_toRightOf="@+id/username"
+                        app:layout_constraintLeft_toLeftOf="@+id/username"/>
 
                 </android.support.constraint.ConstraintLayout>
 
@@ -143,26 +164,31 @@
 
                     <Button
                         android:id="@+id/addimgbutton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="80dp"
+                        android:layout_height="40dp"
                         android:backgroundTint="@android:color/background_light"
                         android:text="封面图片"
                         android:textColor="@color/colorPrimaryDark"
                         android:textSize="14sp"
                         android:layout_marginRight="4dp"
                         app:layout_constraintRight_toLeftOf="@+id/sendbutton"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent"
+                        android:layout_marginEnd="4dp" />
 
-                    <Button
+                    <com.dd.CircularProgressButton
                         android:id="@+id/sendbutton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:backgroundTint="@android:color/background_light"
-                        android:text="发送"
-                        android:textColor="@color/colorPrimaryDark"
+                        android:layout_width="80dp"
+                        android:layout_height="40dp"
+                        android:textColor="@android:color/white"
+                        app:cpb_cornerRadius="10dp"
                         android:textSize="14sp"
+                        android:layout_marginRight="10dp"
                         app:layout_constraintRight_toRightOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:cpb_textComplete="完成"
+                        app:cpb_textError="失败"
+                        app:cpb_textIdle="发送"/>
+
 
                 </android.support.constraint.ConstraintLayout>
 
