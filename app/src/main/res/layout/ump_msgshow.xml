@@ -10,7 +10,7 @@
         android:id="@+id/msgscroll"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginBottom="80dp"
+        android:layout_marginBottom="32dp"
         android:layout_marginLeft="32dp"
         android:layout_marginRight="120dp"
         android:layout_marginTop="32dp"
@@ -20,7 +20,7 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <EditText
+        <com.chen.maptest.MyView.EdittextSizeChangeEvent
             android:id="@+id/msgedittext"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

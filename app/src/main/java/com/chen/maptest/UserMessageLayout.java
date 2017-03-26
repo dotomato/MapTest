@@ -9,6 +9,7 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -20,6 +21,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Space;
 import android.widget.TextView;
 
@@ -28,6 +30,7 @@ import com.bumptech.glide.Glide;
 import com.chen.maptest.MyServer.MyAction1;
 import com.chen.maptest.MyServer.Myserver;
 import com.chen.maptest.MyUpyun.MyUpyunManager;
+import com.chen.maptest.MyView.EdittextSizeChangeEvent;
 import com.chen.maptest.MyView.InnerEdge;
 import com.chen.maptest.MyView.MyBlurImageView;
 import com.chen.maptest.MyView.MyTimeShow;
@@ -37,6 +40,7 @@ import com.chen.maptest.MyView.MyPullZoomScrollView;
 import com.chen.maptest.MyModel.*;
 import com.chen.maptest.MyView.QuickPageAdapter;
 import com.chen.maptest.Utils.UserIconWarp;
+import com.dd.CircularProgressButton;
 import com.google.gson.Gson;
 import com.yalantis.ucrop.UCrop;
 
@@ -52,6 +56,7 @@ import butterknife.ButterKnife;
 
 import butterknife.BindView;
 import butterknife.OnClick;
+import butterknife.OnTextChanged;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
@@ -89,7 +94,7 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
     public ImageView mNoBlurImg;
 
     @BindView(R.id.sendbutton)
-    public Button mSendButton;
+    public CircularProgressButton mSendButton;
 
     @BindView(R.id.messagelayout)
     public ViewGroup mMessageLayout;
@@ -118,7 +123,9 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
     @BindView(R.id.locationdes)
     public TextView mLocationDes;
 
-    public EditText mMsgEdittext;
+    public EdittextSizeChangeEvent mMsgEdittext;
+
+    public NestedScrollView mMsgScroll;
 
     private Context mContext;
     private int mMode;
@@ -156,7 +163,14 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
 
         View view1 = LayoutInflater.from(mContext).inflate(R.layout.ump_msgshow,null,false);
         View view2 = LayoutInflater.from(mContext).inflate(R.layout.ump_showspace,null,false);
-        mMsgEdittext = (EditText)view1.findViewById(R.id.msgedittext);
+        mMsgEdittext = (EdittextSizeChangeEvent)view1.findViewById(R.id.msgedittext);
+        mMsgScroll = (NestedScrollView)view1.findViewById(R.id.msgscroll);
+        mMsgEdittext.setSizeChangeCallback(new EdittextSizeChangeEvent.SizeChangeCallback() {
+            @Override
+            public void SizeChangeCallback(int w, int h) {
+                mMsgScroll.setNestedScrollingEnabled(mMsgScroll.getHeight()<h);
+            }
+        });
 
         viewlist =new ArrayList<>();
         viewlist.add(view1);
@@ -171,6 +185,8 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
 
         //下拉放大效果
         setOnPullZoomListener(this);
+
+        mSendButton.setIndeterminateProgressMode(true);
     }
 
     @Override
@@ -192,6 +208,7 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
         mMode = mode;
         mViewPager.setCurrentItem(0,false);
         scrollTo(0,0);
+        mMsgScroll.scrollTo(0,0);
         switch (mode) {
             case MainActivity.MODE_EDIT:
                 //用户填写数据初始化
@@ -200,10 +217,12 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
                 mAlbumImageURL=null;
 
                 mMsgEdittext.setText("");
+                mMsgEdittext.setHint("你在这里的所闻所想");
                 setEditTextEditable(mMsgEdittext,true);
 
                 mMessageLayout.setVisibility(GONE);
                 mEditLayout.setVisibility(VISIBLE);
+                mSendButton.setProgress(0);
 
                 mMyTimeShow.setTime(Calendar.getInstance().getTime());
 
@@ -211,12 +230,15 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
                 Glide.with(mContext).load(R.drawable.default_album).into(mNoBlurImg);
                 break;
             case MainActivity.MODE_MESSAGE:
+
                 Gson gson = new Gson();
                 MessageJson mj = gson.fromJson(pd.userMessage,MessageJson.class);
 
                 if (mj.ver==100) {
                     mMsgEdittext.setText(mj.text);
+                    mMsgEdittext.setHint("");
                     setEditTextEditable(mMsgEdittext, false);
+
                     if (!mj.albumURL.equals("no_img")) {
                         mBlurImg.setSrc(mj.albumURL);
                         Glide.with(mContext).load(mj.albumURL).into(mNoBlurImg);
@@ -228,6 +250,7 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
 
                 mMessageLayout.setVisibility(VISIBLE);
                 mEditLayout.setVisibility(GONE);
+                mSendButton.setProgress(0);
 
                 mMyTimeShow.setTime(new Date(pd.pointTime*1000));
 
@@ -239,8 +262,6 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
 
         }
     }
-
-
 
     public void initShow2(Userinfo ui){
         mUserName.setText(ui.userName);
@@ -273,7 +294,7 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
 
     @Override
     public void onPullZoomEnd() {
-        if (lastY<-100) {
+        if (lastY<-200) {
             if (mMode==MainActivity.MODE_EDIT)
                 tryExit();
             else if (mExitCallback!=null)
@@ -336,13 +357,9 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
                     Uri imageUri = data.getData();
                     Uri mDestinationUri = Uri.fromFile(new File(mContext.getCacheDir(), "UserAlbum"+UUID.randomUUID().toString()+".jpeg"));
 
-                    UCrop.Options options = new UCrop.Options();
-                    options.setCircleDimmedLayer(true);
-
                     UCrop.of(imageUri, mDestinationUri)
                             .withAspectRatio(3, 4)
                             .withMaxResultSize(1080, 1440)
-                            .withOptions(options)
                             .start((Activity) mContext);
                 }
                 break;
@@ -358,6 +375,7 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
 
     @OnClick(R.id.sendbutton)
     public void newPoint(){
+        mSendButton.setProgress(50);
         if (hasAlbumUpload){
             MyUpyunManager.getIns().upload_image("MessageAlbum",mAlbumImageUri,this);
         } else
@@ -366,7 +384,8 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
 
     //Upyun的回调
     @Override
-    public void onProgress(float progress) {    }
+    public void onProgress(float progress) {
+    }
 
     @Override
     public void onComplete(boolean isSuccess, String url) {
@@ -405,8 +424,18 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
                 .subscribe(new MyAction1<PointDataResult>() {
                     @Override
                     public void call() {
-                        if (mNewPointFinishCallbackCallback !=null)
-                            mNewPointFinishCallbackCallback.newPointFinishCallback();
+                        mSendButton.setProgress(100);
+                        postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (mNewPointFinishCallbackCallback !=null)
+                                    mNewPointFinishCallbackCallback.newPointFinishCallback();
+                            }
+                        },1000);
+                    }
+
+                    public void error(int statue, String errorMessage){
+                        mSendButton.setProgress(-1);
                     }
                 });
     }
@@ -465,11 +494,5 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
 
 
 
-    public interface ScrollCallback {
-        void scrollCallback(int t);
-    }
-    private ScrollCallback mScrollCallback=null;
-    public void setScrollCallback(ScrollCallback scrollCallback) {
-        this.mScrollCallback = scrollCallback;
-    }
+
 }

@@ -35,7 +35,7 @@ import com.chen.maptest.Utils.OnceRunner;
 import com.yalantis.ucrop.UCrop;
 
 public class MainActivity extends BmapAdapterActivity implements
-        MapAdaterCallback {
+        MapAdaterCallback, DrawerLayout.DrawerListener {
 
 
     private final static String TAG = "MainActivity";
@@ -62,6 +62,9 @@ public class MainActivity extends BmapAdapterActivity implements
 
     @BindView(R.id.mymapicon)
     public MyMapIcon mMyMapIcon;
+
+    @BindView(R.id.activity_main)
+    public DrawerLayout mRootView;
 
     private View mapView;
 
@@ -124,6 +127,8 @@ public class MainActivity extends BmapAdapterActivity implements
                 mUpView.setTranslationY(-t/2-(WindowHeight - spaceHeight)/2);
             }
         });
+
+        mRootView.addDrawerListener(this);
     }
 
     private void initUserinfo(){
@@ -215,18 +220,8 @@ public class MainActivity extends BmapAdapterActivity implements
         mSelectHelper.stop();
     }
 
-    private boolean mCameraMovefinish = true;
     public void MyTouch(MotionEvent motionEvent) {
-        switch (motionEvent.getAction()){
-            case MotionEvent.ACTION_DOWN:
-            case MotionEvent.ACTION_MOVE:
-                mMyMapIcon.switchAni(MyMapIcon.ANI_UP);
-                break;
-            case MotionEvent.ACTION_UP:
-                if (mCameraMovefinish)
-                    mMyMapIcon.switchAni(MyMapIcon.ANI_DOWN);
-                break;
-        }
+
     }
 
     public void MyMarkerClick(PointSimpleData psd) {
@@ -258,16 +253,16 @@ public class MainActivity extends BmapAdapterActivity implements
     }
 
     public void MyCameraChangeStart() {
-        mCameraMovefinish = false;
         mMyMapIcon.switchAni(MyMapIcon.ANI_UP);
+        Log.d("CameraChange","Start");
     }
 
 
     public void MyCameraChangeFinish() {
-        mCameraMovefinish = true;
         GlobalVar.viewLatlng = getViewLatlng();
         mMyMapIcon.switchAni(MyMapIcon.ANI_DOWN);
         mSelectHelper.start();
+        Log.d("CameraChange","Finish");
     }
 
     @Override
@@ -390,5 +385,24 @@ public class MainActivity extends BmapAdapterActivity implements
                 mUserMessageLayout.ResultCallback(requestCode,resultCode,data);
                 break;
         }
+    }
+
+    @Override
+    public void onDrawerSlide(View drawerView, float slideOffset) {
+        if (mMyMapIcon!=null)
+            mMyMapIcon.switchAni(MyMapIcon.ANI_DOWN);
+    }
+
+    @Override
+    public void onDrawerOpened(View drawerView) {
+    }
+
+    @Override
+    public void onDrawerClosed(View drawerView) {
+    }
+
+    @Override
+    public void onDrawerStateChanged(int newState) {
+
     }
 }

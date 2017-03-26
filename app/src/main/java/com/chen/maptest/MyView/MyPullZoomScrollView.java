@@ -21,7 +21,7 @@ public class MyPullZoomScrollView extends ScrollView {
 
     private final static String TAG = "MyPullZoomScrollView";
 
-    private static final float FRICTION = 2.0f;
+    private static final float FRICTION = 1.3f;
     private static final float ALPHAY1 = -50f;
     private static final float ALPHAY2 = -200f;
 
@@ -112,7 +112,6 @@ public class MyPullZoomScrollView extends ScrollView {
                 if (getScrollY()==0) {
                     ScrollValue = ScrollValue - mDiffMotionY / FRICTION;
                     isZooming = ScrollValue<0;
-                    Log.d("MyouTouchEvent",isZooming+"");
                     if (isZooming) {
                         newScrollValue = Math.round(ScrollValue);
                         pullEvent();
@@ -139,6 +138,9 @@ public class MyPullZoomScrollView extends ScrollView {
     }
 
     private void pullEvent() {
+
+        if (mScrollCallback!=null)
+            mScrollCallback.scrollCallback(newScrollValue);
         pullHeaderToZoom(newScrollValue);
         if (onPullZoomListener != null) {
             onPullZoomListener.onPullZooming(newScrollValue);
@@ -163,7 +165,7 @@ public class MyPullZoomScrollView extends ScrollView {
     }
 
     protected void smoothScrollToTop() {
-        mScalingRunnable.startAnimation(100L);
+        mScalingRunnable.startAnimation(50L);
     }
 
     private static final Interpolator sInterpolator = new Interpolator() {
@@ -203,6 +205,9 @@ public class MyPullZoomScrollView extends ScrollView {
 
             localLayoutParams.height = ((int) (f2 * mHeaderHeight));
             mZoomView.setLayoutParams(localLayoutParams);
+
+            if (mScrollCallback!=null)
+                mScrollCallback.scrollCallback(mHeaderHeight - localLayoutParams.height);
 
             final int ALPHAY = mHeaderHeight - localLayoutParams.height;
             if (mAlphaView!=null) {
@@ -246,5 +251,13 @@ public class MyPullZoomScrollView extends ScrollView {
         if (mAlphaView==null)
             return;
         mAlphaView.setY(t/2);
+    }
+
+    public interface ScrollCallback {
+        void scrollCallback(int t);
+    }
+    protected ScrollCallback mScrollCallback=null;
+    public void setScrollCallback(ScrollCallback scrollCallback) {
+        this.mScrollCallback = scrollCallback;
     }
 }

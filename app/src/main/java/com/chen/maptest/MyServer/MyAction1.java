@@ -13,7 +13,7 @@ import rx.Observer;
 //一个封装好了服务器已知错误和意外错误的Action1
 public abstract class MyAction1<T> implements Observer<T> {
     @Override
-    public void onCompleted() {
+    public final void onCompleted() {
 
     }
 

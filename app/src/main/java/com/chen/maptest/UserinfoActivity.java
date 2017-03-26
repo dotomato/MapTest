@@ -227,9 +227,10 @@ public class UserinfoActivity extends AppCompatActivity implements Toolbar.OnMen
 
                     UCrop.of(imageUri, mDestinationUri)
                             .withAspectRatio(1, 1)
-                            .withMaxResultSize(128, 128)
+                            .withMaxResultSize(256, 256)
                             .withOptions(options)
                             .start(this);
+
                 }
                 break;
 
