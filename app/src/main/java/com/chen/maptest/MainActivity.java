@@ -10,22 +10,22 @@ import android.content.SharedPreferences;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.ToxicBakery.viewpager.transforms.FlipHorizontalTransformer;
 import com.chen.maptest.MapAdapter.MapAdaterCallback;
 import com.chen.maptest.MapAdapter.MmapAdapterActivity;
 import com.chen.maptest.MyServer.MyAction1;
@@ -40,15 +40,16 @@ import rx.schedulers.Schedulers;
 import com.chen.maptest.MyModel.*;
 import com.chen.maptest.MyView.MyMapIcon;
 import com.chen.maptest.MyView.OutlineProvider;
-import com.chen.maptest.MyView.ScanMessageLayout;
-import com.chen.maptest.Utils.MyUtils;
+import com.chen.maptest.MyView.QuickPageAdapter;
+import com.chen.maptest.MyView.ScanMessageRv;
 import com.chen.maptest.Utils.OnceRunner;
 import com.yalantis.ucrop.UCrop;
 
-import static android.view.View.GONE;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends MmapAdapterActivity implements
-        MapAdaterCallback, DrawerLayout.DrawerListener, ScanMessageLayout.OnRecyclerViewItemClickListener {
+        MapAdaterCallback, DrawerLayout.DrawerListener, ScanMessageRv.OnRecyclerViewItemClickListener {
 
 
     private final static String TAG = "MainActivity";
@@ -57,12 +58,9 @@ public class MainActivity extends MmapAdapterActivity implements
     public final static int MODE_MESSAGE = 1;
     public final static int MODE_EDIT = 2;
 
-    private final boolean SHOULD_CUR = false;
+    private final static boolean SHOULD_CUR = false;
 
     private OnceRunner mSelectHelper;
-
-    @BindView(R.id.user_message_layout)
-    public UserMessageLayout mUserMessageLayout;
 
     @BindView(R.id.floatingActionButton)
     public FloatingActionButton mFloatingActionButton;
@@ -80,18 +78,20 @@ public class MainActivity extends MmapAdapterActivity implements
     public DrawerLayout mRootView;
 
     @BindView(R.id.scan_message_layout)
-    public ScanMessageLayout mScanMessageLayout;
+    public ScanMessageRv mScanMessageRv;
 
     @BindView(R.id.bottom_viewgroup)
     public ViewGroup mBottomViewGroup;
 
+    @BindView(R.id.viewpager)
+    public ViewPager mViewpager;
+
     private View mapView;
 
-    private ActionBarDrawerToggle mDrawerToggle;
+//    private ActionBarDrawerToggle mDrawerToggle;
+    public UserMessageLayout mUserMessageLayout;
 
     private boolean shouldInitonResume = false;
-    private int WindowHeight;
-    private int spaceHeight;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,14 +116,28 @@ public class MainActivity extends MmapAdapterActivity implements
     }
 
     private void initLayout(){
+        mRootView.addDrawerListener(this);
 
+        mScanMessageRv.initview();
+        mScanMessageRv.setOnRecyclerViewItemClickListener(this);
+
+        View v1 = LayoutInflater.from(this).inflate(R.layout.layout_user_message,null,false);
+        View v2 = LayoutInflater.from(this).inflate(R.layout.layout_comment,null,false);
+        List<View> viewlist = new ArrayList<>();
+        viewlist.add(v1);
+        viewlist.add(v2);
+        mViewpager.setAdapter(new QuickPageAdapter<>(viewlist));
+        mViewpager.setPageTransformer(true, new FlipHorizontalTransformer());
+        v1.setCameraDistance(1e5f);
+        v2.setCameraDistance(1e5f);
+
+        mUserMessageLayout = (UserMessageLayout)v1.findViewById(R.id.user_message_layout);
         mUserMessageLayout.setExitCallback(new UserMessageLayout.ExitCallback() {
             @Override
             public void exitCallback() {
                 switchShowMode_force(MODE_SCAN,300);
             }
         });
-
         mUserMessageLayout.callback(new UserMessageLayout.NewPointFinishCallback() {
             @Override
             public void newPointFinishCallback() {
@@ -131,24 +145,8 @@ public class MainActivity extends MmapAdapterActivity implements
                 switchShowMode_force(MODE_SCAN,300);
             }
         });
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            mUserMessageLayout.setElevation(MyUtils.dip2px(this,3));
-        }
+        mUserMessageLayout.setViewPager(mViewpager);
         OutlineProvider.setOutline(mUserMessageLayout,OutlineProvider.SHAPE_RECT);
-
-        mRootView.addDrawerListener(this);
-
-
-        mScanMessageLayout.setLayoutManager(new LinearLayoutManager(this , LinearLayoutManager.VERTICAL, false));
-
-        mScanMessageLayout.setHasFixedSize(true);
-
-        mScanMessageLayout.setItemAnimator(new DefaultItemAnimator());
-
-        mScanMessageLayout.initview();
-
-        mScanMessageLayout.setOnRecyclerViewItemClickListener(this);
     }
 
     private void initUserinfo(){
@@ -251,8 +249,7 @@ public class MainActivity extends MmapAdapterActivity implements
     public MyLatlng calUperLatlng(MyLatlng l){
         MyLatlng l1 = getViewLatlng(getCenterp());
         MyLatlng l2 = getViewLatlng(new PointF(mapView.getWidth()/2,mapView.getHeight()/2));
-        MyLatlng l3 = new MyLatlng(l.latitude+l2.latitude-l1.latitude,l.longitude+l2.longitude-l1.longitude);
-        return l3;
+        return new MyLatlng(l.latitude+l2.latitude-l1.latitude,l.longitude+l2.longitude-l1.longitude);
     }
 
     public void MyMarkerClick(PointSimpleData psd) {
@@ -333,35 +330,31 @@ public class MainActivity extends MmapAdapterActivity implements
     private void _switchShowMode(){
         lmode=mMode;
 
-        Rect frame = new Rect();
-        getWindow().getDecorView().getWindowVisibleDisplayFrame(frame);
-        WindowHeight = frame.height();
-
         mUserMessageLayout.clearAnimation();
-        mScanMessageLayout.clearAnimation();
+        mScanMessageRv.clearAnimation();
 
         switch (mMode){
             case MODE_SCAN:
                 mMyMapIcon.switchIcon(MyMapIcon.ICON_ARROW);
-                mUserMessageLayout.animate().alpha(0).setDuration(mDuration).withEndAction(new Runnable() {
+                mViewpager.animate().alpha(0).setDuration(mDuration).withEndAction(new Runnable() {
                     @Override
                     public void run() {
-                        mUserMessageLayout.setVisibility(View.GONE);
+                        mViewpager.setVisibility(View.GONE);
                     }
                 }).start();
-                mScanMessageLayout.setVisibility(View.VISIBLE);
-                mScanMessageLayout.animate().alpha(1).setDuration(mDuration).start();
+                mScanMessageRv.setVisibility(View.VISIBLE);
+                mScanMessageRv.animate().alpha(1).setDuration(mDuration).start();
                 mFloatingActionButton.show();
                 break;
             case MODE_EDIT:
             case MODE_MESSAGE:
                 mMyMapIcon.switchIcon(MyMapIcon.ICON_FLAG);
-                mUserMessageLayout.setVisibility(View.VISIBLE);
-                mUserMessageLayout.animate().alpha(1).setDuration(mDuration).start();
-                mScanMessageLayout.animate().alpha(0).setDuration(mDuration).withEndAction(new Runnable() {
+                mViewpager.setVisibility(View.VISIBLE);
+                mViewpager.animate().alpha(1).setDuration(mDuration).start();
+                mScanMessageRv.animate().alpha(0).setDuration(mDuration).withEndAction(new Runnable() {
                     @Override
                     public void run() {
-                        mScanMessageLayout.setVisibility(View.GONE);
+                        mScanMessageRv.setVisibility(View.GONE);
                     }
                 }).start();
                 mFloatingActionButton.hide();
@@ -389,7 +382,7 @@ public class MainActivity extends MmapAdapterActivity implements
                         for (PointSimpleData psd:mVar.points) {
                             addMarker(psd);
                         }
-                        mScanMessageLayout.setScanData(mVar.points);
+                        mScanMessageRv.setScanData(mVar.points);
                     }
                 });
     }

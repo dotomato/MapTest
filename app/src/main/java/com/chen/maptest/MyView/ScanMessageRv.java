@@ -3,6 +3,8 @@ package com.chen.maptest.MyView;
 import android.content.Context;
 import android.os.Build;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -17,6 +19,7 @@ import com.chen.maptest.MyModel.Userinfo;
 import com.chen.maptest.MyModel.UserinfoResult;
 import com.chen.maptest.MyServer.MyAction1;
 import com.chen.maptest.MyServer.Myserver;
+import com.chen.maptest.MyView.OutlineProvider;
 import com.chen.maptest.R;
 import com.chen.maptest.Utils.MyUtils;
 import com.chen.maptest.Utils.UserIconWarp;
@@ -37,7 +40,7 @@ import rx.schedulers.Schedulers;
  * Copyright *
  */
 
-public class ScanMessageLayout extends RecyclerView {
+public class ScanMessageRv extends RecyclerView {
     private Context mContext;
 
     private CommonAdapter<PointSimpleData> mAdapter;
@@ -47,12 +50,12 @@ public class ScanMessageLayout extends RecyclerView {
     private List<PointSimpleData> mDatas;
     private HeaderAndFooterWrapper mHeaderAndFooterWrapper;
 
-    public ScanMessageLayout(Context context) {
+    public ScanMessageRv(Context context) {
         super(context);
         init(context);
     }
 
-    public ScanMessageLayout(Context context, @Nullable AttributeSet attrs) {
+    public ScanMessageRv(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         init(context);
     }
@@ -64,6 +67,11 @@ public class ScanMessageLayout extends RecyclerView {
     }
 
     public void initview(){
+
+
+        setLayoutManager(new LinearLayoutManager(mContext , LinearLayoutManager.VERTICAL, false));
+        setHasFixedSize(true);
+        setItemAnimator(new DefaultItemAnimator());
 
         mAdapter = new CommonAdapter<PointSimpleData>(mContext, R.layout.layout_scan_item, mDatas){
             @Override

@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.support.constraint.ConstraintLayout;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -102,6 +103,8 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
     public ScrollView mMsgScroll;
 
     private Context mContext;
+
+    private ViewPager mParent_ViewPager;
     private int mMode;
     private boolean hasAlbumUpload;
     private Uri mAlbumImageUri;
@@ -142,10 +145,24 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
         mMsgEdittext.getPaint().setFakeBoldText(true);
         mUserName.getPaint().setFakeBoldText(true);
 
-        this.setClickable(true);
+        setClickable(true);
+        setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mParent_ViewPager==null)
+                    return;
+                if (mParent_ViewPager.getCurrentItem()==0)
+                    toggleMode2();
+            }
+        });
+//
+//        this.setOnClickListener(new OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                toggleMode2();
+//            }
+//        });
 
-
-        setCameraDistance(50000);
     }
 
     @Override
@@ -156,11 +173,15 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
         x2 = mMyTimeShow.getX();
     }
 
+    public void setViewPager(ViewPager var){
+        mParent_ViewPager = var;
+    }
+
     //显示消息主体、获取图片
     public void initShow(int mode, PointData pd){
         mMode = mode;
         switchMode2(MODE2_TEXT);
-        switchmode3(MODE3_POS);
+//        switchmode3(MODE3_POS);
         switch (mode) {
             case MainActivity.MODE_EDIT:
                 //用户填写数据初始化
@@ -172,7 +193,7 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
                 mMsgEdittext.setHint("你在这里的所闻所想");
                 setEditTextEditable(mMsgEdittext,true);
 
-                mMessageLayout.setVisibility(GONE);
+//                mMessageLayout.setVisibility(GONE);
 //                mSendButton.setProgress(0);
 
                 mMyTimeShow.setTime(Calendar.getInstance().getTime());
@@ -199,7 +220,7 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
                     }
                 }
 
-                mMessageLayout.setVisibility(VISIBLE);
+//                mMessageLayout.setVisibility(VISIBLE);
 //                mSendButton.setProgress(0);
 
                 mMyTimeShow.setTime(new Date(pd.pointTime*1000));
@@ -217,6 +238,8 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
         mUserName.setText(ui.userName);
         mUserDescirpt.setText(ui.userDes);
         UserIconWarp.just(mContext,ui.userIcon,mUserIcon);
+
+        //TODO 两个按钮,消息正文文字的大小
     }
 
     int lmode2;
@@ -386,77 +409,77 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
         this.mNewPointFinishCallbackCallback = npf;
     }
 
-
-    private float lastx;
-    float dx;
-    float dx_fator = 0.1f;
-    private int lmode3 = MODE3_POS;
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        switch (event.getAction()){
-            case MotionEvent.ACTION_DOWN:
-                lastx = event.getX();
-                break;
-            case MotionEvent.ACTION_MOVE:
-                if (lastx==-1){
-                    lastx = event.getX();
-                    break;
-                }
-
-                if (lastx>this.getRight() || lastx<this.getLeft())
-                    break;
-
-                dx = (event.getX()-lastx)*dx_fator;
-                if (lmode3==MODE3_NEG)
-                    dx=-dx;
-                lastx = event.getX();
-
-                Log.d(TAG,""+this.getRotationY()+" "+dx);
-
-                float nx = this.getRotationY() + dx;
-                if (nx>0)
-                    nx=0;
-                else if (nx<-180)
-                    nx = -180;
-                this.setRotationY(nx);
-                break;
-
-            case MotionEvent.ACTION_UP:
-                float nx2 = this.getRotationY()+dx;
-
-                if (lmode3==MODE3_POS ){
-                    if (Math.abs(nx2)>30)
-                        switchmode3(MODE3_NEG);
-                    else {
-                        switchmode3(MODE3_POS);
-                        toggleMode2();
-                    }
-                } else if (lmode3==MODE3_NEG){
-                    if (Math.abs(Math.abs(nx2)-180)>30)
-                        switchmode3(MODE3_POS);
-                    else {
-                        switchmode3(MODE3_NEG);
-                        toggleMode2();
-                    }
-                }
-                break;
-        }
-        return true;
-    }
-
-    private void switchmode3(int mode3){
-        lmode3 = mode3;
-        if (mode3==MODE3_POS){
-            if (this.getRotationY()>180)
-                this.animate().rotationY(360).setDuration(MODE2_DURATION).start();
-            else
-                this.animate().rotationY(0).setDuration(MODE2_DURATION).start();
-        } else {
-            if (this.getRotationY()<0)
-                this.animate().rotationY(-180).setDuration(MODE2_DURATION).start();
-            else
-                this.animate().rotationY(180).setDuration(MODE2_DURATION).start();
-        }
-    }
+//
+//    private float lastx;
+//    float dx;
+//    float dx_fator = 0.1f;
+//    private int lmode3 = MODE3_POS;
+//    @Override
+//    public boolean onTouchEvent(MotionEvent event) {
+//        switch (event.getAction()){
+//            case MotionEvent.ACTION_DOWN:
+//                lastx = event.getX();
+//                break;
+//            case MotionEvent.ACTION_MOVE:
+//                if (lastx==-1){
+//                    lastx = event.getX();
+//                    break;
+//                }
+//
+//                if (lastx>this.getRight() || lastx<this.getLeft())
+//                    break;
+//
+//                dx = (event.getX()-lastx)*dx_fator;
+//                if (lmode3==MODE3_NEG)
+//                    dx=-dx;
+//                lastx = event.getX();
+//
+//                Log.d(TAG,""+this.getRotationY()+" "+dx);
+//
+//                float nx = this.getRotationY() + dx;
+//                if (nx>0)
+//                    nx=0;
+//                else if (nx<-180)
+//                    nx = -180;
+//                this.setRotationY(nx);
+//                break;
+//
+//            case MotionEvent.ACTION_UP:
+//                float nx2 = this.getRotationY()+dx;
+//
+//                if (lmode3==MODE3_POS ){
+//                    if (Math.abs(nx2)>30)
+//                        switchmode3(MODE3_NEG);
+//                    else {
+//                        switchmode3(MODE3_POS);
+//                        toggleMode2();
+//                    }
+//                } else if (lmode3==MODE3_NEG){
+//                    if (Math.abs(Math.abs(nx2)-180)>30)
+//                        switchmode3(MODE3_POS);
+//                    else {
+//                        switchmode3(MODE3_NEG);
+//                        toggleMode2();
+//                    }
+//                }
+//                break;
+//        }
+//        return true;
+//    }
+//
+//    private void switchmode3(int mode3){
+//        lmode3 = mode3;
+//        if (mode3==MODE3_POS){
+//            if (this.getRotationY()>180)
+//                this.animate().rotationY(360).setDuration(MODE2_DURATION).start();
+//            else
+//                this.animate().rotationY(0).setDuration(MODE2_DURATION).start();
+//        } else {
+//            if (this.getRotationY()<0)
+//                this.animate().rotationY(-180).setDuration(MODE2_DURATION).start();
+//            else
+//                this.animate().rotationY(180).setDuration(MODE2_DURATION).start();
+//        }
+//    }
 
 }

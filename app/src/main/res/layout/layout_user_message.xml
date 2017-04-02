@@ -1,155 +1,201 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.chen.maptest.UserMessageLayout
+<android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    xmlns:imagecontrol="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:scrollbars="vertical"
     >
 
-    <ImageView
-        android:id="@+id/noblurimg"
+    <com.chen.maptest.UserMessageLayout
+        android:id="@+id/user_message_layout"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:scaleType="centerCrop"
-        app:layout_constraintBottom_toTopOf="@+id/messagelayout"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-
-    <ImageView
-        android:id="@+id/locationbackground"
-        android:layout_width="0dp"
-        android:layout_height="50dp"
-        android:src="#3000"
-        app:layout_constraintBottom_toTopOf="@+id/messagelayout"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"/>
-
-    <TextView
-        android:id="@+id/locationdes"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginBottom="10dp"
-        android:textColor="@android:color/white"
-        android:gravity="center"
-        app:layout_constraintBottom_toBottomOf="@+id/locationbackground"
-        app:layout_constraintRight_toRightOf="@+id/locationbackground"
-        app:layout_constraintLeft_toLeftOf="@+id/locationbackground"
-        app:layout_constraintTop_toTopOf="@+id/locationbackground"
-        android:text="经度：56.32 纬度：54.15" />
-
-    <com.chen.maptest.MyView.MyBlurImageView
-        android:id="@+id/blurimg"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:scaleType="centerCrop"
-        app:layout_constraintBottom_toTopOf="@+id/messagelayout"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ScrollView
-        android:id="@+id/msgscroll"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginBottom="32dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="16dp"
         android:layout_marginLeft="32dp"
-        android:layout_marginRight="120dp"
-        android:layout_marginTop="32dp"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toTopOf="@+id/messagelayout"
+        android:layout_marginRight="32dp"
+        android:elevation="3dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <com.chen.maptest.MyView.EdittextSizeChangeEvent
-            android:id="@+id/msgedittext"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@null"
-            android:gravity="top"
-            android:hint="你在这里的所闻、所想……"
-            android:lineSpacingExtra="18dp"
-            android:shadowColor="@android:color/black"
-            android:shadowDx="2"
-            android:shadowDy="2"
-            android:shadowRadius="10"
-            android:textColor="@android:color/white"
-            android:textColorHint="#77FFFFFF"
-            android:textSize="14dp" />
-
-    </ScrollView>
-
-    <include
-        layout="@layout/layout_timeshow"
-        android:id="@+id/timeshow"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginTop="22dp"
-        android:layout_height="100dp"
-        android:layout_width="120dp" />
+        >
 
-    <include
-        layout="@layout/layout_inner_edge"
-        android:id="@+id/inneredge"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/messagelayout"
-        app:layout_constraintLeft_toLeftOf="parent"/>
-
-    <android.support.constraint.ConstraintLayout
-        android:id="@+id/messagelayout"
-        android:layout_width="0dp"
-        android:layout_height="50dp"
-        android:background="#FFFFFFFF"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent">
-
-        <com.chen.maptest.MyView.RoundImageView
-            android:id="@+id/usericon"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginLeft="12dp"
-            android:elevation="6dp"
-            android:scaleType="fitXY"
-            android:src="@drawable/usericon"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent" />
-
-        <TextView
-            android:id="@+id/username"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="12dp"
-            android:text="周玲美"
-            android:gravity="right"
-            android:maxLines="1"
-            android:textColor="@android:color/black"
-            android:textSize="12dp"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/usericon"/>
-
-        <TextView
-            android:id="@+id/userdescript"
+        <ImageView
+            android:id="@+id/noblurimg"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:gravity="right"
-            android:text="中国南极科考站科学家"
-            android:textColor="#FF444444"
-            android:textSize="12dp"
-            android:maxLines="1"
-            app:layout_constraintBottom_toBottomOf="@+id/usericon"
-            app:layout_constraintRight_toRightOf="@+id/username"
-            app:layout_constraintLeft_toLeftOf="@+id/username"/>
-
-    </android.support.constraint.ConstraintLayout>
+            android:layout_height="0dp"
+            android:scaleType="centerCrop"
+            app:layout_constraintBottom_toTopOf="@+id/messagelayout"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
 
-</com.chen.maptest.UserMessageLayout>
+        <ImageView
+            android:id="@+id/locationbackground"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:src="#3000"
+            app:layout_constraintBottom_toTopOf="@+id/messagelayout"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"/>
+
+        <TextView
+            android:id="@+id/locationdes"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginBottom="10dp"
+            android:textColor="@android:color/white"
+            android:gravity="center"
+            app:layout_constraintBottom_toBottomOf="@+id/locationbackground"
+            app:layout_constraintRight_toRightOf="@+id/locationbackground"
+            app:layout_constraintLeft_toLeftOf="@+id/locationbackground"
+            app:layout_constraintTop_toTopOf="@+id/locationbackground"
+            android:text="经度：56.32 纬度：54.15" />
+
+        <com.chen.maptest.MyView.MyBlurImageView
+            android:id="@+id/blurimg"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:scaleType="centerCrop"
+            app:layout_constraintBottom_toTopOf="@+id/messagelayout"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ScrollView
+            android:id="@+id/msgscroll"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginBottom="32dp"
+            android:layout_marginLeft="32dp"
+            android:layout_marginRight="120dp"
+            android:layout_marginTop="32dp"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toTopOf="@+id/messagelayout"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.chen.maptest.MyView.EdittextSizeChangeEvent
+                android:id="@+id/msgedittext"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:gravity="top"
+                android:hint="你在这里的所闻、所想……"
+                android:lineSpacingExtra="18dp"
+                android:shadowColor="@android:color/black"
+                android:shadowDx="2"
+                android:shadowDy="2"
+                android:shadowRadius="10"
+                android:textColor="@android:color/white"
+                android:textColorHint="#77FFFFFF"
+                android:textSize="14dp" />
+
+        </ScrollView>
+
+        <include
+            layout="@layout/layout_timeshow"
+            android:id="@+id/timeshow"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            android:layout_marginTop="22dp"
+            android:layout_height="100dp"
+            android:layout_width="120dp" />
+
+        <include
+            layout="@layout/layout_inner_edge"
+            android:id="@+id/inneredge"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/messagelayout"
+            app:layout_constraintLeft_toLeftOf="parent"/>
+
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/editlayout"
+            android:layout_width="100dp"
+            android:layout_height="0dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/locationdes">
+
+            <Button
+                android:id="@+id/sendbutton"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:text="Button"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                android:layout_marginRight="10dp" />
+
+            <Button
+                android:id="@+id/albumbutton"
+                style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:layout_marginRight="10dp"
+                android:text="Button"
+                app:layout_constraintBottom_toTopOf="@+id/sendbutton"
+                app:layout_constraintRight_toRightOf="parent" />
+        </android.support.constraint.ConstraintLayout>
+
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/messagelayout"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:background="#FFFFFFFF"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent">
+
+            <com.chen.maptest.MyView.RoundImageView
+                android:id="@+id/usericon"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginLeft="12dp"
+                android:elevation="6dp"
+                android:scaleType="fitXY"
+                android:src="@drawable/usericon"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent" />
+
+            <TextView
+                android:id="@+id/username"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="12dp"
+                android:text="周玲美"
+                android:gravity="right"
+                android:maxLines="1"
+                android:textColor="@android:color/black"
+                android:textSize="12dp"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/usericon"/>
+
+            <TextView
+                android:id="@+id/userdescript"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:text="中国南极科考站科学家"
+                android:textColor="#FF444444"
+                android:textSize="12dp"
+                android:maxLines="1"
+                app:layout_constraintBottom_toBottomOf="@+id/usericon"
+                app:layout_constraintRight_toRightOf="@+id/username"
+                app:layout_constraintLeft_toLeftOf="@+id/username"/>
+
+        </android.support.constraint.ConstraintLayout>
+
+
+    </com.chen.maptest.UserMessageLayout>
+
+</android.support.constraint.ConstraintLayout>
