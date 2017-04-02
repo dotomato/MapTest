@@ -19,17 +19,17 @@ public abstract class OnceRunner implements Runnable {
     @Override
     public void run() {
         while(true){
+            try {
+                Thread.sleep(internal);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             if (mStatue==RUN) {
                 call();
                 mStatue = FINISH;
             }
             if (mStatue==STOP){
                 break;
-            }
-            try {
-                Thread.sleep(internal);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
             }
         }
     }

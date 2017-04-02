@@ -26,7 +26,7 @@ public class FixRadioConstraintLayout extends ConstraintLayout {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int ws = MeasureSpec.getSize(widthMeasureSpec);
         int hm = MeasureSpec.getMode(heightMeasureSpec);
-        int hs = ws*4/3;
+        int hs = ws*6/5;
         int h = MeasureSpec.makeMeasureSpec(hs,hm);
         super.onMeasure(widthMeasureSpec,h);
     }

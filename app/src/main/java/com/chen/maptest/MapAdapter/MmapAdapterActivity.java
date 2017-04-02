@@ -23,6 +23,7 @@ import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
+import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdate;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
@@ -111,7 +112,8 @@ public class MmapAdapterActivity extends AppCompatActivity implements MapboxMap.
                 if (mMapAdaterCallback!=null)
                     mMapAdaterCallback.MyGPSRecive(new MyLatlng(location.getLatitude(),location.getLongitude()));
                 if (firstshow) {
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location), 16));
+                    mMapAdaterCallback.firstLocation(new MyLatlng(location.getLatitude(),location.getLongitude()));
+//                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location), 16));
                     firstshow = false;
                 }
             }
@@ -127,7 +129,7 @@ public class MmapAdapterActivity extends AppCompatActivity implements MapboxMap.
         UiSettings mUiSettings = mMap.getUiSettings();
         mUiSettings.setScrollGesturesEnabled(true);
         mUiSettings.setZoomGesturesEnabled(true);
-        mUiSettings.setTiltGesturesEnabled(true);
+        mUiSettings.setTiltGesturesEnabled(false);
         mUiSettings.setRotateGesturesEnabled(false);
         mUiSettings.setZoomControlsEnabled(false);
         mUiSettings.setCompassEnabled(false);
@@ -214,13 +216,13 @@ public class MmapAdapterActivity extends AppCompatActivity implements MapboxMap.
 
     @Override
     public void onMapChanged(int change) {
-        Log.d(TAG,""+change);
         switch (change){
             case REGION_WILL_CHANGE_ANIMATED:
                 if (mMapAdaterCallback!=null)
                     mMapAdaterCallback.MyCameraChangeStart();
                 break;
             case REGION_DID_CHANGE_ANIMATED:
+            case REGION_DID_CHANGE:
                 if (mMapAdaterCallback!=null)
                     mMapAdaterCallback.MyCameraChangeFinish();
                 break;
@@ -260,8 +262,15 @@ public class MmapAdapterActivity extends AppCompatActivity implements MapboxMap.
     public void gotoLocation2(MyLatlng latlng){
         //参数依次是：视角调整区域的中心点坐标、希望调整到的缩放级别、俯仰角0°~45°（垂直与地图时为0）、偏航角 0~360° (正北方为0)
         CameraUpdate mCameraUpdate =
-                CameraUpdateFactory.newLatLngZoom(latlng.toLatlng(), mMap.getCameraPosition().zoom);
-        mMap.animateCamera(mCameraUpdate,500);
+                CameraUpdateFactory.newLatLng(latlng.toLatlng());
+        mMap.easeCamera(mCameraUpdate,500);
+    }
+
+    public void gotoLocation2(MyLatlng latlng, double zoom){
+        //参数依次是：视角调整区域的中心点坐标、希望调整到的缩放级别、俯仰角0°~45°（垂直与地图时为0）、偏航角 0~360° (正北方为0)
+        CameraUpdate mCameraUpdate =
+                CameraUpdateFactory.newLatLngZoom(latlng.toLatlng(), zoom);
+        mMap.animateCamera(mCameraUpdate,0);
     }
 
     public MyLatlng getLeftTopLatlng(){
@@ -280,9 +289,7 @@ public class MmapAdapterActivity extends AppCompatActivity implements MapboxMap.
         }
     }
 
-    public MyLatlng getViewLatlng(){
-        int a = mMapView.getWidth();
-        int b = mMapView.getBottom();
-        return mProjection==null?new MyLatlng(-1,-1):new MyLatlng(mProjection.fromScreenLocation(new PointF(a/2,b/2))) ;
+    public MyLatlng getViewLatlng(PointF p){
+        return mProjection==null?new MyLatlng(-1,-1):new MyLatlng(mProjection.fromScreenLocation(p)) ;
     }
 }

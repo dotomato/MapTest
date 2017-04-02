@@ -6,23 +6,18 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
-import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
-import android.support.v4.view.ViewPager;
-import android.support.v4.widget.NestedScrollView;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.view.LayoutInflater;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.Space;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 
@@ -30,37 +25,30 @@ import com.bumptech.glide.Glide;
 import com.chen.maptest.MyServer.MyAction1;
 import com.chen.maptest.MyServer.Myserver;
 import com.chen.maptest.MyUpyun.MyUpyunManager;
-import com.chen.maptest.MyView.EdittextSizeChangeEvent;
 import com.chen.maptest.MyView.InnerEdge;
 import com.chen.maptest.MyView.MyBlurImageView;
 import com.chen.maptest.MyView.MyTimeShow;
 import com.chen.maptest.MyView.OutlineProvider;
-import com.chen.maptest.MyView.MyPullZoomScrollView;
 
 import com.chen.maptest.MyModel.*;
-import com.chen.maptest.MyView.QuickPageAdapter;
 import com.chen.maptest.Utils.UserIconWarp;
-import com.dd.CircularProgressButton;
 import com.google.gson.Gson;
 import com.yalantis.ucrop.UCrop;
 
 import java.io.File;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.regex.Matcher;
 
 import butterknife.ButterKnife;
 
 import butterknife.BindView;
-import butterknife.OnClick;
-import butterknife.OnTextChanged;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
-import static com.chen.maptest.Utils.MyUtils.pickFromGallery;
 import static com.chen.maptest.Utils.MyUtils.setEditTextEditable;
 
 /**
@@ -68,10 +56,15 @@ import static com.chen.maptest.Utils.MyUtils.setEditTextEditable;
  * Copyright *
  */
 
-public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoomScrollView.OnPullZoomListener, MyUpyunManager.UploadProgress {
+public class UserMessageLayout extends ConstraintLayout implements MyUpyunManager.UploadProgress {
 
     private final static String TAG = "UserMessageLayout";
 
+    static public final int MODE2_TEXT = 0;
+    static public final int MODE2_ALBUM = 1;
+
+    static public final int MODE3_POS = 0;
+    static public final int MODE3_NEG = 1;
 
     static public final int SELECT_ALBUM_IMG = 0;
 
@@ -84,38 +77,17 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
     @BindView(R.id.userdescript)
     public TextView mUserDescirpt;
 
-    @BindView(R.id.space)
-    public Space mSpace;
-
     @BindView(R.id.blurimg)
     public MyBlurImageView mBlurImg;
 
     @BindView(R.id.noblurimg)
     public ImageView mNoBlurImg;
 
-    @BindView(R.id.sendbutton)
-    public CircularProgressButton mSendButton;
-
     @BindView(R.id.messagelayout)
     public ViewGroup mMessageLayout;
 
-    @BindView(R.id.editlayout)
-    public ViewGroup mEditLayout;
-
-    @BindView(R.id.zoomview)
-    public ViewGroup zoomview;
-
-    @BindView(R.id.addimgbutton)
-    public Button mAddimgButton;
-
-    @BindView(R.id.viewpager)
-    public ViewPager mViewPager;
-
     @BindView(R.id.timeshow)
     public MyTimeShow mMyTimeShow;
-
-    @BindView(R.id.msgmain)
-    public ViewGroup mMsgMain;
 
     @BindView(R.id.inneredge)
     public InnerEdge mInnerEdge;
@@ -123,9 +95,11 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
     @BindView(R.id.locationdes)
     public TextView mLocationDes;
 
-    public EdittextSizeChangeEvent mMsgEdittext;
+    @BindView(R.id.msgedittext)
+    public EditText mMsgEdittext;
 
-    public NestedScrollView mMsgScroll;
+    @BindView(R.id.msgscroll)
+    public ScrollView mMsgScroll;
 
     private Context mContext;
     private int mMode;
@@ -134,6 +108,8 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
     private String mAlbumImageURL;
 
     private List<View> viewlist;
+    private float x1;
+    private float x2;
 
 
     public UserMessageLayout(Context context) {
@@ -161,54 +137,30 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
         super.onFinishInflate();
         ButterKnife.bind(this);
 
-        View view1 = LayoutInflater.from(mContext).inflate(R.layout.ump_msgshow,null,false);
-        View view2 = LayoutInflater.from(mContext).inflate(R.layout.ump_showspace,null,false);
-        mMsgEdittext = (EdittextSizeChangeEvent)view1.findViewById(R.id.msgedittext);
-        mMsgScroll = (NestedScrollView)view1.findViewById(R.id.msgscroll);
-        mMsgEdittext.setSizeChangeCallback(new EdittextSizeChangeEvent.SizeChangeCallback() {
-            @Override
-            public void SizeChangeCallback(int w, int h) {
-                mMsgScroll.setNestedScrollingEnabled(mMsgScroll.getHeight()<h);
-            }
-        });
-
-        viewlist =new ArrayList<>();
-        viewlist.add(view1);
-        viewlist.add(view2);
-        mViewPager.setAdapter(new QuickPageAdapter<>(viewlist));
-        mViewPager.setPageTransformer(false,new ParallaxPagerTransformer());    //实现消息文字和时间滑动不同步
-
         //设置显示效果
         OutlineProvider.setOutline(mUserIcon,OutlineProvider.SHAPE_OVAL);
         mMsgEdittext.getPaint().setFakeBoldText(true);
         mUserName.getPaint().setFakeBoldText(true);
 
-        //下拉放大效果
-        setOnPullZoomListener(this);
+        this.setClickable(true);
 
-        mSendButton.setIndeterminateProgressMode(true);
+
+        setCameraDistance(50000);
     }
 
     @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec,heightMeasureSpec);
-
-        //设置zoomview刚好与MsgMain的高度填满屏幕
-        int h = MeasureSpec.getSize(heightMeasureSpec);
-        LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) zoomview.getLayoutParams();
-        lp.height = (h) - mMsgMain.getHeight();
-        if (lp.height<0)
-            lp.height=0;
-        zoomview.setLayoutParams(lp);
-        setZoomView(zoomview); //设置zoomview时必须先设置好其LayoutParams，所以在这里设置
+    protected void onLayout(boolean changed,
+                            int l, int t, int r, int b){
+        super.onLayout(changed,l,t,r,b);
+        x1 = mMsgScroll.getX();
+        x2 = mMyTimeShow.getX();
     }
 
     //显示消息主体、获取图片
     public void initShow(int mode, PointData pd){
         mMode = mode;
-        mViewPager.setCurrentItem(0,false);
-        scrollTo(0,0);
-        mMsgScroll.scrollTo(0,0);
+        switchMode2(MODE2_TEXT);
+        switchmode3(MODE3_POS);
         switch (mode) {
             case MainActivity.MODE_EDIT:
                 //用户填写数据初始化
@@ -221,8 +173,7 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
                 setEditTextEditable(mMsgEdittext,true);
 
                 mMessageLayout.setVisibility(GONE);
-                mEditLayout.setVisibility(VISIBLE);
-                mSendButton.setProgress(0);
+//                mSendButton.setProgress(0);
 
                 mMyTimeShow.setTime(Calendar.getInstance().getTime());
 
@@ -249,8 +200,7 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
                 }
 
                 mMessageLayout.setVisibility(VISIBLE);
-                mEditLayout.setVisibility(GONE);
-                mSendButton.setProgress(0);
+//                mSendButton.setProgress(0);
 
                 mMyTimeShow.setTime(new Date(pd.pointTime*1000));
 
@@ -269,54 +219,30 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
         UserIconWarp.just(mContext,ui.userIcon,mUserIcon);
     }
 
-    private boolean spaceInto = false;
-    @Override
-    public boolean onTouchEvent(@NonNull MotionEvent ev){
-        //在这里判断是否属于Space区间，然后回调
-        if (spaceInto || ev.getY()<mSpace.getHeight()-getScrollY() ) {
-            spaceInto = true;
-            if (mSpaceTouchCallback != null)
-                mSpaceTouchCallback.spaceTouchcallback(ev);
-            if (ev.getAction()==MotionEvent.ACTION_UP)
-                spaceInto=false;
-            return true;
-        }
-        return super.onTouchEvent(ev);
-    }
+    int lmode2;
+    final int MODE2_DURATION = 600;
+    public void switchMode2(int mode2){
+        lmode2 = mode2;
+        if (lmode2==MODE2_TEXT){
+            mBlurImg.animate().alpha(1).scaleX(1f).scaleY(1f).setDuration(MODE2_DURATION).start();
+            mNoBlurImg.animate().scaleX(1f).scaleY(1f).setDuration(MODE2_DURATION).start();
+            mMsgScroll.animate().x(x1).setDuration(MODE2_DURATION).start();
+            mMyTimeShow.animate().x(x2).setDuration(MODE2_DURATION).start();
 
-
-    //根据下拉超过的距离判断是否收起
-    private int lastY;
-    @Override
-    public void onPullZooming(int newScrollValue) {
-        lastY = newScrollValue;
-    }
-
-    @Override
-    public void onPullZoomEnd() {
-        if (lastY<-200) {
-            if (mMode==MainActivity.MODE_EDIT)
-                tryExit();
-            else if (mExitCallback!=null)
-                mExitCallback.exitCallback();
+        } else {
+            mBlurImg.animate().alpha(0).scaleX(1.1f).scaleY(1.1f).setDuration(MODE2_DURATION).start();
+            mNoBlurImg.animate().scaleX(1.1f).scaleY(1.1f).setDuration(MODE2_DURATION).start();
+            mMsgScroll.animate().x(-mMsgScroll.getWidth()-300).setDuration(MODE2_DURATION).start();
+            mMyTimeShow.animate().x(70).setDuration(MODE2_DURATION).start();
         }
     }
 
-    @Override
-    protected void onScrollChanged(int l, int t, int oldl, int oldt) {
-        super.onScrollChanged(l, t, oldl, oldt);
-        if (mScrollCallback!=null)
-            mScrollCallback.scrollCallback(t);
+    public void toggleMode2(){
+        if (lmode2==MODE2_TEXT)
+            switchMode2(MODE2_ALBUM);
+        else
+            switchMode2(MODE2_TEXT);
     }
-
-
-    public int getSpaceHeight(){
-        return zoomview.getLayoutParams().height;
-    }
-
-
-
-
 
     public void tryExit(){
         if (TextUtils.isEmpty(mMsgEdittext.getText()) && !hasAlbumUpload){
@@ -341,11 +267,11 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
                 .setNeutralButton("取消", null)
                 .show();//在按键响应事件中显示此对话框
     }
-
-    @OnClick(R.id.addimgbutton)
-    public void addimg(){
-        pickFromGallery((Activity) mContext,SELECT_ALBUM_IMG, "选择封面");
-    }
+//
+//    @OnClick(R.id.addimgbutton)
+//    public void addimg(){
+//        pickFromGallery((Activity) mContext,SELECT_ALBUM_IMG, "选择封面");
+//    }
 
 
     //接收从Activity传过来的Result,已经进行过resultCode==RESULT_OK判断了
@@ -373,15 +299,15 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
         }
     }
 
-    @OnClick(R.id.sendbutton)
-    public void newPoint(){
-        //studing
-        mSendButton.setProgress(50);
-        if (hasAlbumUpload){
-            MyUpyunManager.getIns().upload_image("MessageAlbum",mAlbumImageUri,this);
-        } else
-            uploadnoewpoint();
-    }
+//    @OnClick(R.id.sendbutton)
+//    public void newPoint(){
+//        //studing
+////        mSendButton.setProgress(50);
+//        if (hasAlbumUpload){
+//            MyUpyunManager.getIns().upload_image("MessageAlbum",mAlbumImageUri,this);
+//        } else
+//            uploadnoewpoint();
+//    }
 
     //Upyun的回调
     @Override
@@ -425,7 +351,7 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
                 .subscribe(new MyAction1<PointDataResult>() {
                     @Override
                     public void call() {
-                        mSendButton.setProgress(100);
+//                        mSendButton.setProgress(100);
                         postDelayed(new Runnable() {
                             @Override
                             public void run() {
@@ -436,43 +362,10 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
                     }
 
                     public void error(int statue, String errorMessage){
-                        mSendButton.setProgress(-1);
+//                        mSendButton.setProgress(-1);
                     }
                 });
     }
-
-
-
-    private class ParallaxPagerTransformer implements ViewPager.PageTransformer {
-        private final float speed = 0.6f;
-        private final float scale = 0.05f;
-
-        @Override
-        public void transformPage(View view, float position) {
-            if (view.equals(viewlist.get(0))){
-                if (position > -1 && position < 1) {
-                    float width = view.getWidth();
-                    mMyTimeShow.setTranslationX((position * width * speed));
-                    mBlurImg.setAlpha(1+position);
-                    mInnerEdge.setShadowAlpha(1+position);
-                    mNoBlurImg.setScaleX(1-position*scale);
-                    mNoBlurImg.setScaleY(1-position*scale);
-                }
-            }
-        }
-    }
-
-
-    //空白区域回调
-    interface SpaceTouchCallback {
-        void spaceTouchcallback(MotionEvent ev);
-    }
-    public void setSpaceTouchCallback(SpaceTouchCallback var){
-        mSpaceTouchCallback =var;
-    }
-    SpaceTouchCallback mSpaceTouchCallback =null;
-
-
 
     //退出回调
     interface ExitCallback{
@@ -494,6 +387,76 @@ public class UserMessageLayout extends MyPullZoomScrollView implements MyPullZoo
     }
 
 
+    private float lastx;
+    float dx;
+    float dx_fator = 0.1f;
+    private int lmode3 = MODE3_POS;
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        switch (event.getAction()){
+            case MotionEvent.ACTION_DOWN:
+                lastx = event.getX();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                if (lastx==-1){
+                    lastx = event.getX();
+                    break;
+                }
 
+                if (lastx>this.getRight() || lastx<this.getLeft())
+                    break;
+
+                dx = (event.getX()-lastx)*dx_fator;
+                if (lmode3==MODE3_NEG)
+                    dx=-dx;
+                lastx = event.getX();
+
+                Log.d(TAG,""+this.getRotationY()+" "+dx);
+
+                float nx = this.getRotationY() + dx;
+                if (nx>0)
+                    nx=0;
+                else if (nx<-180)
+                    nx = -180;
+                this.setRotationY(nx);
+                break;
+
+            case MotionEvent.ACTION_UP:
+                float nx2 = this.getRotationY()+dx;
+
+                if (lmode3==MODE3_POS ){
+                    if (Math.abs(nx2)>30)
+                        switchmode3(MODE3_NEG);
+                    else {
+                        switchmode3(MODE3_POS);
+                        toggleMode2();
+                    }
+                } else if (lmode3==MODE3_NEG){
+                    if (Math.abs(Math.abs(nx2)-180)>30)
+                        switchmode3(MODE3_POS);
+                    else {
+                        switchmode3(MODE3_NEG);
+                        toggleMode2();
+                    }
+                }
+                break;
+        }
+        return true;
+    }
+
+    private void switchmode3(int mode3){
+        lmode3 = mode3;
+        if (mode3==MODE3_POS){
+            if (this.getRotationY()>180)
+                this.animate().rotationY(360).setDuration(MODE2_DURATION).start();
+            else
+                this.animate().rotationY(0).setDuration(MODE2_DURATION).start();
+        } else {
+            if (this.getRotationY()<0)
+                this.animate().rotationY(-180).setDuration(MODE2_DURATION).start();
+            else
+                this.animate().rotationY(180).setDuration(MODE2_DURATION).start();
+        }
+    }
 
 }

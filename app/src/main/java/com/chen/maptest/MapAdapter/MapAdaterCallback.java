@@ -16,4 +16,5 @@ public interface MapAdaterCallback{
     void MyCameraChangeStart();
     void MyCameraChangeFinish();
     void MyGPSRecive(MainActivity.MyLatlng latlng);
+    void firstLocation(MainActivity.MyLatlng latlng);
 }

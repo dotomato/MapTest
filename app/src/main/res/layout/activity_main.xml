@@ -28,76 +28,73 @@
             <com.mapbox.mapboxsdk.maps.MapView
                 android:id="@+id/map"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
-
-            <com.chen.maptest.MyView.MyMapIcon
-                android:id="@+id/mymapicon"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <net.steamcrafted.materialiconlib.MaterialIconView
-                    android:id="@+id/iconachor"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:scaleType="center"
-                    android:visibility="visible"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:materialIcon="image_filter_tilt_shift"
-                    app:materialIconColor="#3000"
-                    app:materialIconSize="30dp" />
-
-                <net.steamcrafted.materialiconlib.MaterialIconView
-                    android:id="@+id/icondown"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:paddingBottom="23dp"
-                    android:scaleType="center"
-                    android:visibility="visible"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:materialIcon="arrow_down"
-                    app:materialIconColor="@color/colorAccent"
-                    app:materialIconSize="40dp" />
-
-                <net.steamcrafted.materialiconlib.MaterialIconView
-                    android:id="@+id/iconflag"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:paddingBottom="30dp"
-                    android:paddingLeft="30dp"
-                    android:scaleType="center"
-                    android:visibility="visible"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:materialIcon="feather"
-                    app:materialIconColor="@color/colorAccent"
-                    app:materialIconSize="40dp" />
-
-            </com.chen.maptest.MyView.MyMapIcon>
-
-
+                android:layout_height="match_parent" />
 
         </FrameLayout>
 
-
-        <include
-            android:id="@+id/user_message_layout"
-            layout="@layout/layout_user_message"
+        <com.chen.maptest.MyView.MyMapIcon
+            android:id="@+id/mymapicon"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:visibility="visible"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/bottom_viewgroup"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent">
+
+            <net.steamcrafted.materialiconlib.MaterialIconView
+                android:id="@+id/iconflag"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:paddingBottom="30dp"
+                android:paddingLeft="30dp"
+                android:scaleType="center"
+                android:visibility="visible"
+
+                app:materialIcon="feather"
+                app:materialIconColor="@color/colorAccent"
+                app:materialIconSize="40dp"
+                tools:layout_editor_absoluteX="0dp"
+                tools:layout_editor_absoluteY="0dp" />
+
+        </com.chen.maptest.MyView.MyMapIcon>
+
+
+        <com.chen.maptest.MyView.FixRadioConstraintLayout
+            android:id="@+id/bottom_viewgroup"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintRight_toRightOf="parent">
 
+            <com.chen.maptest.MyView.ScanMessageLayout
+                android:id="@+id/scan_message_layout"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:visibility="visible"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <include
+                android:id="@+id/user_message_layout"
+                layout="@layout/layout_user_message"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="16dp"
+                android:layout_marginLeft="32dp"
+                android:layout_marginRight="32dp"
+                android:elevation="3dp"
+                android:visibility="visible"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+
+        </com.chen.maptest.MyView.FixRadioConstraintLayout>
 
 
         <FrameLayout
@@ -117,7 +114,7 @@
                 android:layout_gravity="end|bottom"
                 android:layout_margin="16dp"
                 android:clickable="true"
-                app:backgroundTint="@color/colorPrimary"
+                app:backgroundTint="@android:color/black"
                 app:fabSize="mini"
                 app:srcCompat="@android:drawable/ic_menu_add" />
         </FrameLayout>

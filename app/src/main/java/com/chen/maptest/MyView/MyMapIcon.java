@@ -3,6 +3,7 @@ package com.chen.maptest.MyView;
 import android.content.Context;
 import android.support.constraint.ConstraintLayout;
 import android.util.AttributeSet;
+import android.util.Log;
 
 import com.chen.maptest.R;
 
@@ -18,25 +19,12 @@ public class MyMapIcon extends ConstraintLayout {
     public static final int ICON_ARROW = 0;
     public static final int ICON_FLAG = 1;
 
-
-    public static final int ANI_UP = 0;
-    public static final int ANI_DOWN = 1;
-
-
-    public int getmDuration() {
-        return mDuration;
-    }
-
-    public void setmDuration(int mDuration) {
-        this.mDuration = mDuration;
-    }
+    private static final String TAG="MyMapIcon";
 
     private int mDuration = 500;
 
     private Context mContext;
-    private MaterialIconView mIconArrow;
     private MaterialIconView mIconFlag;
-    private MaterialIconView mCurIcon;
 
     public MyMapIcon(Context context) {
         super(context);
@@ -60,8 +48,20 @@ public class MyMapIcon extends ConstraintLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mIconArrow = (MaterialIconView)findViewById(R.id.icondown);
-        mIconFlag = (MaterialIconView)findViewById(R.id.iconflag);
+        mIconFlag = (MaterialIconView) findViewById(R.id.iconflag);
+    }
+
+
+    private boolean xinited = false;
+    @Override
+    protected void onLayout(boolean changed,
+                                     int l, int t, int r, int b){
+        super.onLayout(changed,l,t,r,b);
+        if(!xinited) {
+            mIconFlag.setY(this.getHeight() / 2 - mIconFlag.getHeight() / 2);
+            mIconFlag.setX(this.getWidth() / 2 - mIconFlag.getWidth() / 2);
+            xinited=true;
+        }
     }
 
     private int lIconMode = -1;
@@ -69,34 +69,18 @@ public class MyMapIcon extends ConstraintLayout {
         if (mode==lIconMode)
             return;
         lIconMode = mode;
+//
+//        mIconFlag.setY(this.getHeight()/2-mIconFlag.getHeight()/2);
+//        mIconFlag.setX(this.getWidth()/2-mIconFlag.getWidth()/2);
         switch (mode){
             case ICON_ARROW:
-                mIconArrow.animate().alpha(1).setDuration(mDuration).start();
                 mIconFlag.animate().alpha(0).setDuration(mDuration).start();
-                mCurIcon = mIconArrow;
-//                mIconDown.animate().y(0).setDuration(mDuration).start();
                 break;
             case ICON_FLAG:
-                mIconArrow.animate().alpha(0).setDuration(mDuration).start();
                 mIconFlag.animate().alpha(1).setDuration(mDuration).start();
-                mCurIcon = mIconFlag;
                 break;
         }
     }
 
-    private int lAniMode = -1;
-    public void switchAni(int mode){
-        if (mode==lAniMode)
-            return;
-        lAniMode = mode;
-        switch (mode){
-            case ANI_DOWN:
-                mCurIcon.animate().translationY(0).setDuration(mDuration).start();
-                break;
-            case ANI_UP:
-                mCurIcon.animate().translationY(-50).setDuration(mDuration).start();
-                break;
-        }
-    }
 
 }

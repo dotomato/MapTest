@@ -1,17 +1,25 @@
 package com.chen.maptest;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.PointF;
 import android.graphics.Rect;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -31,16 +39,21 @@ import rx.schedulers.Schedulers;
 
 import com.chen.maptest.MyModel.*;
 import com.chen.maptest.MyView.MyMapIcon;
+import com.chen.maptest.MyView.OutlineProvider;
+import com.chen.maptest.MyView.ScanMessageLayout;
+import com.chen.maptest.Utils.MyUtils;
 import com.chen.maptest.Utils.OnceRunner;
 import com.yalantis.ucrop.UCrop;
 
+import static android.view.View.GONE;
+
 public class MainActivity extends MmapAdapterActivity implements
-        MapAdaterCallback, DrawerLayout.DrawerListener {
+        MapAdaterCallback, DrawerLayout.DrawerListener, ScanMessageLayout.OnRecyclerViewItemClickListener {
 
 
     private final static String TAG = "MainActivity";
 
-    public final static int MODE_MAP = 0;
+    public final static int MODE_SCAN = 0;
     public final static int MODE_MESSAGE = 1;
     public final static int MODE_EDIT = 2;
 
@@ -65,6 +78,12 @@ public class MainActivity extends MmapAdapterActivity implements
 
     @BindView(R.id.activity_main)
     public DrawerLayout mRootView;
+
+    @BindView(R.id.scan_message_layout)
+    public ScanMessageLayout mScanMessageLayout;
+
+    @BindView(R.id.bottom_viewgroup)
+    public ViewGroup mBottomViewGroup;
 
     private View mapView;
 
@@ -93,23 +112,15 @@ public class MainActivity extends MmapAdapterActivity implements
 
         setBoardcastReceiver();
 
-        switchShowMode(MODE_MAP,300);
+        switchShowMode(MODE_SCAN,300);
     }
 
     private void initLayout(){
+
         mUserMessageLayout.setExitCallback(new UserMessageLayout.ExitCallback() {
             @Override
             public void exitCallback() {
-                switchShowMode_force(MODE_MAP,300);
-            }
-        });
-
-
-        mUserMessageLayout.setSpaceTouchCallback(new UserMessageLayout.SpaceTouchCallback() {
-            @Override
-            public void spaceTouchcallback(MotionEvent ev) {
-                ev.offsetLocation(0,-mUpView.getY());
-                mapView.dispatchTouchEvent(ev);
+                switchShowMode_force(MODE_SCAN,300);
             }
         });
 
@@ -117,18 +128,27 @@ public class MainActivity extends MmapAdapterActivity implements
             @Override
             public void newPointFinishCallback() {
                 selectArea();
-                switchShowMode_force(MODE_MAP,300);
+                switchShowMode_force(MODE_SCAN,300);
             }
         });
 
-        mUserMessageLayout.setScrollCallback(new UserMessageLayout.ScrollCallback() {
-            @Override
-            public void scrollCallback(int t) {
-                mUpView.setTranslationY(-t/2-(WindowHeight - spaceHeight)/2);
-            }
-        });
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            mUserMessageLayout.setElevation(MyUtils.dip2px(this,3));
+        }
+        OutlineProvider.setOutline(mUserMessageLayout,OutlineProvider.SHAPE_RECT);
 
         mRootView.addDrawerListener(this);
+
+
+        mScanMessageLayout.setLayoutManager(new LinearLayoutManager(this , LinearLayoutManager.VERTICAL, false));
+
+        mScanMessageLayout.setHasFixedSize(true);
+
+        mScanMessageLayout.setItemAnimator(new DefaultItemAnimator());
+
+        mScanMessageLayout.initview();
+
+        mScanMessageLayout.setOnRecyclerViewItemClickListener(this);
     }
 
     private void initUserinfo(){
@@ -224,8 +244,19 @@ public class MainActivity extends MmapAdapterActivity implements
 
     }
 
+    public PointF getCenterp(){
+        return new PointF(mapView.getWidth()/2,(mapView.getTop()+mBottomViewGroup.getTop())/2);
+    }
+
+    public MyLatlng calUperLatlng(MyLatlng l){
+        MyLatlng l1 = getViewLatlng(getCenterp());
+        MyLatlng l2 = getViewLatlng(new PointF(mapView.getWidth()/2,mapView.getHeight()/2));
+        MyLatlng l3 = new MyLatlng(l.latitude+l2.latitude-l1.latitude,l.longitude+l2.longitude-l1.longitude);
+        return l3;
+    }
+
     public void MyMarkerClick(PointSimpleData psd) {
-        gotoLocation2(new MyLatlng(psd.latitude,psd.longitude));
+        gotoLocation2(calUperLatlng(new MyLatlng(psd.latitude,psd.longitude)));
         PointData gpd = new PointData();
         gpd.pointID=psd.pointID;
         Myserver.getApi().getPoint(gpd)
@@ -253,14 +284,12 @@ public class MainActivity extends MmapAdapterActivity implements
     }
 
     public void MyCameraChangeStart() {
-        mMyMapIcon.switchAni(MyMapIcon.ANI_UP);
         Log.d("CameraChange","Start");
     }
 
 
     public void MyCameraChangeFinish() {
-        GlobalVar.viewLatlng = getViewLatlng();
-        mMyMapIcon.switchAni(MyMapIcon.ANI_DOWN);
+        GlobalVar.viewLatlng = getViewLatlng(getCenterp());
         mSelectHelper.start();
         Log.d("CameraChange","Finish");
     }
@@ -270,7 +299,16 @@ public class MainActivity extends MmapAdapterActivity implements
         GlobalVar.gpsLatlng = latlng;
     }
 
-
+    @Override
+    public void firstLocation(final MyLatlng latlng) {
+        gotoLocation2(latlng,15);
+        mapView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                gotoLocation2(calUperLatlng(latlng));
+            }
+        },100);
+    }
 
     int lmode=-1;
     int mMode;
@@ -291,6 +329,7 @@ public class MainActivity extends MmapAdapterActivity implements
         _switchShowMode();
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     private void _switchShowMode(){
         lmode=mMode;
 
@@ -298,28 +337,33 @@ public class MainActivity extends MmapAdapterActivity implements
         getWindow().getDecorView().getWindowVisibleDisplayFrame(frame);
         WindowHeight = frame.height();
 
-        spaceHeight = mUserMessageLayout.getSpaceHeight();
-
-        mUpView.clearAnimation();
         mUserMessageLayout.clearAnimation();
+        mScanMessageLayout.clearAnimation();
 
         switch (mMode){
-            case MODE_MAP:
+            case MODE_SCAN:
                 mMyMapIcon.switchIcon(MyMapIcon.ICON_ARROW);
-                mUpView.animate().y(0).setDuration(mDuration).start();
-                mUserMessageLayout.animate().y(WindowHeight).setDuration(mDuration).start();
+                mUserMessageLayout.animate().alpha(0).setDuration(mDuration).withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        mUserMessageLayout.setVisibility(View.GONE);
+                    }
+                }).start();
+                mScanMessageLayout.setVisibility(View.VISIBLE);
+                mScanMessageLayout.animate().alpha(1).setDuration(mDuration).start();
                 mFloatingActionButton.show();
                 break;
-            case MODE_MESSAGE:
-                mMyMapIcon.switchIcon(MyMapIcon.ICON_ARROW);
-                mUpView.animate().y(-(WindowHeight-spaceHeight)/2).setDuration(mDuration).start();
-                mUserMessageLayout.animate().y(0).setDuration(mDuration).start();
-                mFloatingActionButton.hide();
-                break;
             case MODE_EDIT:
+            case MODE_MESSAGE:
                 mMyMapIcon.switchIcon(MyMapIcon.ICON_FLAG);
-                mUpView.animate().y(-(WindowHeight-spaceHeight)/2).setDuration(mDuration).start();
-                mUserMessageLayout.animate().y(0).setDuration(mDuration).start();
+                mUserMessageLayout.setVisibility(View.VISIBLE);
+                mUserMessageLayout.animate().alpha(1).setDuration(mDuration).start();
+                mScanMessageLayout.animate().alpha(0).setDuration(mDuration).withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        mScanMessageLayout.setVisibility(View.GONE);
+                    }
+                }).start();
                 mFloatingActionButton.hide();
                 break;
         }
@@ -328,7 +372,7 @@ public class MainActivity extends MmapAdapterActivity implements
     private void selectArea(){
         SelectAreaData sad = new SelectAreaData();
         MyLatlng lt = getLeftTopLatlng();
-        MyLatlng rb = getRightBottomLatlng();
+        MyLatlng rb = getViewLatlng(new PointF(mapView.getWidth(),mBottomViewGroup.getTop()));
         sad.left_top_latitude = lt.latitude;
         sad.left_top_longitude = lt.longitude;
         sad.right_bottom_latitude = rb.latitude;
@@ -345,6 +389,7 @@ public class MainActivity extends MmapAdapterActivity implements
                         for (PointSimpleData psd:mVar.points) {
                             addMarker(psd);
                         }
+                        mScanMessageLayout.setScanData(mVar.points);
                     }
                 });
     }
@@ -354,17 +399,17 @@ public class MainActivity extends MmapAdapterActivity implements
         DrawerLayout dl = (DrawerLayout)findViewById(R.id.activity_main);
         if(dl.isDrawerOpen(mLeftDrawerLayout))
             dl.closeDrawer(mLeftDrawerLayout);
-        else if (lmode==MODE_MAP)
+        else if (lmode== MODE_SCAN)
             super.onBackPressed();
         else
-            switchShowMode(MODE_MAP,300);
+            switchShowMode(MODE_SCAN,300);
     }
 
     @OnClick(R.id.floatingActionButton)
     public void floatingClick(){
         if (GlobalVar.mUserinfo2==null
-                || (SHOULD_CUR && GlobalVar.viewLatlng==null)
-                || (!SHOULD_CUR && GlobalVar.gpsLatlng==null)){
+                || (!SHOULD_CUR && GlobalVar.viewLatlng==null)
+                || (SHOULD_CUR && GlobalVar.gpsLatlng==null)){
             Toast.makeText(this,"还没有连上网络",Toast.LENGTH_SHORT).show();
             return;
         }
@@ -389,8 +434,8 @@ public class MainActivity extends MmapAdapterActivity implements
 
     @Override
     public void onDrawerSlide(View drawerView, float slideOffset) {
-        if (mMyMapIcon!=null)
-            mMyMapIcon.switchAni(MyMapIcon.ANI_DOWN);
+//        if (mMyMapIcon!=null)
+//            mMyMapIcon.switchAni(MyMapIcon.ANI_DOWN);
     }
 
     @Override
@@ -405,4 +450,8 @@ public class MainActivity extends MmapAdapterActivity implements
     public void onDrawerStateChanged(int newState) {
 
     }
-}
+
+    @Override
+    public void onItemClickListener(View View, PointSimpleData psd) {
+        MyMarkerClick(psd);
+    }}
