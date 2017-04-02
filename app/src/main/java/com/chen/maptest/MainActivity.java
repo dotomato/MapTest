@@ -18,8 +18,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.chen.maptest.MapAdapter.BmapAdapterActivity;
 import com.chen.maptest.MapAdapter.MapAdaterCallback;
+import com.chen.maptest.MapAdapter.MmapAdapterActivity;
 import com.chen.maptest.MyServer.MyAction1;
 import com.chen.maptest.MyServer.Myserver;
 
@@ -34,7 +34,7 @@ import com.chen.maptest.MyView.MyMapIcon;
 import com.chen.maptest.Utils.OnceRunner;
 import com.yalantis.ucrop.UCrop;
 
-public class MainActivity extends BmapAdapterActivity implements
+public class MainActivity extends MmapAdapterActivity implements
         MapAdaterCallback, DrawerLayout.DrawerListener {
 
 
