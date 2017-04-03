@@ -8,16 +8,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.PointF;
-import android.graphics.Rect;
 import android.os.Build;
 import android.support.design.widget.FloatingActionButton;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -38,7 +34,6 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
 import com.chen.maptest.MyModel.*;
-import com.chen.maptest.MyView.MyMapIcon;
 import com.chen.maptest.MyView.OutlineProvider;
 import com.chen.maptest.MyView.QuickPageAdapter;
 import com.chen.maptest.MyView.ScanMessageRv;
@@ -152,7 +147,6 @@ public class MainActivity extends MmapAdapterActivity implements
     private void initUserinfo(){
         SharedPreferences pref = getSharedPreferences("data",MODE_PRIVATE);
         String userID = pref.getString("userID",null);
-        GlobalVar.mUserinfo2 = new Userinfo2();
         if (userID==null) {
             Userinfo ui = new Userinfo();
             ui.userDes="please give me a new ID!";
@@ -168,6 +162,7 @@ public class MainActivity extends MmapAdapterActivity implements
                             editor.putString("userID2", mVar.userID2);
                             editor.apply();
 
+                            GlobalVar.mUserinfo2 = new Userinfo2();
                             GlobalVar.mUserinfo2.userinfo = mVar.userinfo;
                             GlobalVar.mUserinfo2.userID2 = mVar.userID2;
                             initUserView();
@@ -183,6 +178,8 @@ public class MainActivity extends MmapAdapterActivity implements
                         @Override
                         public void call() {
                             SharedPreferences pref = getSharedPreferences("data",MODE_PRIVATE);
+
+                            GlobalVar.mUserinfo2 = new Userinfo2();
                             GlobalVar.mUserinfo2.userinfo = mVar.userinfo;
                             GlobalVar.mUserinfo2.userID2 = pref.getString("userID2",null);
                             initUserView();

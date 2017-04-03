@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.chen.maptest.MyView.MyTimeShow xmlns:android="http://schemas.android.com/apk/res/android"
+<com.chen.maptest.MyTimeShow xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="125dp"
@@ -91,4 +91,4 @@
         app:layout_constraintBaseline_toBaselineOf="@+id/show_year"
         app:layout_constraintRight_toRightOf="@+id/show_day"
         android:textSize="15dp" />
-</com.chen.maptest.MyView.MyTimeShow>
+</com.chen.maptest.MyTimeShow>

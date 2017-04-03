@@ -1,4 +1,4 @@
-package com.chen.maptest.MyView;
+package com.chen.maptest;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -7,6 +7,7 @@ import android.util.AttributeSet;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.chen.maptest.MyView.OutlineProvider;
 import com.chen.maptest.R;
 
 import java.util.Calendar;

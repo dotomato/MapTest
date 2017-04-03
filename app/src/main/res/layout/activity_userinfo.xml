@@ -22,7 +22,7 @@
         toolbar:title="个人设置"
         android:theme="@style/GalaxyZooThemeToolbarDarkOverflow"/>
 
-    <com.chen.maptest.MyView.RoundImageView
+    <com.chen.maptest.RoundImageView
         android:id="@+id/usericon"
         android:layout_width="120dp"
         android:layout_height="120dp"

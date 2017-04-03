@@ -21,7 +21,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
 
-        <com.chen.maptest.MyView.RoundImageView
+        <com.chen.maptest.RoundImageView
             android:id="@+id/usericon"
             android:layout_width="40dp"
             android:layout_height="40dp"

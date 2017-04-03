@@ -1,4 +1,4 @@
-package com.chen.maptest.MyView;
+package com.chen.maptest;
 
 import android.content.Context;
 import android.support.constraint.ConstraintLayout;

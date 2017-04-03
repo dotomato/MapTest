@@ -12,8 +12,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -28,11 +26,11 @@ import com.chen.maptest.MyServer.Myserver;
 import com.chen.maptest.MyUpyun.MyUpyunManager;
 import com.chen.maptest.MyView.InnerEdge;
 import com.chen.maptest.MyView.MyBlurImageView;
-import com.chen.maptest.MyView.MyTimeShow;
 import com.chen.maptest.MyView.OutlineProvider;
 
 import com.chen.maptest.MyModel.*;
 import com.chen.maptest.Utils.UserIconWarp;
+import com.dd.CircularProgressButton;
 import com.google.gson.Gson;
 import com.yalantis.ucrop.UCrop;
 
@@ -42,14 +40,15 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import java.util.regex.Matcher;
 
 import butterknife.ButterKnife;
 
 import butterknife.BindView;
+import butterknife.OnClick;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
+import static com.chen.maptest.Utils.MyUtils.pickFromGallery;
 import static com.chen.maptest.Utils.MyUtils.setEditTextEditable;
 
 /**
@@ -84,9 +83,6 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
     @BindView(R.id.noblurimg)
     public ImageView mNoBlurImg;
 
-    @BindView(R.id.messagelayout)
-    public ViewGroup mMessageLayout;
-
     @BindView(R.id.timeshow)
     public MyTimeShow mMyTimeShow;
 
@@ -101,6 +97,15 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
 
     @BindView(R.id.msgscroll)
     public ScrollView mMsgScroll;
+
+    @BindView(R.id.messagelayout_1)
+    public ViewGroup ml1;
+
+    @BindView(R.id.messagelayout_2)
+    public ViewGroup ml2;
+
+    @BindView(R.id.sendbutton)
+    public CircularProgressButton mSendButton;
 
     private Context mContext;
 
@@ -155,14 +160,8 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
                     toggleMode2();
             }
         });
-//
-//        this.setOnClickListener(new OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                toggleMode2();
-//            }
-//        });
 
+        mSendButton.setIndeterminateProgressMode(true);
     }
 
     @Override
@@ -181,7 +180,6 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
     public void initShow(int mode, PointData pd){
         mMode = mode;
         switchMode2(MODE2_TEXT);
-//        switchmode3(MODE3_POS);
         switch (mode) {
             case MainActivity.MODE_EDIT:
                 //用户填写数据初始化
@@ -193,13 +191,15 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
                 mMsgEdittext.setHint("你在这里的所闻所想");
                 setEditTextEditable(mMsgEdittext,true);
 
-//                mMessageLayout.setVisibility(GONE);
-//                mSendButton.setProgress(0);
-
                 mMyTimeShow.setTime(Calendar.getInstance().getTime());
 
                 mBlurImg.setSrc(R.drawable.default_album);
                 Glide.with(mContext).load(R.drawable.default_album).into(mNoBlurImg);
+
+                ml1.setVisibility(GONE);
+                ml2.setVisibility(VISIBLE);
+
+                mSendButton.setProgress(0);
                 break;
             case MainActivity.MODE_MESSAGE:
 
@@ -220,15 +220,16 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
                     }
                 }
 
-//                mMessageLayout.setVisibility(VISIBLE);
-//                mSendButton.setProgress(0);
-
                 mMyTimeShow.setTime(new Date(pd.pointTime*1000));
 
                 DecimalFormat decimalFormat=new DecimalFormat(".00");
                 String la=decimalFormat.format(pd.latitude);
                 String lo=decimalFormat.format(pd.longitude);
                 mLocationDes.setText("经度:"+la+"   纬度:"+lo);
+
+
+                ml1.setVisibility(VISIBLE);
+                ml2.setVisibility(GONE);
                 break;
 
         }
@@ -290,11 +291,11 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
                 .setNeutralButton("取消", null)
                 .show();//在按键响应事件中显示此对话框
     }
-//
-//    @OnClick(R.id.addimgbutton)
-//    public void addimg(){
-//        pickFromGallery((Activity) mContext,SELECT_ALBUM_IMG, "选择封面");
-//    }
+
+    @OnClick(R.id.albumbutton)
+    public void addimg(){
+        pickFromGallery((Activity) mContext,SELECT_ALBUM_IMG, "选择封面");
+    }
 
 
     //接收从Activity传过来的Result,已经进行过resultCode==RESULT_OK判断了
@@ -322,15 +323,14 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
         }
     }
 
-//    @OnClick(R.id.sendbutton)
-//    public void newPoint(){
-//        //studing
-////        mSendButton.setProgress(50);
-//        if (hasAlbumUpload){
-//            MyUpyunManager.getIns().upload_image("MessageAlbum",mAlbumImageUri,this);
-//        } else
-//            uploadnoewpoint();
-//    }
+    @OnClick(R.id.sendbutton)
+    public void newPoint(){
+        mSendButton.setProgress(50);
+        if (hasAlbumUpload){
+            MyUpyunManager.getIns().upload_image("MessageAlbum",mAlbumImageUri,this);
+        } else
+            uploadnoewpoint();
+    }
 
     //Upyun的回调
     @Override
@@ -374,7 +374,7 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
                 .subscribe(new MyAction1<PointDataResult>() {
                     @Override
                     public void call() {
-//                        mSendButton.setProgress(100);
+                        mSendButton.setProgress(100);
                         postDelayed(new Runnable() {
                             @Override
                             public void run() {
@@ -385,7 +385,7 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
                     }
 
                     public void error(int statue, String errorMessage){
-//                        mSendButton.setProgress(-1);
+                        mSendButton.setProgress(-1);
                     }
                 });
     }
@@ -409,77 +409,5 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
         this.mNewPointFinishCallbackCallback = npf;
     }
 
-//
-//    private float lastx;
-//    float dx;
-//    float dx_fator = 0.1f;
-//    private int lmode3 = MODE3_POS;
-//    @Override
-//    public boolean onTouchEvent(MotionEvent event) {
-//        switch (event.getAction()){
-//            case MotionEvent.ACTION_DOWN:
-//                lastx = event.getX();
-//                break;
-//            case MotionEvent.ACTION_MOVE:
-//                if (lastx==-1){
-//                    lastx = event.getX();
-//                    break;
-//                }
-//
-//                if (lastx>this.getRight() || lastx<this.getLeft())
-//                    break;
-//
-//                dx = (event.getX()-lastx)*dx_fator;
-//                if (lmode3==MODE3_NEG)
-//                    dx=-dx;
-//                lastx = event.getX();
-//
-//                Log.d(TAG,""+this.getRotationY()+" "+dx);
-//
-//                float nx = this.getRotationY() + dx;
-//                if (nx>0)
-//                    nx=0;
-//                else if (nx<-180)
-//                    nx = -180;
-//                this.setRotationY(nx);
-//                break;
-//
-//            case MotionEvent.ACTION_UP:
-//                float nx2 = this.getRotationY()+dx;
-//
-//                if (lmode3==MODE3_POS ){
-//                    if (Math.abs(nx2)>30)
-//                        switchmode3(MODE3_NEG);
-//                    else {
-//                        switchmode3(MODE3_POS);
-//                        toggleMode2();
-//                    }
-//                } else if (lmode3==MODE3_NEG){
-//                    if (Math.abs(Math.abs(nx2)-180)>30)
-//                        switchmode3(MODE3_POS);
-//                    else {
-//                        switchmode3(MODE3_NEG);
-//                        toggleMode2();
-//                    }
-//                }
-//                break;
-//        }
-//        return true;
-//    }
-//
-//    private void switchmode3(int mode3){
-//        lmode3 = mode3;
-//        if (mode3==MODE3_POS){
-//            if (this.getRotationY()>180)
-//                this.animate().rotationY(360).setDuration(MODE2_DURATION).start();
-//            else
-//                this.animate().rotationY(0).setDuration(MODE2_DURATION).start();
-//        } else {
-//            if (this.getRotationY()<0)
-//                this.animate().rotationY(-180).setDuration(MODE2_DURATION).start();
-//            else
-//                this.animate().rotationY(180).setDuration(MODE2_DURATION).start();
-//        }
-//    }
 
 }
