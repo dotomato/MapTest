@@ -26,6 +26,7 @@ import com.chen.maptest.MyServer.Myserver;
 import com.chen.maptest.MyUpyun.MyUpyunManager;
 import com.chen.maptest.MyView.InnerEdge;
 import com.chen.maptest.MyView.MyBlurImageView;
+import com.chen.maptest.MyView.MyTimeShow;
 import com.chen.maptest.MyView.OutlineProvider;
 
 import com.chen.maptest.MyModel.*;
@@ -239,8 +240,6 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
         mUserName.setText(ui.userName);
         mUserDescirpt.setText(ui.userDes);
         UserIconWarp.just(mContext,ui.userIcon,mUserIcon);
-
-        //TODO 两个按钮,消息正文文字的大小
     }
 
     int lmode2;

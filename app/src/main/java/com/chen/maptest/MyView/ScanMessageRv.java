@@ -49,6 +49,7 @@ public class ScanMessageRv extends RecyclerView {
 
     private List<PointSimpleData> mDatas;
     private HeaderAndFooterWrapper mHeaderAndFooterWrapper;
+    private EmptyWrapper mEmptyWrapper;
 
     public ScanMessageRv(Context context) {
         super(context);
@@ -70,8 +71,7 @@ public class ScanMessageRv extends RecyclerView {
 
 
         setLayoutManager(new LinearLayoutManager(mContext , LinearLayoutManager.VERTICAL, false));
-        setHasFixedSize(true);
-        setItemAnimator(new DefaultItemAnimator());
+//        setHasFixedSize(true);
 
         mAdapter = new CommonAdapter<PointSimpleData>(mContext, R.layout.layout_scan_item, mDatas){
             @Override
@@ -103,10 +103,13 @@ public class ScanMessageRv extends RecyclerView {
                 });
             }
         };
-        EmptyWrapper mEmptyWrapper = new EmptyWrapper(mAdapter);
+
+
+        mEmptyWrapper = new EmptyWrapper(mAdapter);
         View emptyView = LayoutInflater.from(mContext).inflate(R.layout.layout_empty_message,this,false);
         OutlineProvider.setOutline(emptyView,OutlineProvider.SHAPE_RECT);
         mEmptyWrapper.setEmptyView(emptyView);
+
 
         mHeaderAndFooterWrapper = new HeaderAndFooterWrapper(mEmptyWrapper);
         View footerView = LayoutInflater.from(mContext).inflate(R.layout.layout_footer_message,this,false);
@@ -125,14 +128,22 @@ public class ScanMessageRv extends RecyclerView {
 
         setAdapter(mHeaderAndFooterWrapper);
         mAddAnimateRunnable = new AddAnimateRunnable();
+
+        DefaultItemAnimator da = new DefaultItemAnimator();
+        da.setRemoveDuration(0);
+        da.setAddDuration(1000);
+        setItemAnimator(da);
     }
 
     public void setScanData(List<PointSimpleData> points){
 //        mAddAnimateRunnable.stop();
+        int j = mDatas.size();
         mDatas.clear();
-//        mAdapter.notifyItemRangeRemoved(0,mAdapter.getItemCount());
+        mHeaderAndFooterWrapper.notifyItemRangeRemoved(0,j);
+//        mHeaderAndFooterWrapper.notifyDataSetChanged();
         mDatas.addAll(points);
-        mHeaderAndFooterWrapper.notifyDataSetChanged();
+//        for (int i=0;i<mDatas.size();i++)
+        mHeaderAndFooterWrapper.notifyItemRangeInserted(1,mDatas.size());
 //        mAddAnimateRunnable.setData(points);
 //        new Thread(mAddAnimateRunnable).start();
     }
@@ -166,7 +177,7 @@ public class ScanMessageRv extends RecyclerView {
         public void run() {
             while(curItem!=points.size() && canRun){
                 mDatas.add(points.get(curItem));
-                mAdapter.notifyDataSetChanged();
+                mHeaderAndFooterWrapper.notifyItemInserted(curItem);
                 curItem++;
                 try {
                     Thread.sleep(200);

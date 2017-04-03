@@ -70,7 +70,7 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginBottom="32dp"
-            android:layout_marginLeft="32dp"
+            android:layout_marginLeft="20dp"
             android:layout_marginRight="120dp"
             android:layout_marginTop="32dp"
             android:orientation="vertical"
@@ -86,14 +86,14 @@
                 android:background="@null"
                 android:gravity="top"
                 android:hint="你在这里的所闻、所想……"
-                android:lineSpacingExtra="18dp"
+                android:lineSpacingExtra="14dp"
                 android:shadowColor="@android:color/black"
                 android:shadowDx="2"
                 android:shadowDy="2"
                 android:shadowRadius="10"
                 android:textColor="@android:color/white"
                 android:textColorHint="#77FFFFFF"
-                android:textSize="14dp" />
+                android:textSize="12sp" />
 
         </ScrollView>
 
@@ -104,7 +104,7 @@
             app:layout_constraintRight_toRightOf="parent"
             android:layout_marginTop="22dp"
             android:layout_height="100dp"
-            android:layout_width="120dp" />
+            android:layout_width="110dp" />
 
         <include
             layout="@layout/layout_inner_edge"
@@ -173,7 +173,8 @@
                 android:id="@+id/messagelayout_2"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:visibility="invisible">
 
 
                 <Button
@@ -188,13 +189,13 @@
                     android:id="@+id/sendbutton"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
                     android:layout_margin="6dp"
-                    app:cpb_cornerRadius="1dp"
+                    android:layout_weight="1"
                     android:textColor="@color/cpb_white"
-                    app:cpb_textIdle="发送"
+                    app:cpb_cornerRadius="1dp"
                     app:cpb_textComplete="完成"
-                    app:cpb_textError="出错"/>
+                    app:cpb_textError="出错"
+                    app:cpb_textIdle="发送" />
             </LinearLayout>
 
         </FrameLayout>

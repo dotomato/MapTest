@@ -8,26 +8,38 @@ package com.chen.maptest.Utils;
 
 public abstract class OnceRunner implements Runnable {
 
-    private OnceRunner mInternalRunner;
-    private int mStatue;
-    private static final int FINISH=0;
-    private static final int RUN=1;
-    private static final int STOP=2;
+    private static final int IDLE =-1;
+    private static final int TAKE =0;
+    private static final int NEEDRUN =1;
+    private static final int FINISH =2;
+    private static final int STOP=3;
 
+    private int mStatue = IDLE;
     private int internal = 1000;
 
     @Override
     public void run() {
         while(true){
+
+            switch (mStatue) {
+                case NEEDRUN:
+                    mStatue = TAKE;
+                    break;
+                case TAKE:
+                    call();
+                    mStatue = FINISH;
+                    break;
+                case FINISH:
+                case IDLE:
+                    break;
+            }
+
             try {
                 Thread.sleep(internal);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            if (mStatue==RUN) {
-                call();
-                mStatue = FINISH;
-            }
+
             if (mStatue==STOP){
                 break;
             }
@@ -37,7 +49,7 @@ public abstract class OnceRunner implements Runnable {
     protected abstract void call();
 
     public void start() {
-        this.mStatue = RUN;
+        this.mStatue = NEEDRUN;
     }
 
     public void stop(){

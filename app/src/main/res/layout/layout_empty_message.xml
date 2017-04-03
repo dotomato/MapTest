@@ -9,14 +9,14 @@
     android:layout_marginLeft="32dp"
     android:layout_marginRight="32dp"
     android:elevation="3dp"
-    android:background="#AAFFFFFF"
+    android:background="#FFFFFFFF"
     >
 
     <TextView
         android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="这里无人踏足,留下第一条消息!"
+        android:text="世界尽头"
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"

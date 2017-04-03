@@ -58,6 +58,9 @@ public class MmapAdapterActivity extends AppCompatActivity implements MapboxMap.
     private MapboxMap mMap;
 
     private MarkerOptions mMarkerOption;
+    private MarkerOptions mReadMarkerOption;
+    private Marker mReadMark;
+    private Icon mReadIcon;
     private HashMap<String, Marker> markerMap;
     private HashMap<String, PointSimpleData> PSDMap;
     private Icon mIcon;
@@ -149,7 +152,12 @@ public class MmapAdapterActivity extends AppCompatActivity implements MapboxMap.
         scaleMatrix.postScale(scale, scale);
         Bitmap b0 = BitmapFactory.decodeResource(getResources(),R.drawable.map_msg_icon);
         Bitmap b1 = Bitmap.createBitmap(b0, 0, 0, b0.getWidth(), b0.getHeight(), scaleMatrix, true);
-        mIcon = IconFactory.recreate("UserPoint",b1);
+        mIcon = IconFactory.recreate("MarkerIcon",b1);
+
+        mReadMarkerOption= new MarkerOptions();
+        Bitmap b2 = BitmapFactory.decodeResource(getResources(),R.drawable.down_arrow2);
+        Bitmap b3 = Bitmap.createBitmap(b2, 0, 0, b2.getWidth(), b2.getHeight(), scaleMatrix, true);
+        mReadIcon = IconFactory.recreate("ReadMarkerIcon",b3);
     }
 
     @Override
@@ -221,8 +229,8 @@ public class MmapAdapterActivity extends AppCompatActivity implements MapboxMap.
                 if (mMapAdaterCallback!=null)
                     mMapAdaterCallback.MyCameraChangeStart();
                 break;
-            case REGION_DID_CHANGE_ANIMATED:
             case REGION_DID_CHANGE:
+            case REGION_DID_CHANGE_ANIMATED:
                 if (mMapAdaterCallback!=null)
                     mMapAdaterCallback.MyCameraChangeFinish();
                 break;
@@ -259,6 +267,20 @@ public class MmapAdapterActivity extends AppCompatActivity implements MapboxMap.
         PSDMap.put(psd.pointID,psd);
     }
 
+    public void addReadMarker(MyLatlng latlng){
+        if (mReadMark!=null)
+            mReadMark.remove();
+
+        mReadMarkerOption.position(latlng.toLatlng())
+                .icon(mReadIcon);
+        mReadMark = mMap.addMarker(mReadMarkerOption);
+    }
+
+    public void removeReadMarker(){
+        if (mReadMark!=null)
+            mReadMark.remove();
+    }
+
     public void gotoLocation2(MyLatlng latlng){
         //参数依次是：视角调整区域的中心点坐标、希望调整到的缩放级别、俯仰角0°~45°（垂直与地图时为0）、偏航角 0~360° (正北方为0)
         CameraUpdate mCameraUpdate =
@@ -273,23 +295,17 @@ public class MmapAdapterActivity extends AppCompatActivity implements MapboxMap.
         mMap.animateCamera(mCameraUpdate,0);
     }
 
-    public MyLatlng getLeftTopLatlng(){
-        return new MyLatlng(mProjection.fromScreenLocation(new PointF(0,0)));
-    }
-
-    public MyLatlng getRightBottomLatlng(){
-        int a = mMapView.getWidth();
-        int b = mMapView.getBottom();
-        return new MyLatlng(mProjection.fromScreenLocation(new PointF(a,b)));
-    }
-
     public void rmAllMarker(){
         for (Marker var:markerMap.values()) {
             var.remove();
         }
     }
 
-    public MyLatlng getViewLatlng(PointF p){
+    public MyLatlng pointToMyLatlng(PointF p){
         return mProjection==null?new MyLatlng(-1,-1):new MyLatlng(mProjection.fromScreenLocation(p)) ;
+    }
+
+    public PointF myLatlgnToPoint(MyLatlng l){
+        return mProjection==null?new PointF(-1,-1):mProjection.toScreenLocation(l.toLatlng()) ;
     }
 }

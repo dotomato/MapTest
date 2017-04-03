@@ -56,6 +56,20 @@
                 tools:layout_editor_absoluteX="0dp"
                 tools:layout_editor_absoluteY="0dp" />
 
+            <!--<net.steamcrafted.materialiconlib.MaterialIconView-->
+                <!--android:id="@+id/iconarrow"-->
+                <!--android:layout_width="100dp"-->
+                <!--android:layout_height="100dp"-->
+                <!--android:paddingBottom="20dp"-->
+                <!--android:scaleType="center"-->
+                <!--android:visibility="visible"-->
+
+                <!--app:materialIcon="arrow_down"-->
+                <!--app:materialIconColor="@color/colorAccent"-->
+                <!--app:materialIconSize="40dp"-->
+                <!--tools:layout_editor_absoluteX="0dp"-->
+                <!--tools:layout_editor_absoluteY="0dp" />-->
+
         </com.chen.maptest.MyMapIcon>
 
 

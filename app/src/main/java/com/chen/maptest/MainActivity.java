@@ -43,6 +43,11 @@ import com.yalantis.ucrop.UCrop;
 import java.util.ArrayList;
 import java.util.List;
 
+
+//TODO 扫描器一条条增加的动画,
+//TODO 新增点的动画
+//TODO 用户点赞,评论机制
+
 public class MainActivity extends MmapAdapterActivity implements
         MapAdaterCallback, DrawerLayout.DrawerListener, ScanMessageRv.OnRecyclerViewItemClickListener {
 
@@ -200,7 +205,7 @@ public class MainActivity extends MmapAdapterActivity implements
                 selectArea();
             }
         };
-        mSelectHelper.setInternal(1000);
+        mSelectHelper.setInternal(400);
         new Thread(mSelectHelper).start();
     }
 
@@ -236,7 +241,6 @@ public class MainActivity extends MmapAdapterActivity implements
     }
 
     public void MyTouch(MotionEvent motionEvent) {
-
     }
 
     public PointF getCenterp(){
@@ -244,13 +248,18 @@ public class MainActivity extends MmapAdapterActivity implements
     }
 
     public MyLatlng calUperLatlng(MyLatlng l){
-        MyLatlng l1 = getViewLatlng(getCenterp());
-        MyLatlng l2 = getViewLatlng(new PointF(mapView.getWidth()/2,mapView.getHeight()/2));
+        MyLatlng l1 = pointToMyLatlng(getCenterp());
+        MyLatlng l2 = pointToMyLatlng(new PointF(mapView.getWidth()/2,mapView.getHeight()/2));
         return new MyLatlng(l.latitude+l2.latitude-l1.latitude,l.longitude+l2.longitude-l1.longitude);
     }
 
     public void MyMarkerClick(PointSimpleData psd) {
-        gotoLocation2(calUperLatlng(new MyLatlng(psd.latitude,psd.longitude)));
+//        gotoLocation2(calUperLatlng(new MyLatlng(psd.latitude,psd.longitude)));
+        MyLatlng l =new MyLatlng(psd.latitude,psd.longitude);
+
+        removeReadMarker();
+        addReadMarker(l);
+
         PointData gpd = new PointData();
         gpd.pointID=psd.pointID;
         Myserver.getApi().getPoint(gpd)
@@ -278,14 +287,11 @@ public class MainActivity extends MmapAdapterActivity implements
     }
 
     public void MyCameraChangeStart() {
-        Log.d("CameraChange","Start");
     }
 
-
     public void MyCameraChangeFinish() {
-        GlobalVar.viewLatlng = getViewLatlng(getCenterp());
+        GlobalVar.viewLatlng = pointToMyLatlng(getCenterp());
         mSelectHelper.start();
-        Log.d("CameraChange","Finish");
     }
 
     @Override
@@ -303,6 +309,8 @@ public class MainActivity extends MmapAdapterActivity implements
             }
         },100);
     }
+
+
 
     int lmode=-1;
     int mMode;
@@ -332,22 +340,45 @@ public class MainActivity extends MmapAdapterActivity implements
 
         switch (mMode){
             case MODE_SCAN:
-                mMyMapIcon.switchIcon(MyMapIcon.ICON_ARROW);
+                mMyMapIcon.switchIcon(MyMapIcon.ICON_HIDE);
+                removeReadMarker();
+
                 mViewpager.animate().alpha(0).setDuration(mDuration).withEndAction(new Runnable() {
                     @Override
                     public void run() {
                         mViewpager.setVisibility(View.GONE);
                     }
                 }).start();
+
                 mScanMessageRv.setVisibility(View.VISIBLE);
                 mScanMessageRv.animate().alpha(1).setDuration(mDuration).start();
+
                 mFloatingActionButton.show();
                 break;
             case MODE_EDIT:
-            case MODE_MESSAGE:
                 mMyMapIcon.switchIcon(MyMapIcon.ICON_FLAG);
+                mMyMapIcon.gotoLalng(getCenterp());
+
+                removeReadMarker();
+
                 mViewpager.setVisibility(View.VISIBLE);
                 mViewpager.animate().alpha(1).setDuration(mDuration).start();
+
+                mScanMessageRv.animate().alpha(0).setDuration(mDuration).withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        mScanMessageRv.setVisibility(View.GONE);
+                    }
+                }).start();
+
+                mFloatingActionButton.hide();
+                break;
+            case MODE_MESSAGE:
+                mMyMapIcon.switchIcon(MyMapIcon.ICON_HIDE);
+
+                mViewpager.setVisibility(View.VISIBLE);
+                mViewpager.animate().alpha(1).setDuration(mDuration).start();
+
                 mScanMessageRv.animate().alpha(0).setDuration(mDuration).withEndAction(new Runnable() {
                     @Override
                     public void run() {
@@ -361,8 +392,8 @@ public class MainActivity extends MmapAdapterActivity implements
 
     private void selectArea(){
         SelectAreaData sad = new SelectAreaData();
-        MyLatlng lt = getLeftTopLatlng();
-        MyLatlng rb = getViewLatlng(new PointF(mapView.getWidth(),mBottomViewGroup.getTop()));
+        MyLatlng lt = pointToMyLatlng(new PointF(0,0));
+        MyLatlng rb = pointToMyLatlng(new PointF(mapView.getWidth(),mBottomViewGroup.getTop()));
         sad.left_top_latitude = lt.latitude;
         sad.left_top_longitude = lt.longitude;
         sad.right_bottom_latitude = rb.latitude;
