@@ -43,8 +43,6 @@ import com.yalantis.ucrop.UCrop;
 import java.util.ArrayList;
 import java.util.List;
 
-
-//TODO 新增点的动画
 //TODO 用户点赞,评论机制
 
 public class MainActivity extends MmapAdapterActivity implements
@@ -142,6 +140,7 @@ public class MainActivity extends MmapAdapterActivity implements
             public void newPointFinishCallback() {
                 selectArea();
                 switchShowMode_force(MODE_SCAN,300);
+                mMyMapIcon.shine_button(getCenterp());
             }
         });
         mUserMessageLayout.setViewPager(mViewpager);

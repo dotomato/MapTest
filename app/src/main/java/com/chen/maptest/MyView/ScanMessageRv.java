@@ -116,10 +116,10 @@ public class ScanMessageRv extends RecyclerView {
         mEmptyWrapper.setEmptyView(emptyView);
 
 
-        mHeaderAndFooterWrapper = new HeaderAndFooterWrapper(mEmptyWrapper);
-        View footerView = LayoutInflater.from(mContext).inflate(R.layout.layout_footer_message,this,false);
-        OutlineProvider.setOutline(footerView,OutlineProvider.SHAPE_RECT);
-        mHeaderAndFooterWrapper.addFootView(footerView);
+//        mHeaderAndFooterWrapper = new HeaderAndFooterWrapper(mEmptyWrapper);
+//        View footerView = LayoutInflater.from(mContext).inflate(R.layout.layout_footer_message,this,false);
+//        OutlineProvider.setOutline(footerView,OutlineProvider.SHAPE_RECT);
+//        mHeaderAndFooterWrapper.addFootView(footerView);
 
 //        LoadMoreWrapper mLoadMoreWrapper = new LoadMoreWrapper(mEmptyWrapper);
 //        mLoadMoreWrapper.setLoadMoreView(R.layout.default_loading);
@@ -131,21 +131,21 @@ public class ScanMessageRv extends RecyclerView {
 //            }
 //        });
 
-        setAdapter(mHeaderAndFooterWrapper);
+        setAdapter(mEmptyWrapper);
         mAddAnimateRunnable = new AddAnimateRunnable();
 
         DefaultItemAnimator da = new DefaultItemAnimator();
         da.setRemoveDuration(0);
-        da.setAddDuration(200);
+        da.setAddDuration(350);
         setItemAnimator(da);
     }
 
     public void setScanData(final List<PointSimpleData> points){
         int j = mDatas.size();
         mDatas.clear();
-        mHeaderAndFooterWrapper.notifyItemRangeRemoved(0,j);
+        mEmptyWrapper.notifyItemRangeRemoved(0,j);
 
-        Observable.interval(0,250, TimeUnit.MILLISECONDS)
+        Observable.interval(0,100, TimeUnit.MILLISECONDS)
                 .take(points.size())
                 .map(new Func1<Long, PointSimpleData>() {
                     @Override
@@ -158,7 +158,7 @@ public class ScanMessageRv extends RecyclerView {
                     @Override
                     public void call(PointSimpleData psd) {
                         mDatas.add(psd);
-                        mHeaderAndFooterWrapper.notifyItemRangeInserted(mDatas.size()-1,1);
+                        mEmptyWrapper.notifyItemRangeInserted(mDatas.size(),1);
                     }
         });
     }

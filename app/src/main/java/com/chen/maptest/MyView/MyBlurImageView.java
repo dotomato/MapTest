@@ -18,11 +18,14 @@ import jp.wasabeef.glide.transformations.ColorFilterTransformation;
  * Copyright *
  */
 
-public class MyBlurImageView extends ImageView {
+public class MyBlurImageView extends android.support.v7.widget.AppCompatImageView {
     private Context mContext;
     private int mRadis=4;
-    private int mDownSample=16;
-    private int mColor = Color.argb(128,50,50,50);
+    private int mDownSample=8;
+    private int mColor = Color.argb(64,50,50,50);
+    private ColorFilterTransformation ct;
+    private BlurTransformation bt;
+
     public MyBlurImageView(Context context) {
         super(context);
         init(context);
@@ -40,47 +43,43 @@ public class MyBlurImageView extends ImageView {
 
     private void init(Context var){
         mContext = var;
+        ct = new ColorFilterTransformation(mContext, mColor);
+        bt = new BlurTransformation(mContext,mRadis,mDownSample);
     }
 
     public void setSrc(Integer res){
-        BlurTransformation bt = new BlurTransformation(mContext,mRadis,mDownSample);
-        ColorFilterTransformation ct = new ColorFilterTransformation(mContext, Color.argb(128,50,50,50));
-        Glide.with(mContext).load(res).centerCrop().bitmapTransform(bt,ct).into(this);
+        Glide.with(mContext).load(res).centerCrop().bitmapTransform(bt, ct).into(this);
     }
 
     public void setSrc(String res){
-        BlurTransformation bt = new BlurTransformation(mContext,mRadis,mDownSample);
-        ColorFilterTransformation ct = new ColorFilterTransformation(mContext, Color.argb(128,50,50,50));
         Glide.with(mContext).load(res).centerCrop().bitmapTransform(bt,ct).into(this);
     }
 
     public void setSrc(Uri res){
-        BlurTransformation bt = new BlurTransformation(mContext,mRadis,mDownSample);
-        ColorFilterTransformation ct = new ColorFilterTransformation(mContext, Color.argb(128,50,50,50));
         Glide.with(mContext).load(res).centerCrop().bitmapTransform(bt,ct).into(this);
     }
 
-    public int getRadis() {
-        return mRadis;
-    }
+//    public int getRadis() {
+//        return mRadis;
+//    }
+//
+//    public void setRadis(int mRadis) {
+//        this.mRadis = mRadis;
+//    }
+//
+//    public int getDownSample() {
+//        return mDownSample;
+//    }
+//
+//    public void setDownSample(int mDownSample) {
+//        this.mDownSample = mDownSample;
+//    }
+//
+//    public int getColor() {
+//        return mColor;
+//    }
 
-    public void setRadis(int mRadis) {
-        this.mRadis = mRadis;
-    }
-
-    public int getDownSample() {
-        return mDownSample;
-    }
-
-    public void setDownSample(int mDownSample) {
-        this.mDownSample = mDownSample;
-    }
-
-    public int getColor() {
-        return mColor;
-    }
-
-    public void setColor(int mColor) {
-        this.mColor = mColor;
-    }
+//    public void setColor(int mColor) {
+//        this.mColor = mColor;
+//    }
 }

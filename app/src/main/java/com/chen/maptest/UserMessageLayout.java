@@ -30,6 +30,7 @@ import com.chen.maptest.MyView.MyTimeShow;
 import com.chen.maptest.MyView.OutlineProvider;
 
 import com.chen.maptest.MyModel.*;
+import com.chen.maptest.Utils.MyUtils;
 import com.chen.maptest.Utils.UserIconWarp;
 import com.dd.CircularProgressButton;
 import com.google.gson.Gson;
@@ -249,14 +250,16 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
         if (lmode2==MODE2_TEXT){
             mBlurImg.animate().alpha(1).scaleX(1f).scaleY(1f).setDuration(MODE2_DURATION).start();
             mNoBlurImg.animate().scaleX(1f).scaleY(1f).setDuration(MODE2_DURATION).start();
-            mMsgScroll.animate().x(x1).setDuration(MODE2_DURATION).start();
-            mMyTimeShow.animate().x(x2).setDuration(MODE2_DURATION).start();
+            mMsgScroll.animate().x(x1).setDuration(MODE2_DURATION/2).start();
+            mMyTimeShow.animate().x(x2).setDuration(MODE2_DURATION/2).start();
+            mInnerEdge.setShadowAlpha(1);
 
         } else {
-            mBlurImg.animate().alpha(0).scaleX(1.1f).scaleY(1.1f).setDuration(MODE2_DURATION).start();
-            mNoBlurImg.animate().scaleX(1.1f).scaleY(1.1f).setDuration(MODE2_DURATION).start();
-            mMsgScroll.animate().x(-mMsgScroll.getWidth()-300).setDuration(MODE2_DURATION).start();
-            mMyTimeShow.animate().x(70).setDuration(MODE2_DURATION).start();
+            mBlurImg.animate().alpha(0).scaleX(1.05f).scaleY(1.05f).setDuration(MODE2_DURATION).start();
+            mNoBlurImg.animate().scaleX(1.05f).scaleY(1.05f).setDuration(MODE2_DURATION).start();
+            mMsgScroll.animate().x(-mMsgScroll.getWidth()-300).setDuration(MODE2_DURATION/2).start();
+            mMyTimeShow.animate().x(getWidth()+100).setDuration(MODE2_DURATION/2).start();
+            mInnerEdge.setShadowAlpha(0);
         }
     }
 
