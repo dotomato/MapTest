@@ -44,7 +44,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-//TODO 扫描器一条条增加的动画,
 //TODO 新增点的动画
 //TODO 用户点赞,评论机制
 

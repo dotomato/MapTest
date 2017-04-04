@@ -31,8 +31,13 @@ import com.zhy.adapter.recyclerview.wrapper.LoadMoreWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+import rx.Observable;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 /**
@@ -131,21 +136,31 @@ public class ScanMessageRv extends RecyclerView {
 
         DefaultItemAnimator da = new DefaultItemAnimator();
         da.setRemoveDuration(0);
-        da.setAddDuration(1000);
+        da.setAddDuration(200);
         setItemAnimator(da);
     }
 
-    public void setScanData(List<PointSimpleData> points){
-//        mAddAnimateRunnable.stop();
+    public void setScanData(final List<PointSimpleData> points){
         int j = mDatas.size();
         mDatas.clear();
         mHeaderAndFooterWrapper.notifyItemRangeRemoved(0,j);
-//        mHeaderAndFooterWrapper.notifyDataSetChanged();
-        mDatas.addAll(points);
-//        for (int i=0;i<mDatas.size();i++)
-        mHeaderAndFooterWrapper.notifyItemRangeInserted(1,mDatas.size());
-//        mAddAnimateRunnable.setData(points);
-//        new Thread(mAddAnimateRunnable).start();
+
+        Observable.interval(0,250, TimeUnit.MILLISECONDS)
+                .take(points.size())
+                .map(new Func1<Long, PointSimpleData>() {
+                    @Override
+                    public PointSimpleData call(Long aLong) {
+                        return points.get(aLong.intValue());
+                    }
+                })
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<PointSimpleData>() {
+                    @Override
+                    public void call(PointSimpleData psd) {
+                        mDatas.add(psd);
+                        mHeaderAndFooterWrapper.notifyItemRangeInserted(mDatas.size()-1,1);
+                    }
+        });
     }
 
 
