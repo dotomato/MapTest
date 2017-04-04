@@ -8,21 +8,35 @@ import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageView;
 
+import com.chen.maptest.MyModel.PointComment;
 import com.chen.maptest.MyModel.PointData;
 import com.chen.maptest.MyModel.PointSimpleData;
+import com.chen.maptest.MyModel.UserComment;
 import com.chen.maptest.MyModel.UserNewComment;
+import com.chen.maptest.MyModel.UserNewCommentResult;
+import com.chen.maptest.MyServer.MyAction1;
+import com.chen.maptest.MyServer.Myserver;
 import com.chen.maptest.MyView.OutlineProvider;
+import com.chen.maptest.Utils.UserIconWarp;
 import com.dd.CircularProgressButton;
 import com.zhy.adapter.recyclerview.CommonAdapter;
 import com.zhy.adapter.recyclerview.wrapper.EmptyWrapper;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by chen on 17-4-2.
@@ -39,9 +53,15 @@ public class CommentLayout extends ConstraintLayout {
     @BindView(R.id.commentsendbutton)
     public CircularProgressButton mSendButton;
 
-    CommonAdapter<PointSimpleData> mAdapter;
-    List<PointSimpleData> mDatas;
+    @BindView(R.id.usercommentedit)
+    public EditText mUserComment;
+
+    CommonAdapter<UserComment> mAdapter;
+    List<UserComment> mDatas;
     private PointData mPointData;
+    private boolean hadGetComment;
+    private EmptyWrapper mEmptyWrapper;
+    private Calendar mCalender;
 
     public CommentLayout(Context context) {
         super(context);
@@ -56,6 +76,7 @@ public class CommentLayout extends ConstraintLayout {
     private void init(Context var){
         mContext = var;
         mDatas = new ArrayList<>();
+        mCalender = Calendar.getInstance();
     }
 
     @Override
@@ -78,20 +99,24 @@ public class CommentLayout extends ConstraintLayout {
         commentRv.setLayoutManager(new LinearLayoutManager(mContext , LinearLayoutManager.VERTICAL, false));
         commentRv.setHasFixedSize(true);
 
-        mAdapter = new CommonAdapter<PointSimpleData>(mContext, R.layout.layout_scan_item, mDatas){
+        mAdapter = new CommonAdapter<UserComment>(mContext, R.layout.layout_comment_item, mDatas){
             @Override
-            protected void convert(final com.zhy.adapter.recyclerview.base.ViewHolder holder,final PointSimpleData psd, int position) {
-
+            protected void convert(final com.zhy.adapter.recyclerview.base.ViewHolder holder,
+                                   UserComment uc, int position) {
+                UserIconWarp.just(mContext, uc.userIcon, (ImageView) holder.getView(R.id.usericon));
+                OutlineProvider.setOutline(holder.getView(R.id.usericon),OutlineProvider.SHAPE_OVAL);
+                holder.setText(R.id.username,uc.userName);
+                holder.setText(R.id.usercomment,uc.userComment);
+                DateFormat sdf = SimpleDateFormat.getDateInstance();
+                holder.setText(R.id.commenttime,sdf.format(new Date(uc.commentTime*1000)));
             }
         };
 
-        EmptyWrapper mEmptyWrapper = new EmptyWrapper(mAdapter);
+        mEmptyWrapper = new EmptyWrapper(mAdapter);
         View emptyView = LayoutInflater.from(mContext).inflate(R.layout.layout_empty_comment,commentRv,false);
-        OutlineProvider.setOutline(emptyView,OutlineProvider.SHAPE_RECT);
         mEmptyWrapper.setEmptyView(emptyView);
 
         commentRv.setAdapter(mEmptyWrapper);
-        commentRv.setItemAnimator(new DefaultItemAnimator());
 
         mSendButton.setProgress(0);
     }
@@ -102,9 +127,46 @@ public class CommentLayout extends ConstraintLayout {
         unc.pointID = mPointData.pointID;
         unc.userID = GlobalVar.mUserinfo2.userinfo.userID;
         unc.userID2 = GlobalVar.mUserinfo2.userID2;
+        unc.userComment = mUserComment.getText().toString();
+
+        Myserver.getApi().newcomment(unc)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new MyAction1<UserNewCommentResult>() {
+                    @Override
+                    public void call() {
+                        mUserComment.setText("");
+                        mSendButton.setProgress(100);
+                        initShow(0,mPointData);
+                        initShowStub();
+                    }
+                });
+
     }
 
     public void initShow(int mode, PointData pointData) {
         mPointData = pointData;
+        hadGetComment = false;
+        int j = mDatas.size();
+        mDatas.clear();
+        mEmptyWrapper.notifyItemRangeRemoved(0,j);
+        mUserComment.setText("");
+    }
+
+    public void initShowStub(){
+        if (hadGetComment)
+            return;
+        Myserver.getApi().getpointcomment(mPointData)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new MyAction1<PointComment>() {
+                    @Override
+                    public void call() {
+                        mDatas.clear();
+                        mDatas.addAll(mVar.userCommentList);
+                        mEmptyWrapper.notifyItemRangeInserted(1,mDatas.size());
+                        hadGetComment = true;
+                    }
+                });
     }
 }

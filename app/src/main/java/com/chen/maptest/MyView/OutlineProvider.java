@@ -18,6 +18,8 @@ public class OutlineProvider {
     public static void setOutline(View view,int shape){
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//            if (view.getOutlineProvider()!=null)  //// TODO: 17-4-5 这个检查是否有意义
+//                return;
             switch (shape) {
                 case SHAPE_RECT:
                     view.setOutlineProvider(getRectOutline());

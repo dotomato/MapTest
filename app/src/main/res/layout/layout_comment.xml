@@ -50,10 +50,10 @@
             app:layout_constraintTop_toBottomOf="@+id/imageView"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintBottom_toTopOf="@+id/usercomment"  />
+            app:layout_constraintBottom_toTopOf="@+id/usercommentedit"  />
 
         <EditText
-            android:id="@+id/usercomment"
+            android:id="@+id/usercommentedit"
             android:background="@null"
             android:layout_marginTop="0dp"
             android:layout_marginBottom="3dp"

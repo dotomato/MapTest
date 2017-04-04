@@ -149,6 +149,7 @@ public class MainActivity extends MmapAdapterActivity implements
                     case 1:
                         v1.setVisibility(View.GONE);
                         v2.setVisibility(View.VISIBLE);
+                        mCommentLayout.initShowStub();
                         break;
                 }
             }
@@ -301,7 +302,7 @@ public class MainActivity extends MmapAdapterActivity implements
                     public void call() {
                         switchShowMode(MODE_MESSAGE,300);
                         mUserMessageLayout.initShow(MODE_MESSAGE,mVar.pointData);
-                        mCommentLayout.initShow(MODE_MESSAGE,mVar.pointData);
+                        mCommentLayout.initShow(0,mVar.pointData);
                     }
                 });
 

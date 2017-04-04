@@ -95,6 +95,7 @@ public class ScanMessageRv extends RecyclerView {
                         });
 
                 OutlineProvider.setOutline(holder.getConvertView(),OutlineProvider.SHAPE_RECT);
+                OutlineProvider.setOutline(holder.getView(R.id.usericon),OutlineProvider.SHAPE_RECT);
 
                 holder.setText(R.id.smallmsg,psd.smallMsg);
 
