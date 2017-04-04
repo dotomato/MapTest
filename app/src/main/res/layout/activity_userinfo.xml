@@ -54,6 +54,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:maxLines="1"
+            android:maxEms="10"
             android:hint="昵称"/>
     </android.support.design.widget.TextInputLayout>
 
@@ -74,7 +75,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="个人简介"
-            android:maxLines="1" />
+            android:maxLines="1"
+            android:maxEms="10" />
 
     </android.support.design.widget.TextInputLayout>
 

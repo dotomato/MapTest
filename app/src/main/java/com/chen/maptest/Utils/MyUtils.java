@@ -8,9 +8,12 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.util.Base64;
 import android.widget.EditText;
 
 import com.google.gson.Gson;
+
+
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -145,4 +148,16 @@ public class MyUtils {
         }
 
     }
+
+//    // 将 s 进行 BASE64 编码
+//    public static String getBASE64(String s) {
+//        if (s == null) return null;
+//        return Base64.encodeToString(s.getBytes(), Base64.DEFAULT);
+//    }
+//
+//    // 将 BASE64 编码的字符串 s 进行解码
+//    public static String getFromBASE64(String s) {
+//        if (s == null) return null;
+//        return new String(Base64.decode(s.getBytes(),Base64.DEFAULT));
+//    }
 }

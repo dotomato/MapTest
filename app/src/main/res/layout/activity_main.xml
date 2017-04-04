@@ -81,7 +81,7 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent">
 
-            <com.chen.maptest.MyView.ScanMessageRv
+            <com.chen.maptest.ScanMessageRv
                 android:id="@+id/scan_message_layout"
                 android:layout_width="0dp"
                 android:layout_height="0dp"

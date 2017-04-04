@@ -36,7 +36,6 @@ import rx.schedulers.Schedulers;
 import com.chen.maptest.MyModel.*;
 import com.chen.maptest.MyView.OutlineProvider;
 import com.chen.maptest.MyView.QuickPageAdapter;
-import com.chen.maptest.MyView.ScanMessageRv;
 import com.chen.maptest.Utils.OnceRunner;
 import com.yalantis.ucrop.UCrop;
 
