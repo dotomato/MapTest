@@ -36,8 +36,11 @@ import rx.schedulers.Schedulers;
 import com.chen.maptest.MyModel.*;
 import com.chen.maptest.MyView.OutlineProvider;
 import com.chen.maptest.MyView.QuickPageAdapter;
+import com.chen.maptest.MyView.ScrollableViewPager;
 import com.chen.maptest.Utils.OnceRunner;
 import com.yalantis.ucrop.UCrop;
+
+import org.w3c.dom.Comment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,7 +83,7 @@ public class MainActivity extends MmapAdapterActivity implements
     public ViewGroup mBottomViewGroup;
 
     @BindView(R.id.viewpager)
-    public ViewPager mViewpager;
+    public ScrollableViewPager mViewpager;
 
     private View mapView;
 
@@ -88,6 +91,9 @@ public class MainActivity extends MmapAdapterActivity implements
     public UserMessageLayout mUserMessageLayout;
 
     private boolean shouldInitonResume = false;
+    private View v1;
+    private View v2;
+    private CommentLayout mCommentLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,8 +123,8 @@ public class MainActivity extends MmapAdapterActivity implements
         mScanMessageRv.initview();
         mScanMessageRv.setOnRecyclerViewItemClickListener(this);
 
-        View v1 = LayoutInflater.from(this).inflate(R.layout.layout_user_message,null,false);
-        View v2 = LayoutInflater.from(this).inflate(R.layout.layout_comment,null,false);
+        v1 = LayoutInflater.from(this).inflate(R.layout.layout_user_message,null,false);
+        v2 = LayoutInflater.from(this).inflate(R.layout.layout_comment,null,false);
         List<View> viewlist = new ArrayList<>();
         viewlist.add(v1);
         viewlist.add(v2);
@@ -127,7 +133,33 @@ public class MainActivity extends MmapAdapterActivity implements
         v1.setCameraDistance(1e5f);
         v2.setCameraDistance(1e5f);
 
-        mUserMessageLayout = (UserMessageLayout)v1.findViewById(R.id.user_message_layout);
+        mViewpager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                switch (position){
+                    case 0:
+                        v1.setVisibility(View.VISIBLE);
+                        v2.setVisibility(View.GONE);
+                        break;
+                    case 1:
+                        v1.setVisibility(View.GONE);
+                        v2.setVisibility(View.VISIBLE);
+                        break;
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+
+        mUserMessageLayout = (UserMessageLayout) v1.findViewById(R.id.user_message_layout);
         mUserMessageLayout.setExitCallback(new UserMessageLayout.ExitCallback() {
             @Override
             public void exitCallback() {
@@ -144,6 +176,8 @@ public class MainActivity extends MmapAdapterActivity implements
         });
         mUserMessageLayout.setViewPager(mViewpager);
         OutlineProvider.setOutline(mUserMessageLayout,OutlineProvider.SHAPE_RECT);
+
+        mCommentLayout = (CommentLayout)v2.findViewById(R.id.comment_layout);
     }
 
     private void initUserinfo(){
@@ -267,6 +301,7 @@ public class MainActivity extends MmapAdapterActivity implements
                     public void call() {
                         switchShowMode(MODE_MESSAGE,300);
                         mUserMessageLayout.initShow(MODE_MESSAGE,mVar.pointData);
+                        mCommentLayout.initShow(MODE_MESSAGE,mVar.pointData);
                     }
                 });
 
@@ -360,6 +395,8 @@ public class MainActivity extends MmapAdapterActivity implements
 
                 mViewpager.setVisibility(View.VISIBLE);
                 mViewpager.animate().alpha(1).setDuration(mDuration).start();
+                mViewpager.setCurrentItem(0,false);
+                mViewpager.setScrollAble(false);
 
                 mScanMessageRv.animate().alpha(0).setDuration(mDuration).withEndAction(new Runnable() {
                     @Override
@@ -375,6 +412,8 @@ public class MainActivity extends MmapAdapterActivity implements
 
                 mViewpager.setVisibility(View.VISIBLE);
                 mViewpager.animate().alpha(1).setDuration(mDuration).start();
+                mViewpager.setCurrentItem(0,false);
+                mViewpager.setScrollAble(true);
 
                 mScanMessageRv.animate().alpha(0).setDuration(mDuration).withEndAction(new Runnable() {
                     @Override

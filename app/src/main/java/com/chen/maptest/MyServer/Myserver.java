@@ -58,6 +58,14 @@ public class Myserver {
         @Headers({"Content-Type: application/json","Accept: application/json"})
         @POST(VERSION+"/updateuser")
         Observable<UserinfoResult> updateuser(@Body Userinfo2 var);
+
+        @Headers({"Content-Type: application/json","Accept: application/json"})
+        @POST(VERSION+"/newcomment")
+        Observable<UserNewCommentResult> newcomment(@Body UserNewComment var);
+
+        @Headers({"Content-Type: application/json","Accept: application/json"})
+        @POST(VERSION+"/getpointcomment")
+        Observable<PointComment> getpointcomment(@Body PointData var);
     }
 
 

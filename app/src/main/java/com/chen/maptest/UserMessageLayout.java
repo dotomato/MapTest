@@ -156,9 +156,9 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
         setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (mParent_ViewPager==null)
-                    return;
-                if (mParent_ViewPager.getCurrentItem()==0)
+//                if (mParent_ViewPager==null)
+//                    return;
+//                if (mParent_ViewPager.getCurrentItem()==0)
                     toggleMode2();
             }
         });

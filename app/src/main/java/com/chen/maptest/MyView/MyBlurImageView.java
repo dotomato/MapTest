@@ -43,8 +43,10 @@ public class MyBlurImageView extends android.support.v7.widget.AppCompatImageVie
 
     private void init(Context var){
         mContext = var;
-        ct = new ColorFilterTransformation(mContext, mColor);
-        bt = new BlurTransformation(mContext,mRadis,mDownSample);
+        if (!isInEditMode()) {
+            ct = new ColorFilterTransformation(mContext, mColor);
+            bt = new BlurTransformation(mContext, mRadis, mDownSample);
+        }
     }
 
     public void setSrc(Integer res){
