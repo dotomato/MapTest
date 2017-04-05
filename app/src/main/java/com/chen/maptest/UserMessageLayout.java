@@ -34,6 +34,7 @@ import com.chen.maptest.Utils.MyUtils;
 import com.chen.maptest.Utils.UserIconWarp;
 import com.dd.CircularProgressButton;
 import com.google.gson.Gson;
+import com.sackcentury.shinebuttonlib.ShineButton;
 import com.yalantis.ucrop.UCrop;
 
 import java.io.File;
@@ -109,6 +110,12 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
     @BindView(R.id.sendbutton)
     public CircularProgressButton mSendButton;
 
+    @BindView(R.id.likenum)
+    public TextView mLikeNum;
+
+    @BindView(R.id.likebutton)
+    public ShineButton mLikeButton;
+
     private Context mContext;
 
     private ViewPager mParent_ViewPager;
@@ -120,6 +127,7 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
     private List<View> viewlist;
     private float x1;
     private float x2;
+    private PointData mPointData;
 
 
     public UserMessageLayout(Context context) {
@@ -180,6 +188,7 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
 
     //显示消息主体、获取图片
     public void initShow(int mode, PointData pd){
+        mPointData = pd;
         mMode = mode;
         switchMode2(MODE2_TEXT);
         switch (mode) {
@@ -206,7 +215,7 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
             case MainActivity.MODE_MESSAGE:
 
                 Gson gson = new Gson();
-                MessageJson mj = gson.fromJson(pd.userMessage,MessageJson.class);
+                MessageJson mj = gson.fromJson(mPointData.userMessage,MessageJson.class);
 
                 if (mj.ver==100) {
                     mMsgEdittext.setText(mj.text);
@@ -222,13 +231,15 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
                     }
                 }
 
-                mMyTimeShow.setTime(new Date(pd.pointTime*1000));
+                mMyTimeShow.setTime(new Date(mPointData.pointTime*1000));
 
                 DecimalFormat decimalFormat=new DecimalFormat(".00");
-                String la=decimalFormat.format(pd.latitude);
-                String lo=decimalFormat.format(pd.longitude);
+                String la=decimalFormat.format(mPointData.latitude);
+                String lo=decimalFormat.format(mPointData.longitude);
                 mLocationDes.setText("经度:"+la+"   纬度:"+lo);
 
+                mLikeNum.setText(String.valueOf(mPointData.pointLikeNum));
+                mLikeButton.setChecked(GlobalVar.mUserinfo2.userinfo.userLikePointIDList.contains(mPointData.pointID),false);
 
                 ml1.setVisibility(VISIBLE);
                 ml2.setVisibility(GONE);
@@ -390,6 +401,38 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
                         mSendButton.setProgress(-1);
                     }
                 });
+    }
+
+    @OnClick(R.id.likebutton)
+    public void OnLikeButtonClike(){
+        UserLikePoint ulp = new UserLikePoint();
+        ulp.pointID = mPointData.pointID;
+        ulp.isLike = mLikeButton.isChecked();
+        ulp.userID = GlobalVar.mUserinfo2.userinfo.userID;
+        ulp.userID2 = GlobalVar.mUserinfo2.userID2;
+        Myserver.getApi().userlikepoint(ulp)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new MyAction1<UserLikePointResult>() {
+                    @Override
+                    public void call() {
+                        updatePoint(mVar);
+                    }
+                });
+    }
+
+    private void updatePoint(UserLikePointResult mVar) {
+        if (!mPointData.pointID.equals(mVar.pointID))
+            return;
+        mLikeButton.setChecked(mVar.isLike);
+        mLikeNum.setText(String.valueOf(mVar.pointLikeNum));
+
+        List<String> ulpd = GlobalVar.mUserinfo2.userinfo.userLikePointIDList;
+        boolean isContain = ulpd.contains(mVar.pointID);
+        if (mVar.isLike && !isContain)
+            ulpd.add(mVar.pointID);
+        else if (!mVar.isLike && isContain)
+            ulpd.remove(mVar.pointID);
     }
 
     //退出回调

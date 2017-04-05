@@ -13,4 +13,6 @@ public class PointData{
     public double latitude;
     public double longitude;
     public long pointTime;
+    public int pointLikeNum;
+//    public int isLikeStub;
 }

@@ -116,7 +116,7 @@ public class CommentLayout extends ConstraintLayout {
                 holder.setText(R.id.commenttime,sdf.format(new Date(uc.commentTime*1000)));
                 holder.setOnClickListener(R.id.likebutton, new OnLikeButtonClick(uc));
                 ShineButton sb = holder.getView(R.id.likebutton);
-                sb.setChecked(GlobalVar.mUserinfo2.userinfo.userLikeCommentIDList.contains(uc.commentID));
+                sb.setChecked(GlobalVar.mUserinfo2.userinfo.userLikeCommentIDList.contains(uc.commentID),false);
                 holder.setText(R.id.likenum,String.valueOf(uc.commentLikeNum));
             }
         };
@@ -165,14 +165,17 @@ public class CommentLayout extends ConstraintLayout {
         for (UserComment uc:mDatas) {
             if (uc.commentID.equals(mVar.commentID)) {
                 uc.commentLikeNum = mVar.commentLikeNum;
-                uc.isLikeStub = mVar.isLike;
-                if (mVar.isLike)
-                    GlobalVar.mUserinfo2.userinfo.userLikeCommentIDList.add(mVar.commentID);
-                else
-                    GlobalVar.mUserinfo2.userinfo.userLikeCommentIDList.remove(mVar.commentID);
+
+                List<String> ulcl = GlobalVar.mUserinfo2.userinfo.userLikeCommentIDList;
+                boolean isContain = ulcl.contains(mVar.commentID);
+                if (mVar.isLike && !isContain)
+                    ulcl.add(mVar.commentID);
+                else if (!mVar.isLike && isContain)
+                    ulcl.remove(mVar.commentID);
+
+                mHeaderAndFooterWarpper.notifyDataSetChanged();
             }
         }
-        mHeaderAndFooterWarpper.notifyDataSetChanged();
     }
 
     @OnClick(R.id.commentsendbutton)

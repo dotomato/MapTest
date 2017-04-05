@@ -70,6 +70,10 @@ public class Myserver {
         @Headers({"Content-Type: application/json","Accept: application/json"})
         @POST(VERSION+"/userlikecomment")
         Observable<UserLikeCommentResult> userlikecomment(@Body UserLikeComment var);
+
+        @Headers({"Content-Type: application/json","Accept: application/json"})
+        @POST(VERSION+"/userlikepoint")
+        Observable<UserLikePointResult> userlikepoint(@Body UserLikePoint var);
     }
 
 

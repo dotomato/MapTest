@@ -70,6 +70,7 @@ public class UserinfoActivity extends AppCompatActivity implements Toolbar.OnMen
     private Uri tempIconUri;
     private Boolean change;
     private List<String> ulcltemp;
+    private List<String> ulptemp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,6 +103,22 @@ public class UserinfoActivity extends AppCompatActivity implements Toolbar.OnMen
         initUserView();
         iconChange = false;
         change = false;
+    }
+
+
+    private void initUserView(){
+        if (GlobalVar.mUserinfo2==null)
+            return;
+        tempUserinfo2 = MyUtils.pojoCopy(GlobalVar.mUserinfo2);
+        ulcltemp = tempUserinfo2.userinfo.userLikeCommentIDList;//服务器不更新此字段,暂存起来,节省带宽
+        tempUserinfo2.userinfo.userLikeCommentIDList = null;
+        ulptemp = tempUserinfo2.userinfo.userLikePointIDList; //服务器不更新此字段,暂存起来,节省带宽
+        tempUserinfo2.userinfo.userLikePointIDList = null;
+        ishuman =false;
+        mUsername.setText(tempUserinfo2.userinfo.userName);
+        mUserdes.setText(tempUserinfo2.userinfo.userDes);
+        ishuman =true;
+        UserIconWarp.just(this, tempUserinfo2.userinfo.userIcon,mUsericon);
     }
 
     @Override
@@ -166,6 +183,7 @@ public class UserinfoActivity extends AppCompatActivity implements Toolbar.OnMen
                     public void call() {
                         GlobalVar.mUserinfo2.userinfo = mVar.userinfo;
                         GlobalVar.mUserinfo2.userinfo.userLikeCommentIDList = ulcltemp;
+                        GlobalVar.mUserinfo2.userinfo.userLikePointIDList = ulptemp;
                         awareUserinfoUpdate();
                         UserinfoActivity.this.finish();
                     }
@@ -177,17 +195,6 @@ public class UserinfoActivity extends AppCompatActivity implements Toolbar.OnMen
         LocalBroadcastManager.getInstance(UserinfoActivity.this).sendBroadcast(intent);
     }
 
-    private void initUserView(){
-        if (GlobalVar.mUserinfo2==null)
-            return;
-        tempUserinfo2 = MyUtils.pojoCopy(GlobalVar.mUserinfo2);
-        ulcltemp = tempUserinfo2.userinfo.userLikeCommentIDList = null; //服务器不更新此字段,暂存起来,节省带宽
-        ishuman =false;
-        mUsername.setText(tempUserinfo2.userinfo.userName);
-        mUserdes.setText(tempUserinfo2.userinfo.userDes);
-        ishuman =true;
-        UserIconWarp.just(this, tempUserinfo2.userinfo.userIcon,mUsericon);
-    }
 
 
     @Override
