@@ -36,6 +36,7 @@ import net.steamcrafted.materialiconlib.MaterialDrawableBuilder;
 import net.steamcrafted.materialiconlib.MaterialMenuInflater;
 
 import java.io.File;
+import java.util.List;
 import java.util.UUID;
 
 import butterknife.BindView;
@@ -68,6 +69,7 @@ public class UserinfoActivity extends AppCompatActivity implements Toolbar.OnMen
     private Boolean iconChange;
     private Uri tempIconUri;
     private Boolean change;
+    private List<String> ulcltemp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -163,6 +165,7 @@ public class UserinfoActivity extends AppCompatActivity implements Toolbar.OnMen
                     @Override
                     public void call() {
                         GlobalVar.mUserinfo2.userinfo = mVar.userinfo;
+                        GlobalVar.mUserinfo2.userinfo.userLikeCommentIDList = ulcltemp;
                         awareUserinfoUpdate();
                         UserinfoActivity.this.finish();
                     }
@@ -178,6 +181,7 @@ public class UserinfoActivity extends AppCompatActivity implements Toolbar.OnMen
         if (GlobalVar.mUserinfo2==null)
             return;
         tempUserinfo2 = MyUtils.pojoCopy(GlobalVar.mUserinfo2);
+        ulcltemp = tempUserinfo2.userinfo.userLikeCommentIDList = null; //服务器不更新此字段,暂存起来,节省带宽
         ishuman =false;
         mUsername.setText(tempUserinfo2.userinfo.userName);
         mUserdes.setText(tempUserinfo2.userinfo.userDes);

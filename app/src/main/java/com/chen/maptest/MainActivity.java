@@ -45,7 +45,6 @@ import org.w3c.dom.Comment;
 import java.util.ArrayList;
 import java.util.List;
 
-//TODO 用户点赞,评论机制
 
 public class MainActivity extends MmapAdapterActivity implements
         MapAdaterCallback, DrawerLayout.DrawerListener, ScanMessageRv.OnRecyclerViewItemClickListener {

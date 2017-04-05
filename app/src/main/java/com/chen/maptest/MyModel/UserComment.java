@@ -13,5 +13,6 @@ public class UserComment {
     public String userIcon;
     public long commentTime;
     public int commentLikeNum;
+    public boolean isLikeStub;
 
 }
