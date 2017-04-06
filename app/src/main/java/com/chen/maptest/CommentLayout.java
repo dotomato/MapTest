@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import com.chen.maptest.Manager.MyUM;
 import com.chen.maptest.MyModel.PointComment;
 import com.chen.maptest.MyModel.PointData;
 import com.chen.maptest.MyModel.UserComment;
@@ -116,7 +117,7 @@ public class CommentLayout extends ConstraintLayout {
                 holder.setText(R.id.commenttime,sdf.format(new Date(uc.commentTime*1000)));
                 holder.setOnClickListener(R.id.likebutton, new OnLikeButtonClick(uc));
                 ShineButton sb = holder.getView(R.id.likebutton);
-                sb.setChecked(GlobalVar.mUserinfo2.userinfo.userLikeCommentIDList.contains(uc.commentID),false);
+                sb.setChecked(MyUM.islikecomment(uc.commentID),false);
                 holder.setText(R.id.likenum,String.valueOf(uc.commentLikeNum));
             }
         };
@@ -147,8 +148,8 @@ public class CommentLayout extends ConstraintLayout {
             UserLikeComment ulc = new UserLikeComment();
             ulc.commentID = uc.commentID;
             ulc.isLike = ((ShineButton) view).isChecked();
-            ulc.userID = GlobalVar.mUserinfo2.userinfo.userID;
-            ulc.userID2 = GlobalVar.mUserinfo2.userID2;
+            ulc.userID = MyUM.getuid();
+            ulc.userID2 = MyUM.getuid2();
             Myserver.getApi().userlikecomment(ulc)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -165,14 +166,8 @@ public class CommentLayout extends ConstraintLayout {
         for (UserComment uc:mDatas) {
             if (uc.commentID.equals(mVar.commentID)) {
                 uc.commentLikeNum = mVar.commentLikeNum;
-
-                List<String> ulcl = GlobalVar.mUserinfo2.userinfo.userLikeCommentIDList;
-                boolean isContain = ulcl.contains(mVar.commentID);
-                if (mVar.isLike && !isContain)
-                    ulcl.add(mVar.commentID);
-                else if (!mVar.isLike && isContain)
-                    ulcl.remove(mVar.commentID);
-
+                if (mVar.isLike != MyUM.islikecomment(mVar.commentID))
+                    MyUM.likecomment(mVar.commentID,mVar.isLike);
                 mHeaderAndFooterWarpper.notifyDataSetChanged();
             }
         }
@@ -182,8 +177,8 @@ public class CommentLayout extends ConstraintLayout {
     public void commentSendButttonClick(){
         UserNewComment unc = new UserNewComment();
         unc.pointID = mPointData.pointID;
-        unc.userID = GlobalVar.mUserinfo2.userinfo.userID;
-        unc.userID2 = GlobalVar.mUserinfo2.userID2;
+        unc.userID = MyUM.getuid();
+        unc.userID2 = MyUM.getuid2();
         unc.userComment = mUserComment.getText().toString();
         mSendButton.setProgress(50);
 

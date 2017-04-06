@@ -7,8 +7,8 @@ import java.util.List;
  * Copyright *
  */
 
-public class Userinfo2Result extends BaseResult {
-    public Userinfo2 userinfo2;
+public class Userinfo2List {
+    public Userinfo2 ui2;
     public List<String> userLikeCommentIDList;
     public List<String> userLikePointIDList;
 }

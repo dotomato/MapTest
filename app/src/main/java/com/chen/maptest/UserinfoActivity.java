@@ -12,7 +12,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,8 +19,9 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.chen.maptest.MyModel.Userinfo;
+import com.chen.maptest.Manager.MyUM;
 import com.chen.maptest.MyModel.Userinfo2;
+import com.chen.maptest.MyModel.Userinfo;
 import com.chen.maptest.MyModel.Userinfo2Result;
 import com.chen.maptest.MyModel.UserinfoResult;
 import com.chen.maptest.MyServer.MyAction1;
@@ -36,8 +36,6 @@ import net.steamcrafted.materialiconlib.MaterialDrawableBuilder;
 import net.steamcrafted.materialiconlib.MaterialMenuInflater;
 
 import java.io.File;
-import java.util.List;
-import java.util.UUID;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -64,13 +62,10 @@ public class UserinfoActivity extends AppCompatActivity implements Toolbar.OnMen
 
     private Menu mMenu;
 
-    private Userinfo2 tempUserinfo2;
-
     private Boolean iconChange;
     private Uri tempIconUri;
     private Boolean change;
-    private List<String> ulcltemp;
-    private List<String> ulptemp;
+    private Userinfo2 tempUserinfo2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,13 +102,9 @@ public class UserinfoActivity extends AppCompatActivity implements Toolbar.OnMen
 
 
     private void initUserView(){
-        if (GlobalVar.mUserinfo2==null)
+        if (!MyUM.isinited())
             return;
-        tempUserinfo2 = MyUtils.pojoCopy(GlobalVar.mUserinfo2);
-        ulcltemp = tempUserinfo2.userinfo.userLikeCommentIDList;//服务器不更新此字段,暂存起来,节省带宽
-        tempUserinfo2.userinfo.userLikeCommentIDList = null;
-        ulptemp = tempUserinfo2.userinfo.userLikePointIDList; //服务器不更新此字段,暂存起来,节省带宽
-        tempUserinfo2.userinfo.userLikePointIDList = null;
+        tempUserinfo2 = MyUtils.pojoCopy(MyUM.getui2());
         ishuman =false;
         mUsername.setText(tempUserinfo2.userinfo.userName);
         mUserdes.setText(tempUserinfo2.userinfo.userDes);
@@ -153,12 +144,11 @@ public class UserinfoActivity extends AppCompatActivity implements Toolbar.OnMen
                             public void call() {
                                 SharedPreferences pref = getSharedPreferences("data",MODE_PRIVATE);
                                 SharedPreferences.Editor editor = pref.edit();
-                                editor.putString("userID", mVar.userinfo.userID);
-                                editor.putString("userID2", mVar.userID2);
+                                editor.putString("userID", mVar.userinfo2.userinfo.userID);
+                                editor.putString("userID2", mVar.userinfo2.userID2);
                                 editor.apply();
 
-                                GlobalVar.mUserinfo2.userinfo = mVar.userinfo;
-                                GlobalVar.mUserinfo2.userID2 = mVar.userID2;
+                                GlobalVar.mUserd.ui2 = mVar.userinfo2;
                                 initUserView();
                                 setMenuComplete(false);
                                 awareUserinfoUpdate();
@@ -175,15 +165,14 @@ public class UserinfoActivity extends AppCompatActivity implements Toolbar.OnMen
     }
 
     private void updateUserinfo(){
+        Userinfo2 uui = new Userinfo2();
         Myserver.getApi().updateuser(tempUserinfo2)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new MyAction1<UserinfoResult>() {
                     @Override
                     public void call() {
-                        GlobalVar.mUserinfo2.userinfo = mVar.userinfo;
-                        GlobalVar.mUserinfo2.userinfo.userLikeCommentIDList = ulcltemp;
-                        GlobalVar.mUserinfo2.userinfo.userLikePointIDList = ulptemp;
+                        GlobalVar.mUserd.ui2.userinfo = mVar.userinfo;
                         awareUserinfoUpdate();
                         UserinfoActivity.this.finish();
                     }

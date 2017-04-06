@@ -12,6 +12,4 @@ public class Userinfo{
     public String userIcon;
     public String userName;
     public String userDes;
-    public List<String> userLikeCommentIDList;
-    public List<String> userLikePointIDList;
 }

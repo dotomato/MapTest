@@ -101,7 +101,7 @@ public class ScanMessageRv extends RecyclerView {
 
         mEmptyWrapper = new EmptyWrapper(mAdapter);
         View emptyView = LayoutInflater.from(mContext).inflate(R.layout.layout_empty_message,this,false);
-        OutlineProvider.setOutline(emptyView,OutlineProvider.SHAPE_RECT);
+//        OutlineProvider.setOutline(emptyView,OutlineProvider.SHAPE_RECT);
         mEmptyWrapper.setEmptyView(emptyView);
 
 

@@ -1,7 +1,7 @@
 package com.chen.maptest;
 
 
-import com.chen.maptest.MyModel.Userinfo2;
+import com.chen.maptest.MyModel.Userinfo2List;
 
 /**
  * Created by chen on 17-2-25.
@@ -9,7 +9,7 @@ import com.chen.maptest.MyModel.Userinfo2;
  */
 
 public class GlobalVar {
-    static public Userinfo2 mUserinfo2;
+    static public Userinfo2List mUserd;
     static public MainActivity.MyLatlng viewLatlng;
     static public MainActivity.MyLatlng gpsLatlng;
 }

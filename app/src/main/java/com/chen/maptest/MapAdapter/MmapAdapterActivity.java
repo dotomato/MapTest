@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.chen.maptest.GlobalVar;
 import com.chen.maptest.MyModel.PointSimpleData;
 import com.chen.maptest.R;
 import com.mapbox.mapboxsdk.Mapbox;
@@ -69,6 +70,11 @@ public class MmapAdapterActivity extends AppCompatActivity implements MapboxMap.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        firstshow = true;
+        markerMap = new HashMap<>();
+        PSDMap = new HashMap<>();
+
         super.onCreate(savedInstanceState);
 
         Mapbox.getInstance(this, getString(R.string.MapBox_access_token));
@@ -101,26 +107,26 @@ public class MmapAdapterActivity extends AppCompatActivity implements MapboxMap.
         }
     }
 
+    @SuppressWarnings("MissingPermission")
     private void initMmap() {
         LocationEngine locationEngine = LocationSource.getLocationEngine(this);
         locationEngine.activate();
         locationEngine.addLocationEngineListener(new LocationEngineListener() {
             @Override
             public void onConnected() {
-
             }
 
             @Override
             public void onLocationChanged(Location location) {
-                if (mMapAdaterCallback!=null)
-                    mMapAdaterCallback.MyGPSRecive(new MyLatlng(location.getLatitude(),location.getLongitude()));
+                if (mMapAdaterCallback != null)
+                    mMapAdaterCallback.MyGPSRecive(new MyLatlng(location.getLatitude(), location.getLongitude()));
                 if (firstshow) {
-                    mMapAdaterCallback.firstLocation(new MyLatlng(location.getLatitude(),location.getLongitude()));
-//                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location), 16));
+                    mMapAdaterCallback.firstLocation(new MyLatlng(location.getLatitude(), location.getLongitude()));
                     firstshow = false;
                 }
             }
         });
+        locationEngine.requestLocationUpdates();
 
 //        mMap.setOnMapTouchListener(this);
         mMap.setOnMarkerClickListener(this);
@@ -141,10 +147,6 @@ public class MmapAdapterActivity extends AppCompatActivity implements MapboxMap.
 
         mProjection = mMap.getProjection();
 
-        firstshow=true;
-
-        markerMap = new HashMap<>();
-        PSDMap = new HashMap<>();
 
         mMarkerOption= new MarkerOptions();
         float scale = 0.5f;

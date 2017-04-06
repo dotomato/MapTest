@@ -21,7 +21,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.ToxicBakery.viewpager.transforms.FlipHorizontalTransformer;
-import com.chen.maptest.Manager.MyUserManager;
+import com.chen.maptest.Manager.MyUM;
 import com.chen.maptest.MapAdapter.MapAdaterCallback;
 import com.chen.maptest.MapAdapter.MmapAdapterActivity;
 import com.chen.maptest.MyServer.MyAction1;
@@ -87,14 +87,17 @@ public class MainActivity extends MmapAdapterActivity implements
 //    private ActionBarDrawerToggle mDrawerToggle;
     public UserMessageLayout mUserMessageLayout;
 
-    private boolean shouldInitonResume = false;
+    private boolean shouldInitonResume;
     private View v1;
     private View v2;
     private CommentLayout mCommentLayout;
-    private MyUserManager mUserManager;
+    private MyUM mUserManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        shouldInitonResume = false;
+
         super.onCreate(savedInstanceState);
         ButterKnife.bind(this);
 
@@ -104,9 +107,9 @@ public class MainActivity extends MmapAdapterActivity implements
 
         Myserver.apiTest();
 
-        mUserManager = new MyUserManager(this);
+        mUserManager = new MyUM(this);
         mUserManager.inituserinfo();
-        mUserManager.setmUserInitFinish(new MyUserManager.UserInitFinish() {
+        mUserManager.setmUserdInitFinish(new MyUM.UserInitFinish() {
             @Override
             public void OnUserInitFinish() {
                 initUserView();
@@ -121,6 +124,7 @@ public class MainActivity extends MmapAdapterActivity implements
         setBoardcastReceiver();
 
         switchShowMode(MODE_SCAN,300);
+
     }
 
     private void initLayout(){
@@ -418,15 +422,18 @@ public class MainActivity extends MmapAdapterActivity implements
         DrawerLayout dl = (DrawerLayout)findViewById(R.id.activity_main);
         if(dl.isDrawerOpen(mLeftDrawerLayout))
             dl.closeDrawer(mLeftDrawerLayout);
-        else if (lmode== MODE_SCAN)
+        else if (lmode== MODE_SCAN) {
+//            this.finish();
+//            getApplication().onTerminate();
             super.onBackPressed();
+        }
         else
             switchShowMode(MODE_SCAN,300);
     }
 
     @OnClick(R.id.floatingActionButton)
     public void floatingClick(){
-        if (GlobalVar.mUserinfo2==null
+        if (GlobalVar.mUserd ==null
                 || (!SHOULD_CUR && GlobalVar.viewLatlng==null)
                 || (SHOULD_CUR && GlobalVar.gpsLatlng==null)){
             Toast.makeText(this,"还没有连上网络",Toast.LENGTH_SHORT).show();
@@ -435,7 +442,7 @@ public class MainActivity extends MmapAdapterActivity implements
 
         switchShowMode(MODE_EDIT,300);
         mUserMessageLayout.initShow(MODE_EDIT,null);
-        mUserMessageLayout.initShow2(GlobalVar.mUserinfo2.userinfo);
+        mUserMessageLayout.initShow2(MyUM.getui());
     }
 
     @Override

@@ -30,7 +30,6 @@ import com.chen.maptest.MyView.MyTimeShow;
 import com.chen.maptest.MyView.OutlineProvider;
 
 import com.chen.maptest.MyModel.*;
-import com.chen.maptest.Utils.MyUtils;
 import com.chen.maptest.Utils.UserIconWarp;
 import com.dd.CircularProgressButton;
 import com.google.gson.Gson;
@@ -72,13 +71,13 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
     static public final int SELECT_ALBUM_IMG = 0;
 
     @BindView(R.id.usericon)
-    public ImageView mUserIcon;
+    public ImageView mUserdIcon;
 
     @BindView(R.id.username)
-    public TextView mUserName;
+    public TextView mUserdName;
 
     @BindView(R.id.userdescript)
-    public TextView mUserDescirpt;
+    public TextView mUserdDescirpt;
 
     @BindView(R.id.blurimg)
     public MyBlurImageView mBlurImg;
@@ -156,9 +155,9 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
         ButterKnife.bind(this);
 
         //设置显示效果
-        OutlineProvider.setOutline(mUserIcon,OutlineProvider.SHAPE_OVAL);
+        OutlineProvider.setOutline(mUserdIcon,OutlineProvider.SHAPE_OVAL);
         mMsgEdittext.getPaint().setFakeBoldText(true);
-        mUserName.getPaint().setFakeBoldText(true);
+        mUserdName.getPaint().setFakeBoldText(true);
 
         setClickable(true);
         setOnClickListener(new OnClickListener() {
@@ -239,7 +238,7 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
                 mLocationDes.setText("经度:"+la+"   纬度:"+lo);
 
                 mLikeNum.setText(String.valueOf(mPointData.pointLikeNum));
-                mLikeButton.setChecked(GlobalVar.mUserinfo2.userinfo.userLikePointIDList.contains(mPointData.pointID),false);
+                mLikeButton.setChecked(GlobalVar.mUserd.userLikePointIDList.contains(mPointData.pointID),false);
 
                 ml1.setVisibility(VISIBLE);
                 ml2.setVisibility(GONE);
@@ -249,9 +248,9 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
     }
 
     public void initShow2(Userinfo ui){
-        mUserName.setText(ui.userName);
-        mUserDescirpt.setText(ui.userDes);
-        UserIconWarp.just(mContext,ui.userIcon,mUserIcon);
+        mUserdName.setText(ui.userName);
+        mUserdDescirpt.setText(ui.userDes);
+        UserIconWarp.just(mContext,ui.userIcon,mUserdIcon);
     }
 
     int lmode2;
@@ -364,7 +363,7 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
 
         pd.latitude = l.latitude;
         pd.longitude = l.longitude;
-        pd.userID = GlobalVar.mUserinfo2.userinfo.userID;
+        pd.userID = GlobalVar.mUserd.ui2.userinfo.userID;
 
         MessageJson mj= new MessageJson();
         mj.ver=100;
@@ -379,7 +378,7 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
         pd.userMessage = gson.toJson(mj);
 
         pd2.pointData = pd;
-        pd2.userID2 = GlobalVar.mUserinfo2.userID2;
+        pd2.userID2 = GlobalVar.mUserd.ui2.userID2;
 
         Myserver.getApi().newPoint(pd2)
                 .subscribeOn(Schedulers.io())
@@ -408,8 +407,8 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
         UserLikePoint ulp = new UserLikePoint();
         ulp.pointID = mPointData.pointID;
         ulp.isLike = mLikeButton.isChecked();
-        ulp.userID = GlobalVar.mUserinfo2.userinfo.userID;
-        ulp.userID2 = GlobalVar.mUserinfo2.userID2;
+        ulp.userID = GlobalVar.mUserd.ui2.userinfo.userID;
+        ulp.userID2 = GlobalVar.mUserd.ui2.userID2;
         Myserver.getApi().userlikepoint(ulp)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -427,7 +426,7 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
         mLikeButton.setChecked(mVar.isLike);
         mLikeNum.setText(String.valueOf(mVar.pointLikeNum));
 
-        List<String> ulpd = GlobalVar.mUserinfo2.userinfo.userLikePointIDList;
+        List<String> ulpd = GlobalVar.mUserd.userLikePointIDList;
         boolean isContain = ulpd.contains(mVar.pointID);
         if (mVar.isLike && !isContain)
             ulpd.add(mVar.pointID);

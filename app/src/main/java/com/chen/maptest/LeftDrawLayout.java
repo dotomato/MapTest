@@ -2,8 +2,6 @@ package com.chen.maptest;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
-import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,13 +11,13 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.chen.maptest.Manager.MyUM;
 import com.chen.maptest.MyView.ListViewItemData;
 import com.chen.maptest.MyView.MyListViewAdapter;
 import com.chen.maptest.MyView.OutlineProvider;
 import com.chen.maptest.Utils.UserIconWarp;
 
 import net.steamcrafted.materialiconlib.MaterialDrawableBuilder;
-import net.steamcrafted.materialiconlib.MaterialIconUtils;
 
 import java.util.ArrayList;
 
@@ -34,7 +32,7 @@ public class LeftDrawLayout extends ListView {
 
     private Context mContext;
 
-    private ArrayList<ListViewItemData> mData = new ArrayList<>();
+    private ArrayList<ListViewItemData> mData;
 
     private View mHeader;
 
@@ -60,6 +58,7 @@ public class LeftDrawLayout extends ListView {
 
     private void init(Context context){
         mContext = context;
+        mData = new ArrayList<>();
     }
 
 
@@ -91,7 +90,7 @@ public class LeftDrawLayout extends ListView {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 if (i==0){
-                    if (GlobalVar.mUserinfo2 != null) {
+                    if (MyUM.isinited()) {
                         Intent intent = new Intent(mContext, UserinfoActivity.class);
                         mContext.startActivity(intent);
                     } else {
@@ -108,8 +107,8 @@ public class LeftDrawLayout extends ListView {
     }
 
     public void initUserView(){
-        mUserName.setText(GlobalVar.mUserinfo2.userinfo.userName);
-        mUserDes.setText(GlobalVar.mUserinfo2.userinfo.userDes);
-        UserIconWarp.just(mContext,GlobalVar.mUserinfo2.userinfo.userIcon,mUsericon);
+        mUserName.setText(MyUM.getui().userName);
+        mUserDes.setText(MyUM.getui().userDes);
+        UserIconWarp.just(mContext,MyUM.getui().userIcon,mUsericon);
     }
 }
