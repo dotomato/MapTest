@@ -8,6 +8,8 @@ package com.chen.maptest.MyModel;
 public class PointSimpleData{
     public String pointID;
     public String userID;
+    public String userName;
+    public String userIcon;
     public String smallMsg;
     public double latitude;
     public double longitude;

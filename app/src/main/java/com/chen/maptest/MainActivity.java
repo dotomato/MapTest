@@ -6,7 +6,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.graphics.PointF;
 import android.os.Build;
 import android.support.design.widget.FloatingActionButton;
@@ -22,6 +21,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.ToxicBakery.viewpager.transforms.FlipHorizontalTransformer;
+import com.chen.maptest.Manager.MyUserManager;
 import com.chen.maptest.MapAdapter.MapAdaterCallback;
 import com.chen.maptest.MapAdapter.MmapAdapterActivity;
 import com.chen.maptest.MyServer.MyAction1;
@@ -39,8 +39,6 @@ import com.chen.maptest.MyView.QuickPageAdapter;
 import com.chen.maptest.MyView.ScrollableViewPager;
 import com.chen.maptest.Utils.OnceRunner;
 import com.yalantis.ucrop.UCrop;
-
-import org.w3c.dom.Comment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,6 +91,7 @@ public class MainActivity extends MmapAdapterActivity implements
     private View v1;
     private View v2;
     private CommentLayout mCommentLayout;
+    private MyUserManager mUserManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,7 +104,15 @@ public class MainActivity extends MmapAdapterActivity implements
 
         Myserver.apiTest();
 
-        initUserinfo();
+        mUserManager = new MyUserManager(this);
+        mUserManager.inituserinfo();
+        mUserManager.setmUserInitFinish(new MyUserManager.UserInitFinish() {
+            @Override
+            public void OnUserInitFinish() {
+                initUserView();
+            }
+        });
+
 
         initSelectHelper();
 
@@ -180,50 +187,6 @@ public class MainActivity extends MmapAdapterActivity implements
         mCommentLayout = (CommentLayout)v2.findViewById(R.id.comment_layout);
     }
 
-    private void initUserinfo(){
-        SharedPreferences pref = getSharedPreferences("data",MODE_PRIVATE);
-        String userID = pref.getString("userID",null);
-        if (userID==null) {
-            Userinfo ui = new Userinfo();
-            ui.userDes="please give me a new ID!";
-            Myserver.getApi().newuser(ui)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new MyAction1<Userinfo2Result>() {
-                        @Override
-                        public void call() {
-                            SharedPreferences pref = getSharedPreferences("data",MODE_PRIVATE);
-                            SharedPreferences.Editor editor = pref.edit();
-                            editor.putString("userID", mVar.userinfo.userID);
-                            editor.putString("userID2", mVar.userID2);
-                            editor.apply();
-
-                            GlobalVar.mUserinfo2 = new Userinfo2();
-                            GlobalVar.mUserinfo2.userinfo = mVar.userinfo;
-                            GlobalVar.mUserinfo2.userID2 = mVar.userID2;
-                            initUserView();
-                        }
-                    });
-        } else {
-            Userinfo ui = new Userinfo();
-            ui.userID=userID;
-            Myserver.getApi().getuser(ui)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new MyAction1<UserinfoResult>() {
-                        @Override
-                        public void call() {
-                            SharedPreferences pref = getSharedPreferences("data",MODE_PRIVATE);
-
-                            GlobalVar.mUserinfo2 = new Userinfo2();
-                            GlobalVar.mUserinfo2.userinfo = mVar.userinfo;
-                            GlobalVar.mUserinfo2.userID2 = pref.getString("userID2",null);
-                            initUserView();
-                        }
-                    });
-        }
-    }
-
     private void initUserView(){
         mLeftDrawerLayout.initUserView();
     }
@@ -233,7 +196,8 @@ public class MainActivity extends MmapAdapterActivity implements
         mSelectHelper = new OnceRunner() {
             @Override
             protected void call() {
-                selectArea();
+                if (lmode == MODE_SCAN)
+                    selectArea();
             }
         };
         mSelectHelper.setInternal(400);
@@ -285,7 +249,6 @@ public class MainActivity extends MmapAdapterActivity implements
     }
 
     public void MyMarkerClick(PointSimpleData psd) {
-//        gotoLocation2(calUperLatlng(new MyLatlng(psd.latitude,psd.longitude)));
         MyLatlng l =new MyLatlng(psd.latitude,psd.longitude);
 
         removeReadMarker();
@@ -299,6 +262,8 @@ public class MainActivity extends MmapAdapterActivity implements
                 .subscribe(new MyAction1<PointDataResult>() {
                     @Override
                     public void call() {
+                        gotoLocation2(calUperLatlng(
+                                new MyLatlng(mVar.pointData.latitude,mVar.pointData.longitude)));
                         switchShowMode(MODE_MESSAGE,300);
                         mUserMessageLayout.initShow(MODE_MESSAGE,mVar.pointData);
                         mCommentLayout.initShow(0,mVar.pointData);
@@ -367,18 +332,15 @@ public class MainActivity extends MmapAdapterActivity implements
     private void _switchShowMode(){
         lmode=mMode;
 
-        mUserMessageLayout.clearAnimation();
-        mScanMessageRv.clearAnimation();
-
         switch (mMode){
             case MODE_SCAN:
                 mMyMapIcon.switchIcon(MyMapIcon.ICON_HIDE);
                 removeReadMarker();
 
-                mViewpager.animate().alpha(0).setDuration(mDuration).withEndAction(new Runnable() {
+                mBottomViewGroup.animate().alpha(0).setDuration(mDuration).withEndAction(new Runnable() {
                     @Override
                     public void run() {
-                        mViewpager.setVisibility(View.GONE);
+                        mBottomViewGroup.setVisibility(View.GONE);
                     }
                 }).start();
 
@@ -393,8 +355,8 @@ public class MainActivity extends MmapAdapterActivity implements
 
                 removeReadMarker();
 
-                mViewpager.setVisibility(View.VISIBLE);
-                mViewpager.animate().alpha(1).setDuration(mDuration).start();
+                mBottomViewGroup.setVisibility(View.VISIBLE);
+                mBottomViewGroup.animate().alpha(1).setDuration(mDuration).start();
                 mViewpager.setCurrentItem(0,false);
                 mViewpager.setScrollAble(false);
 
@@ -410,8 +372,8 @@ public class MainActivity extends MmapAdapterActivity implements
             case MODE_MESSAGE:
                 mMyMapIcon.switchIcon(MyMapIcon.ICON_HIDE);
 
-                mViewpager.setVisibility(View.VISIBLE);
-                mViewpager.animate().alpha(1).setDuration(mDuration).start();
+                mBottomViewGroup.setVisibility(View.VISIBLE);
+                mBottomViewGroup.animate().alpha(1).setDuration(mDuration).start();
                 mViewpager.setCurrentItem(0,false);
                 mViewpager.setScrollAble(true);
 
@@ -429,7 +391,7 @@ public class MainActivity extends MmapAdapterActivity implements
     private void selectArea(){
         SelectAreaData sad = new SelectAreaData();
         MyLatlng lt = pointToMyLatlng(new PointF(0,0));
-        MyLatlng rb = pointToMyLatlng(new PointF(mapView.getWidth(),mBottomViewGroup.getTop()));
+        MyLatlng rb = pointToMyLatlng(new PointF(mapView.getWidth(),mScanMessageRv.getTop()));
         sad.left_top_latitude = lt.latitude;
         sad.left_top_longitude = lt.longitude;
         sad.right_bottom_latitude = rb.latitude;

@@ -53,7 +53,7 @@ public class Myserver {
 
         @Headers({"Content-Type: application/json","Accept: application/json"})
         @POST(VERSION+"/getuser")
-        Observable<UserinfoResult> getuser(@Body Userinfo var);
+        Observable<UserinfoResult> getuser(@Body Userinfo var); // TODO: 17-4-6 将用户的大型信息分离
 
         @Headers({"Content-Type: application/json","Accept: application/json"})
         @POST(VERSION+"/updateuser")

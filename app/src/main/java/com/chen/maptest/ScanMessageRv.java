@@ -50,8 +50,6 @@ public class ScanMessageRv extends RecyclerView {
 
     private CommonAdapter<PointSimpleData> mAdapter;
 
-    private AddAnimateRunnable mAddAnimateRunnable;
-
     private List<PointSimpleData> mDatas;
     private HeaderAndFooterWrapper mHeaderAndFooterWrapper;
     private EmptyWrapper mEmptyWrapper;
@@ -76,23 +74,13 @@ public class ScanMessageRv extends RecyclerView {
 
 
         setLayoutManager(new LinearLayoutManager(mContext , LinearLayoutManager.VERTICAL, false));
-//        setHasFixedSize(true);
+        setHasFixedSize(true);
 
         mAdapter = new CommonAdapter<PointSimpleData>(mContext, R.layout.layout_scan_item, mDatas){
             @Override
             protected void convert(final com.zhy.adapter.recyclerview.base.ViewHolder holder,final PointSimpleData psd, int position) {
-                Userinfo nuid = new Userinfo();
-                nuid.userID = psd.userID;
-                Myserver.getApi().getuser(nuid)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new MyAction1<UserinfoResult>() {
-                            @Override
-                            public void call() {
-                                UserIconWarp.just(mContext, mVar.userinfo.userIcon, (ImageView) holder.getView(R.id.usericon));
-                                holder.setText(R.id.username, mVar.userinfo.userName);
-                            }
-                        });
+                UserIconWarp.just(mContext, psd.userIcon, (ImageView) holder.getView(R.id.usericon));
+                holder.setText(R.id.username, psd.userName);
 
                 OutlineProvider.setOutline(holder.getConvertView(),OutlineProvider.SHAPE_RECT);
                 OutlineProvider.setOutline(holder.getView(R.id.usericon),OutlineProvider.SHAPE_OVAL);
@@ -133,7 +121,6 @@ public class ScanMessageRv extends RecyclerView {
 //        });
 
         setAdapter(mEmptyWrapper);
-        mAddAnimateRunnable = new AddAnimateRunnable();
 
         DefaultItemAnimator da = new DefaultItemAnimator();
         da.setRemoveDuration(0);
@@ -146,7 +133,7 @@ public class ScanMessageRv extends RecyclerView {
         mDatas.clear();
         mEmptyWrapper.notifyItemRangeRemoved(0,j);
 
-        Observable.interval(0,100, TimeUnit.MILLISECONDS)
+        Observable.interval(0,200, TimeUnit.MILLISECONDS)
                 .take(points.size())
                 .map(new Func1<Long, PointSimpleData>() {
                     @Override
@@ -159,7 +146,7 @@ public class ScanMessageRv extends RecyclerView {
                     @Override
                     public void call(PointSimpleData psd) {
                         mDatas.add(psd);
-                        mEmptyWrapper.notifyItemRangeInserted(mDatas.size(),1);
+                        mEmptyWrapper.notifyItemInserted(mDatas.size());
                     }
         });
     }
@@ -171,37 +158,6 @@ public class ScanMessageRv extends RecyclerView {
     private OnRecyclerViewItemClickListener mOnRecyclerViewItemClickListener;
     public void setOnRecyclerViewItemClickListener(OnRecyclerViewItemClickListener recyclerViewItemClickListener) {
         this.mOnRecyclerViewItemClickListener = recyclerViewItemClickListener;
-    }
-
-    private class AddAnimateRunnable implements Runnable{
-
-        private int curItem;
-        private boolean canRun;
-        private List<PointSimpleData> points;
-
-        public void setData(List<PointSimpleData> points){
-            this.points = points;
-            this.canRun = true;
-            this.curItem= 0;
-        }
-        public void stop(){
-            canRun=false;
-            points=null;
-        }
-
-        @Override
-        public void run() {
-            while(curItem!=points.size() && canRun){
-                mDatas.add(points.get(curItem));
-                mHeaderAndFooterWrapper.notifyItemInserted(curItem);
-                curItem++;
-                try {
-                    Thread.sleep(200);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
     }
 
 }
