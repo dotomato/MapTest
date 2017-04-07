@@ -18,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.SeekBar;
 import android.widget.Toast;
 
 import com.ToxicBakery.viewpager.transforms.FlipHorizontalTransformer;
@@ -38,6 +39,7 @@ import com.chen.maptest.MyView.OutlineProvider;
 import com.chen.maptest.MyView.QuickPageAdapter;
 import com.chen.maptest.MyView.ScrollableViewPager;
 import com.chen.maptest.Utils.OnceRunner;
+import com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBar;
 import com.yalantis.ucrop.UCrop;
 
 import java.util.ArrayList;
@@ -73,14 +75,20 @@ public class MainActivity extends MmapAdapterActivity implements
     @BindView(R.id.activity_main)
     public DrawerLayout mRootView;
 
-    @BindView(R.id.scan_message_layout)
-    public ScanMessageRv mScanMessageRv;
-
-    @BindView(R.id.bottom_viewgroup)
+    @BindView(R.id.messageviewgroup)
     public ViewGroup mBottomViewGroup;
 
     @BindView(R.id.viewpager)
     public ScrollableViewPager mViewpager;
+
+    @BindView(R.id.zoombar)
+    public VerticalSeekBar mZoombar;
+
+    @BindView(R.id.zoomview)
+    public ViewGroup mZoomView;
+
+    @BindView(R.id.scanviewgroup)
+    public ScanView mScanViewGroup;
 
     private View mapView;
 
@@ -130,8 +138,8 @@ public class MainActivity extends MmapAdapterActivity implements
     private void initLayout(){
         mRootView.addDrawerListener(this);
 
-        mScanMessageRv.initview();
-        mScanMessageRv.setOnRecyclerViewItemClickListener(this);
+        mScanViewGroup.initview(this);
+
 
         v1 = LayoutInflater.from(this).inflate(R.layout.layout_user_message,null,false);
         v2 = LayoutInflater.from(this).inflate(R.layout.layout_comment,null,false);
@@ -189,6 +197,25 @@ public class MainActivity extends MmapAdapterActivity implements
         OutlineProvider.setOutline(mUserMessageLayout,OutlineProvider.SHAPE_RECT);
 
         mCommentLayout = (CommentLayout)v2.findViewById(R.id.comment_layout);
+
+        mZoombar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                if (!b)
+                    return;
+                onZoomCtrl(i*1.0/100);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
     }
 
     private void initUserView(){
@@ -266,7 +293,7 @@ public class MainActivity extends MmapAdapterActivity implements
                 .subscribe(new MyAction1<PointDataResult>() {
                     @Override
                     public void call() {
-                        gotoLocation2(calUperLatlng(
+                        gotoLocationSmooth(calUperLatlng(
                                 new MyLatlng(mVar.pointData.latitude,mVar.pointData.longitude)));
                         switchShowMode(MODE_MESSAGE,300);
                         mUserMessageLayout.initShow(MODE_MESSAGE,mVar.pointData);
@@ -293,6 +320,8 @@ public class MainActivity extends MmapAdapterActivity implements
     public void MyCameraChangeFinish() {
         GlobalVar.viewLatlng = pointToMyLatlng(getCenterp());
         mSelectHelper.start();
+        mZoombar.setProgress((int) (getZoom()*100));
+        Log.d(TAG,"zoom"+getZoom()+" LatLng"+GlobalVar.viewLatlng.toLatlng());
     }
 
     @Override
@@ -302,13 +331,13 @@ public class MainActivity extends MmapAdapterActivity implements
 
     @Override
     public void firstLocation(final MyLatlng latlng) {
-        gotoLocation2(latlng,15);
-        mapView.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                gotoLocation2(calUperLatlng(latlng));
-            }
-        },100);
+        gotoLocation(latlng,15);
+//        mapView.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                gotoLocationSmooth(calUperLatlng(latlng));
+//            }
+//        },100);
     }
 
 
@@ -348,10 +377,13 @@ public class MainActivity extends MmapAdapterActivity implements
                     }
                 }).start();
 
-                mScanMessageRv.setVisibility(View.VISIBLE);
-                mScanMessageRv.animate().alpha(1).setDuration(mDuration).start();
+                mZoomView.setVisibility(View.VISIBLE);
+                mZoomView.animate().alpha(1).setDuration(mDuration).start();
+                mScanViewGroup.setVisibility(View.VISIBLE);
+                mScanViewGroup.animate().alpha(1).setDuration(mDuration).start();
 
                 mFloatingActionButton.show();
+
                 break;
             case MODE_EDIT:
                 mMyMapIcon.switchIcon(MyMapIcon.ICON_FLAG);
@@ -364,10 +396,12 @@ public class MainActivity extends MmapAdapterActivity implements
                 mViewpager.setCurrentItem(0,false);
                 mViewpager.setScrollAble(false);
 
-                mScanMessageRv.animate().alpha(0).setDuration(mDuration).withEndAction(new Runnable() {
+                mZoomView.animate().alpha(0).setDuration(mDuration).start();
+                mScanViewGroup.animate().alpha(0).setDuration(mDuration).withEndAction(new Runnable() {
                     @Override
                     public void run() {
-                        mScanMessageRv.setVisibility(View.GONE);
+                        mScanViewGroup.setVisibility(View.GONE);
+                        mZoomView.setVisibility(View.GONE);
                     }
                 }).start();
 
@@ -381,10 +415,12 @@ public class MainActivity extends MmapAdapterActivity implements
                 mViewpager.setCurrentItem(0,false);
                 mViewpager.setScrollAble(true);
 
-                mScanMessageRv.animate().alpha(0).setDuration(mDuration).withEndAction(new Runnable() {
+                mZoomView.animate().alpha(0).setDuration(mDuration).start();
+                mScanViewGroup.animate().alpha(0).setDuration(mDuration).withEndAction(new Runnable() {
                     @Override
                     public void run() {
-                        mScanMessageRv.setVisibility(View.GONE);
+                        mScanViewGroup.setVisibility(View.GONE);
+                        mZoomView.setVisibility(View.GONE);
                     }
                 }).start();
                 mFloatingActionButton.hide();
@@ -395,7 +431,7 @@ public class MainActivity extends MmapAdapterActivity implements
     private void selectArea(){
         SelectAreaData sad = new SelectAreaData();
         MyLatlng lt = pointToMyLatlng(new PointF(0,0));
-        MyLatlng rb = pointToMyLatlng(new PointF(mapView.getWidth(),mScanMessageRv.getTop()));
+        MyLatlng rb = pointToMyLatlng(new PointF(mapView.getWidth(),mScanViewGroup.getTop()));
         sad.left_top_latitude = lt.latitude;
         sad.left_top_longitude = lt.longitude;
         sad.right_bottom_latitude = rb.latitude;
@@ -412,7 +448,7 @@ public class MainActivity extends MmapAdapterActivity implements
                         for (PointSimpleData psd:mVar.points) {
                             addMarker(psd);
                         }
-                        mScanMessageRv.setScanData(mVar.points);
+                        mScanViewGroup.setScanData(mVar.points);
                     }
                 });
     }
@@ -439,7 +475,6 @@ public class MainActivity extends MmapAdapterActivity implements
             Toast.makeText(this,"还没有连上网络",Toast.LENGTH_SHORT).show();
             return;
         }
-
         switchShowMode(MODE_EDIT,300);
         mUserMessageLayout.initShow(MODE_EDIT,null);
         mUserMessageLayout.initShow2(MyUM.getui());

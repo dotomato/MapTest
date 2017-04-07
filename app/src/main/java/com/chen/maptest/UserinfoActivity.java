@@ -12,6 +12,8 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -180,6 +182,22 @@ public class UserinfoActivity extends AppCompatActivity implements Toolbar.OnMen
     }
 
     private void awareUserinfoUpdate() {
+        mUsername.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
         Intent intent = new Intent(GlobalConst.UPDATE_USERINFO_VIEW);
         LocalBroadcastManager.getInstance(UserinfoActivity.this).sendBroadcast(intent);
     }

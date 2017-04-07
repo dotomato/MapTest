@@ -5,16 +5,20 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.graphics.Point;
 import android.graphics.PointF;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.FrameLayout;
 
 import com.chen.maptest.GlobalVar;
 import com.chen.maptest.MyModel.PointSimpleData;
@@ -144,6 +148,7 @@ public class MmapAdapterActivity extends AppCompatActivity implements MapboxMap.
         mUiSettings.setCompassEnabled(false);
         mUiSettings.setAttributionEnabled(false);
         mUiSettings.setLogoEnabled(true);
+        mUiSettings.setLogoGravity(Gravity.TOP | Gravity.LEFT);
 
         mProjection = mMap.getProjection();
 
@@ -283,18 +288,16 @@ public class MmapAdapterActivity extends AppCompatActivity implements MapboxMap.
             mReadMark.remove();
     }
 
-    public void gotoLocation2(MyLatlng latlng){
-        //参数依次是：视角调整区域的中心点坐标、希望调整到的缩放级别、俯仰角0°~45°（垂直与地图时为0）、偏航角 0~360° (正北方为0)
+    public void gotoLocationSmooth(MyLatlng latlng){
         CameraUpdate mCameraUpdate =
                 CameraUpdateFactory.newLatLng(latlng.toLatlng());
         mMap.easeCamera(mCameraUpdate,500);
     }
 
-    public void gotoLocation2(MyLatlng latlng, double zoom){
-        //参数依次是：视角调整区域的中心点坐标、希望调整到的缩放级别、俯仰角0°~45°（垂直与地图时为0）、偏航角 0~360° (正北方为0)
+    public void gotoLocation(MyLatlng latlng, double zoom){
         CameraUpdate mCameraUpdate =
                 CameraUpdateFactory.newLatLngZoom(latlng.toLatlng(), zoom);
-        mMap.animateCamera(mCameraUpdate,0);
+        mMap.animateCamera(mCameraUpdate,1000);
     }
 
     public void rmAllMarker(){
@@ -309,5 +312,22 @@ public class MmapAdapterActivity extends AppCompatActivity implements MapboxMap.
 
     public PointF myLatlgnToPoint(MyLatlng l){
         return mProjection==null?new PointF(-1,-1):mProjection.toScreenLocation(l.toLatlng()) ;
+    }
+
+    protected void onZoomCtrl(double z){
+        if (z>1)
+            z = 1;
+        else if (z<0)
+            z = 0;
+        double v1 = mMap.getMaxZoomLevel();
+        double v2 = mMap.getMinZoomLevel();
+        double v3 = v2 + (v1 - v2)*z;
+        CameraUpdate cameraUpdate = CameraUpdateFactory.zoomTo(v3);
+        mMap.moveCamera(cameraUpdate);
+    }
+
+    protected double getZoom(){
+        double v = mMap.getCameraPosition().zoom;
+        return (v-mMap.getMinZoomLevel())/(mMap.getMaxZoomLevel()-mMap.getMinZoomLevel());
     }
 }

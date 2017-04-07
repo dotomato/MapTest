@@ -7,6 +7,7 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,8 +52,7 @@ public class ScanMessageRv extends RecyclerView {
     private CommonAdapter<PointSimpleData> mAdapter;
 
     private List<PointSimpleData> mDatas;
-    private HeaderAndFooterWrapper mHeaderAndFooterWrapper;
-    private EmptyWrapper mEmptyWrapper;
+    private final String TAG = "ScanMessageRv";
 
     public ScanMessageRv(Context context) {
         super(context);
@@ -74,7 +74,7 @@ public class ScanMessageRv extends RecyclerView {
 
 
         setLayoutManager(new LinearLayoutManager(mContext , LinearLayoutManager.VERTICAL, false));
-        setHasFixedSize(true);
+        setHasFixedSize(false);
 
         mAdapter = new CommonAdapter<PointSimpleData>(mContext, R.layout.layout_scan_item, mDatas){
             @Override
@@ -98,57 +98,43 @@ public class ScanMessageRv extends RecyclerView {
             }
         };
 
+        setAdapter(mAdapter);
 
-        mEmptyWrapper = new EmptyWrapper(mAdapter);
-        View emptyView = LayoutInflater.from(mContext).inflate(R.layout.layout_empty_message,this,false);
-//        OutlineProvider.setOutline(emptyView,OutlineProvider.SHAPE_RECT);
-        mEmptyWrapper.setEmptyView(emptyView);
-
-
-//        mHeaderAndFooterWrapper = new HeaderAndFooterWrapper(mEmptyWrapper);
-//        View footerView = LayoutInflater.from(mContext).inflate(R.layout.layout_footer_message,this,false);
-//        OutlineProvider.setOutline(footerView,OutlineProvider.SHAPE_RECT);
-//        mHeaderAndFooterWrapper.addFootView(footerView);
-
-//        LoadMoreWrapper mLoadMoreWrapper = new LoadMoreWrapper(mEmptyWrapper);
-//        mLoadMoreWrapper.setLoadMoreView(R.layout.default_loading);
-//        mLoadMoreWrapper.setOnLoadMoreListener(new LoadMoreWrapper.OnLoadMoreListener()
-//        {
-//            @Override
-//            public void onLoadMoreRequested()
-//            {
-//            }
-//        });
-
-        setAdapter(mEmptyWrapper);
-
-        DefaultItemAnimator da = new DefaultItemAnimator();
-        da.setRemoveDuration(0);
-        da.setAddDuration(350);
-        setItemAnimator(da);
+//        DefaultItemAnimator da = new DefaultItemAnimator();
+//        da.setRemoveDuration(0);
+//        da.setAddDuration(350);
+//        setItemAnimator(da);
     }
 
     public void setScanData(final List<PointSimpleData> points){
         int j = mDatas.size();
         mDatas.clear();
-        mEmptyWrapper.notifyItemRangeRemoved(0,j);
+        mAdapter.notifyDataSetChanged();
 
-        Observable.interval(0,200, TimeUnit.MILLISECONDS)
-                .take(points.size())
-                .map(new Func1<Long, PointSimpleData>() {
-                    @Override
-                    public PointSimpleData call(Long aLong) {
-                        return points.get(aLong.intValue());
-                    }
-                })
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<PointSimpleData>() {
-                    @Override
-                    public void call(PointSimpleData psd) {
-                        mDatas.add(psd);
-                        mEmptyWrapper.notifyItemInserted(mDatas.size());
-                    }
-        });
+        for (int i=0;i<points.size();i++){
+            mDatas.add(i,points.get(i));
+            mAdapter.notifyItemInserted(i);
+        }
+//        mDatas.addAll(points);
+//        mAdapter.notifyItemRangeInserted(0,mDatas.size());
+
+//        Observable.interval(200,200, TimeUnit.MILLISECONDS)
+//                .take(points.size())
+//                .map(new Func1<Long, PointSimpleData>() {
+//                    @Override
+//                    public PointSimpleData call(Long aLong) {
+//                        return points.get(aLong.intValue());
+//                    }
+//                })
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(new Action1<PointSimpleData>() {
+//                    @Override
+//                    public void call(PointSimpleData psd) {
+//                        Log.d(TAG,psd.smallMsg);
+//                        mDatas.add(psd);
+//                        mAdapter.notifyItemInserted(mDatas.size()-1);
+//                    }
+//        });
     }
 
 

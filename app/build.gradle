@@ -50,6 +50,7 @@ dependencies {
     compile 'com.zhy:base-rvadapter:3.0.3'
     compile 'com.ToxicBakery.viewpager.transforms:view-pager-transforms:1.2.32@aar'
     compile 'com.sackcentury:shinebutton:0.1.7'
+    compile 'com.h6ah4i.android.widget.verticalseekbar:verticalseekbar:0.7.2'
     testCompile 'junit:junit:4.12'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.0.1'
 }
