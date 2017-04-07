@@ -108,8 +108,9 @@ public class MyMapIcon extends ConstraintLayout {
         int tw = MyUtils.dip2px(mContext,35);
 
         final ShineButton shineButtonJava = new ShineButton(mContext);
-        shineButtonJava.setBtnColor(Color.rgb(128,0,0));
-        shineButtonJava.setBtnFillColor(Color.RED);
+        shineButtonJava.setBtnColor(Color.GRAY);
+        shineButtonJava.setBtnFillColor(Color.rgb(255,64,129));
+        shineButtonJava.setAllowRandomColor(true);
         shineButtonJava.setShapeResource(R.raw.star);
         shineButtonJava.setClickAnimDuration(1000);
         shineButtonJava.setShineTurnAngle(180);

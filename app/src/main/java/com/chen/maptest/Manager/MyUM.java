@@ -26,11 +26,7 @@ import rx.schedulers.Schedulers;
 
 public class MyUM {
 
-    private Context mContext;
-    public MyUM(Context var){
-        mContext = var;
-        uiinited = false;
-        ulinited = 0;
+    public MyUM(){
     }
 
     private static boolean uiinited;
@@ -40,58 +36,69 @@ public class MyUM {
         return uiinited && (ulinited == 2);
     }
 
-    public void inituserinfo(){
-        SharedPreferences pref = mContext.getSharedPreferences("data",mContext.MODE_PRIVATE);
+    public void inituserinfo(Context var,UserInitFinish mUserdInitFinish){
+        SharedPreferences pref = var.getSharedPreferences("data",Context.MODE_PRIVATE);
         String userID = pref.getString("userID",null);
         if (userID==null) {
-            Userinfo ui = new Userinfo();
-            ui.userDes="please give me a new ID!";
-            Myserver.getApi().newuser(ui)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new MyAction1<Userinfo2Result>() {
-                        @Override
-                        public void call() {
-                            SharedPreferences pref = mContext.getSharedPreferences("data",mContext.MODE_PRIVATE);
-                            SharedPreferences.Editor editor = pref.edit();
-                            editor.putString("userID", mVar.userinfo2.userinfo.userID);
-                            editor.putString("userID2", mVar.userinfo2.userID2);
-                            editor.apply();
-
-                            GlobalVar.mUserd = new Userinfo2List();
-                            GlobalVar.mUserd.ui2 = mVar.userinfo2;
-                            GlobalVar.mUserd.userLikeCommentIDList = mVar.userLikeCommentIDList;
-                            GlobalVar.mUserd.userLikePointIDList = mVar.userLikePointIDList;
-
-                            uiinited = true;
-                            initlist();
-                        }
-                    });
+            createNewUser(var,mUserdInitFinish);
         } else {
-            Userinfo ui = new Userinfo();
-            ui.userID=userID;
-            Myserver.getApi().getuser(ui)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new MyAction1<UserinfoResult>() {
-                        @Override
-                        public void call() {
-                            SharedPreferences pref = mContext.getSharedPreferences("data",mContext.MODE_PRIVATE);
-
-                            GlobalVar.mUserd = new Userinfo2List();
-                            GlobalVar.mUserd.ui2 = new Userinfo2();
-                            GlobalVar.mUserd.ui2.userinfo = mVar.userinfo;
-                            GlobalVar.mUserd.ui2.userID2 = pref.getString("userID2",null);
-
-                            uiinited = true;
-                            initlist();
-                        }
-                    });
-
+            getOldUser(var,userID,mUserdInitFinish);
         }
     }
 
-    private void initlist(){
+    public static void createNewUser(final Context var, final UserInitFinish mUserdInitFinish){
+        Userinfo ui = new Userinfo();
+        uiinited = false;
+        ulinited = 0;
+        ui.userDes="please give me a new ID!";
+        Myserver.getApi().newuser(ui)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new MyAction1<Userinfo2Result>() {
+                    @Override
+                    public void call() {
+                        SharedPreferences pref = var.getSharedPreferences("data",Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = pref.edit();
+                        editor.putString("userID", mVar.userinfo2.userinfo.userID);
+                        editor.putString("userID2", mVar.userinfo2.userID2);
+                        editor.apply();
+
+                        GlobalVar.mUserd = new Userinfo2List();
+                        GlobalVar.mUserd.ui2 = mVar.userinfo2;
+                        GlobalVar.mUserd.userLikeCommentIDList = mVar.userLikeCommentIDList;
+                        GlobalVar.mUserd.userLikePointIDList = mVar.userLikePointIDList;
+
+                        uiinited = true;
+                        initlist(mUserdInitFinish);
+                    }
+                });
+    }
+
+    public static void getOldUser(final Context var, String userID, final UserInitFinish mUserdInitFinish){
+        Userinfo ui = new Userinfo();
+        uiinited = false;
+        ulinited = 0;
+        ui.userID=userID;
+        Myserver.getApi().getuser(ui)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new MyAction1<UserinfoResult>() {
+                    @Override
+                    public void call() {
+                        SharedPreferences pref = var.getSharedPreferences("data",Context.MODE_PRIVATE);
+
+                        GlobalVar.mUserd = new Userinfo2List();
+                        GlobalVar.mUserd.ui2 = new Userinfo2();
+                        GlobalVar.mUserd.ui2.userinfo = mVar.userinfo;
+                        GlobalVar.mUserd.ui2.userID2 = pref.getString("userID2",null);
+
+                        uiinited = true;
+                        initlist(mUserdInitFinish);
+                    }
+                });
+    }
+
+    private static void initlist(final UserInitFinish mUserdInitFinish){
         Myserver.getApi().getuserlikecommentidlist(GlobalVar.mUserd.ui2)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -118,14 +125,9 @@ public class MyUM {
                 });
     }
 
-    public void setmUserdInitFinish(UserInitFinish mUserdInitFinish) {
-        this.mUserdInitFinish = mUserdInitFinish;
-    }
-
     public interface UserInitFinish{
         void OnUserInitFinish();
     }
-    private UserInitFinish mUserdInitFinish=null;
     
     public static Userinfo2 getui2(){
         return GlobalVar.mUserd.ui2;

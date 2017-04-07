@@ -136,27 +136,15 @@ public class UserinfoActivity extends AppCompatActivity implements Toolbar.OnMen
                 }
                 break;
             case R.id.useruuid:
-                Userinfo nuid = new Userinfo();
-                nuid.userDes="please give me a new ID!";
-                Myserver.getApi().newuser(nuid)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new MyAction1<Userinfo2Result>() {
-                            @Override
-                            public void call() {
-                                SharedPreferences pref = getSharedPreferences("data",MODE_PRIVATE);
-                                SharedPreferences.Editor editor = pref.edit();
-                                editor.putString("userID", mVar.userinfo2.userinfo.userID);
-                                editor.putString("userID2", mVar.userinfo2.userID2);
-                                editor.apply();
-
-                                GlobalVar.mUserd.ui2 = mVar.userinfo2;
-                                initUserView();
-                                setMenuComplete(false);
-                                awareUserinfoUpdate();
-                                Toast.makeText(UserinfoActivity.this,"更换了uuid",Toast.LENGTH_SHORT).show();
-                            }
-                        });
+                MyUM.createNewUser(this, new MyUM.UserInitFinish() {
+                    @Override
+                    public void OnUserInitFinish() {
+                        initUserView();
+                        setMenuComplete(false);
+                        awareUserinfoUpdate();
+                        Toast.makeText(UserinfoActivity.this,"更换了uuid",Toast.LENGTH_SHORT).show();
+                    }
+                });
                 break;
         }
         return true;
@@ -167,7 +155,6 @@ public class UserinfoActivity extends AppCompatActivity implements Toolbar.OnMen
     }
 
     private void updateUserinfo(){
-        Userinfo2 uui = new Userinfo2();
         Myserver.getApi().updateuser(tempUserinfo2)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

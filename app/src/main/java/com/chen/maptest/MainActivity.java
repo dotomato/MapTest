@@ -115,15 +115,13 @@ public class MainActivity extends MmapAdapterActivity implements
 
         Myserver.apiTest();
 
-        mUserManager = new MyUM(this);
-        mUserManager.inituserinfo();
-        mUserManager.setmUserdInitFinish(new MyUM.UserInitFinish() {
+        mUserManager = new MyUM();
+        mUserManager.inituserinfo(this,new MyUM.UserInitFinish() {
             @Override
             public void OnUserInitFinish() {
                 initUserView();
             }
         });
-
 
         initSelectHelper();
 
@@ -190,7 +188,7 @@ public class MainActivity extends MmapAdapterActivity implements
             public void newPointFinishCallback() {
                 selectArea();
                 switchShowMode_force(MODE_SCAN,300);
-                mMyMapIcon.shine_button(getCenterp());
+                mMyMapIcon.shine_button(getCenterpUper());
             }
         });
         mUserMessageLayout.setViewPager(mViewpager);
@@ -269,12 +267,16 @@ public class MainActivity extends MmapAdapterActivity implements
     public void MyTouch(MotionEvent motionEvent) {
     }
 
-    public PointF getCenterp(){
+    public PointF getCenterpUper(){
         return new PointF(mapView.getWidth()/2,(mapView.getTop()+mBottomViewGroup.getTop())/2);
     }
 
+    public PointF getCenterp2Lower(){
+        return new PointF(mapView.getWidth()/2,(mapView.getTop()+mScanViewGroup.getTop())/2);
+    }
+
     public MyLatlng calUperLatlng(MyLatlng l){
-        MyLatlng l1 = pointToMyLatlng(getCenterp());
+        MyLatlng l1 = pointToMyLatlng(getCenterpUper());
         MyLatlng l2 = pointToMyLatlng(new PointF(mapView.getWidth()/2,mapView.getHeight()/2));
         return new MyLatlng(l.latitude+l2.latitude-l1.latitude,l.longitude+l2.longitude-l1.longitude);
     }
@@ -318,7 +320,7 @@ public class MainActivity extends MmapAdapterActivity implements
     }
 
     public void MyCameraChangeFinish() {
-        GlobalVar.viewLatlng = pointToMyLatlng(getCenterp());
+        GlobalVar.viewLatlng = pointToMyLatlng(getCenterpUper());
         mSelectHelper.start();
         mZoombar.setProgress((int) (getZoom()*100));
         Log.d(TAG,"zoom"+getZoom()+" LatLng"+GlobalVar.viewLatlng.toLatlng());
@@ -386,8 +388,10 @@ public class MainActivity extends MmapAdapterActivity implements
 
                 break;
             case MODE_EDIT:
+                gotoLocationSmooth(calUperLatlng(pointToMyLatlng(getCenterp2Lower())));
+
                 mMyMapIcon.switchIcon(MyMapIcon.ICON_FLAG);
-                mMyMapIcon.gotoLalng(getCenterp());
+                mMyMapIcon.gotoLalng(getCenterpUper());
 
                 removeReadMarker();
 
