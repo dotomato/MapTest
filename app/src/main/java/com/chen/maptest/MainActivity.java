@@ -35,6 +35,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
 import com.chen.maptest.MyModel.*;
+import com.chen.maptest.MyView.MapUI;
 import com.chen.maptest.MyView.OutlineProvider;
 import com.chen.maptest.MyView.QuickPageAdapter;
 import com.chen.maptest.MyView.ScrollableViewPager;
@@ -90,6 +91,9 @@ public class MainActivity extends MmapAdapterActivity implements
     @BindView(R.id.scanviewgroup)
     public ScanView mScanViewGroup;
 
+    @BindView(R.id.mapui)
+    public MapUI mMapui;
+
     private View mapView;
 
 //    private ActionBarDrawerToggle mDrawerToggle;
@@ -110,13 +114,13 @@ public class MainActivity extends MmapAdapterActivity implements
         ButterKnife.bind(this);
 
         mapView = getMapView();
+        setMapAdaterCallback(this);
 
         initLayout();
 
         Myserver.apiTest();
 
-        mUserManager = new MyUM();
-        mUserManager.inituserinfo(this,new MyUM.UserInitFinish() {
+        MyUM.inituserinfo(this,new MyUM.UserInitFinish() {
             @Override
             public void OnUserInitFinish() {
                 initUserView();
@@ -124,8 +128,6 @@ public class MainActivity extends MmapAdapterActivity implements
         });
 
         initSelectHelper();
-
-        setMapAdaterCallback(this);
 
         setBoardcastReceiver();
 
@@ -267,25 +269,57 @@ public class MainActivity extends MmapAdapterActivity implements
     public void MyTouch(MotionEvent motionEvent) {
     }
 
+    public PointF getCenterp(){
+        return new PointF(mapView.getWidth()/2,mapView.getHeight()/2);
+    }
+
     public PointF getCenterpUper(){
         return new PointF(mapView.getWidth()/2,(mapView.getTop()+mBottomViewGroup.getTop())/2);
     }
 
-    public PointF getCenterp2Lower(){
+    public PointF getCenterpLower(){
         return new PointF(mapView.getWidth()/2,(mapView.getTop()+mScanViewGroup.getTop())/2);
     }
 
     public MyLatlng calUperLatlng(MyLatlng l){
         MyLatlng l1 = pointToMyLatlng(getCenterpUper());
-        MyLatlng l2 = pointToMyLatlng(new PointF(mapView.getWidth()/2,mapView.getHeight()/2));
+        MyLatlng l2 = pointToMyLatlng(getCenterp());
         return new MyLatlng(l.latitude+l2.latitude-l1.latitude,l.longitude+l2.longitude-l1.longitude);
     }
+
+
+    public void MyCameraChangeStart() {
+    }
+
+    public void MyCameraChangeFinish() {
+        GlobalVar.viewLatlng = pointToMyLatlng(getCenterpUper());
+        mSelectHelper.start();
+        mZoombar.setProgress((int) (getZoom()*100));
+        Log.d(TAG,"zoom"+getZoom()+" LatLng"+GlobalVar.viewLatlng.toLatlng());
+    }
+
+    @Override
+    public void MyGPSRecive(MyLatlng latlng) {
+        GlobalVar.gpsLatlng = latlng;
+    }
+
+    @Override
+    public void firstLocation(final MyLatlng latlng) {
+        gotoLocation(latlng,15);
+//        mapView.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                gotoLocationSmooth(calUperLatlng(latlng));
+//            }
+//        },100);
+    }
+
 
     public void MyMarkerClick(PointSimpleData psd) {
         MyLatlng l =new MyLatlng(psd.latitude,psd.longitude);
 
-        removeReadMarker();
-        addReadMarker(l);
+//        removeReadMarker();
+//        addReadMarker(l);
 
         PointData gpd = new PointData();
         gpd.pointID=psd.pointID;
@@ -316,34 +350,6 @@ public class MainActivity extends MmapAdapterActivity implements
                 });
     }
 
-    public void MyCameraChangeStart() {
-    }
-
-    public void MyCameraChangeFinish() {
-        GlobalVar.viewLatlng = pointToMyLatlng(getCenterpUper());
-        mSelectHelper.start();
-        mZoombar.setProgress((int) (getZoom()*100));
-        Log.d(TAG,"zoom"+getZoom()+" LatLng"+GlobalVar.viewLatlng.toLatlng());
-    }
-
-    @Override
-    public void MyGPSRecive(MyLatlng latlng) {
-        GlobalVar.gpsLatlng = latlng;
-    }
-
-    @Override
-    public void firstLocation(final MyLatlng latlng) {
-        gotoLocation(latlng,15);
-//        mapView.postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                gotoLocationSmooth(calUperLatlng(latlng));
-//            }
-//        },100);
-    }
-
-
-
     int lmode=-1;
     int mMode;
     long mDuration;
@@ -369,6 +375,9 @@ public class MainActivity extends MmapAdapterActivity implements
 
         switch (mMode){
             case MODE_SCAN:
+                gotoLocationSmooth(pointToMyLatlng(getCenterpUper()));
+                mMapui.setCenter(getCenterp());
+
                 mMyMapIcon.switchIcon(MyMapIcon.ICON_HIDE);
                 removeReadMarker();
 
@@ -388,7 +397,8 @@ public class MainActivity extends MmapAdapterActivity implements
 
                 break;
             case MODE_EDIT:
-                gotoLocationSmooth(calUperLatlng(pointToMyLatlng(getCenterp2Lower())));
+                gotoLocationSmooth(calUperLatlng(pointToMyLatlng(getCenterp())));
+                mMapui.setCenter(getCenterpUper());
 
                 mMyMapIcon.switchIcon(MyMapIcon.ICON_FLAG);
                 mMyMapIcon.gotoLalng(getCenterpUper());
@@ -412,6 +422,7 @@ public class MainActivity extends MmapAdapterActivity implements
                 mFloatingActionButton.hide();
                 break;
             case MODE_MESSAGE:
+                mMapui.setCenter(getCenterpUper());
                 mMyMapIcon.switchIcon(MyMapIcon.ICON_HIDE);
 
                 mBottomViewGroup.setVisibility(View.VISIBLE);
@@ -519,4 +530,24 @@ public class MainActivity extends MmapAdapterActivity implements
     @Override
     public void onItemClickListener(View View, PointSimpleData psd) {
         MyMarkerClick(psd);
-    }}
+    }
+
+    @OnClick(R.id.zoominbutton)
+    public void zoomin(){
+        super.onZoomCtrl(mZoombar.getProgress()*1.0/100-0.1);
+    }
+
+
+    @OnClick(R.id.zoomoutbutton)
+    public void zoomout(){
+        super.onZoomCtrl(mZoombar.getProgress()*1.0/100+0.1);
+    }
+
+    @OnClick(R.id.retlocalbutton)
+    public void retlocal(){
+        if (GlobalVar.gpsLatlng!=null)
+            gotoLocationSmooth(GlobalVar.gpsLatlng);
+    }
+
+
+}

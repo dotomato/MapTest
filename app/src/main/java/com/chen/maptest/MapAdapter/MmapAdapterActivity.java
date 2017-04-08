@@ -57,7 +57,6 @@ public class MmapAdapterActivity extends AppCompatActivity implements MapboxMap.
 
 
     private final static String TAG = "MmapAdapterActivity";
-    private final static int WRITE_COARSE_LOCATION_REQUEST_CODE = 0;
 
     private MapView mMapView;
     private MapboxMap mMap;
@@ -82,7 +81,6 @@ public class MmapAdapterActivity extends AppCompatActivity implements MapboxMap.
         super.onCreate(savedInstanceState);
 
         Mapbox.getInstance(this, getString(R.string.MapBox_access_token));
-        initPremisstion();
         setContentView(R.layout.activity_main);
         mMapView = (MapView) findViewById(R.id.map);
         mMapView.onCreate(savedInstanceState);
@@ -93,22 +91,6 @@ public class MmapAdapterActivity extends AppCompatActivity implements MapboxMap.
                 initMmap();
             }
         });
-    }
-
-    private void initPremisstion() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            //申请WRITE_EXTERNAL_STORAGE权限
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
-                    WRITE_COARSE_LOCATION_REQUEST_CODE);//自定义的code
-        }
-
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            //申请WRITE_EXTERNAL_STORAGE权限
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    WRITE_COARSE_LOCATION_REQUEST_CODE);//自定义的code
-        }
     }
 
     @SuppressWarnings("MissingPermission")
@@ -165,6 +147,8 @@ public class MmapAdapterActivity extends AppCompatActivity implements MapboxMap.
         Bitmap b2 = BitmapFactory.decodeResource(getResources(),R.drawable.down_arrow2);
         Bitmap b3 = Bitmap.createBitmap(b2, 0, 0, b2.getWidth(), b2.getHeight(), scaleMatrix, true);
         mReadIcon = IconFactory.recreate("ReadMarkerIcon",b3);
+
+        mMap.setMaxZoomPreference(15);
     }
 
     @Override
@@ -220,7 +204,10 @@ public class MmapAdapterActivity extends AppCompatActivity implements MapboxMap.
     @Override
     public boolean onMarkerClick(@NonNull Marker marker) {
         if (mMapAdaterCallback!=null) {
-            mMapAdaterCallback.MyMarkerClick(PSDMap.get(marker.getTitle()));
+            PointSimpleData psd = PSDMap.get(marker.getTitle());
+            if (psd == null)
+                return true;
+            mMapAdaterCallback.MyMarkerClick(psd);
         }
         return true;   //false会移动地图到marker点，true不会
     }
@@ -275,6 +262,10 @@ public class MmapAdapterActivity extends AppCompatActivity implements MapboxMap.
     }
 
     public void addReadMarker(MyLatlng latlng){
+        if (mMap == null) {
+            Log.w(TAG,"Map Box is not ready!");
+            return;
+        }
         if (mReadMark!=null)
             mReadMark.remove();
 
@@ -289,12 +280,20 @@ public class MmapAdapterActivity extends AppCompatActivity implements MapboxMap.
     }
 
     public void gotoLocationSmooth(MyLatlng latlng){
+        if (mMap == null) {
+            Log.w(TAG,"Map Box is not ready!");
+            return;
+        }
         CameraUpdate mCameraUpdate =
                 CameraUpdateFactory.newLatLng(latlng.toLatlng());
         mMap.easeCamera(mCameraUpdate,500);
     }
 
     public void gotoLocation(MyLatlng latlng, double zoom){
+        if (mMap == null) {
+            Log.w(TAG,"Map Box is not ready!");
+            return;
+        }
         CameraUpdate mCameraUpdate =
                 CameraUpdateFactory.newLatLngZoom(latlng.toLatlng(), zoom);
         mMap.animateCamera(mCameraUpdate,1000);
@@ -315,6 +314,10 @@ public class MmapAdapterActivity extends AppCompatActivity implements MapboxMap.
     }
 
     protected void onZoomCtrl(double z){
+        if (mMap == null) {
+            Log.w(TAG,"Map Box is not ready!");
+            return;
+        }
         if (z>1)
             z = 1;
         else if (z<0)
@@ -323,10 +326,14 @@ public class MmapAdapterActivity extends AppCompatActivity implements MapboxMap.
         double v2 = mMap.getMinZoomLevel();
         double v3 = v2 + (v1 - v2)*z;
         CameraUpdate cameraUpdate = CameraUpdateFactory.zoomTo(v3);
-        mMap.moveCamera(cameraUpdate);
+        mMap.animateCamera(cameraUpdate,100);
     }
 
     protected double getZoom(){
+        if (mMap == null) {
+            Log.w(TAG,"Map Box is not ready!");
+            return 0;
+        }
         double v = mMap.getCameraPosition().zoom;
         return (v-mMap.getMinZoomLevel())/(mMap.getMaxZoomLevel()-mMap.getMinZoomLevel());
     }

@@ -26,9 +26,6 @@ import rx.schedulers.Schedulers;
 
 public class MyUM {
 
-    public MyUM(){
-    }
-
     private static boolean uiinited;
     private static int ulinited;
 
@@ -36,7 +33,7 @@ public class MyUM {
         return uiinited && (ulinited == 2);
     }
 
-    public void inituserinfo(Context var,UserInitFinish mUserdInitFinish){
+    public static void inituserinfo(Context var,UserInitFinish mUserdInitFinish){
         SharedPreferences pref = var.getSharedPreferences("data",Context.MODE_PRIVATE);
         String userID = pref.getString("userID",null);
         if (userID==null) {
