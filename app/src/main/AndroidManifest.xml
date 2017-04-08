@@ -47,11 +47,6 @@
         <activity
             android:name="com.chen.maptest.MainActivity"
             android:windowSoftInputMode="adjustPan|stateHidden">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
 
         <activity android:name="com.chen.maptest.UserinfoActivity" />
@@ -63,6 +58,11 @@
 
         <activity android:name="com.chen.maptest.AlbumActivity">
 
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
 
     </application>

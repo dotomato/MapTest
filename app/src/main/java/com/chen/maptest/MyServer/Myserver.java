@@ -26,8 +26,8 @@ public class Myserver {
     final static private String TAG = "Myserver";
 
 //    final static private String BASEURL = "www.dotomato.win";
-    final static private String BASEURL = "http://192.168.1.106:5001";
-//    final static private String BASEURL = "https://cj.1994.io";
+//    final static private String BASEURL = "http://192.168.1.106:5001";
+    final static private String BASEURL = "https://cj.1994.io";
     final static private String VERSION = "/api/v0.01";
 
     public interface MyserverInterface{
