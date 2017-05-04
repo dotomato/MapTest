@@ -26,6 +26,7 @@ import com.chen.maptest.MyServer.MyAction1;
 import com.chen.maptest.MyServer.Myserver;
 import com.chen.maptest.MyUpyun.MyUpyunManager;
 import com.chen.maptest.MyView.InnerEdge;
+import com.chen.maptest.MyView.MainFragment;
 import com.chen.maptest.MyView.MyBlurImageView;
 import com.chen.maptest.MyView.MyTimeShow;
 import com.chen.maptest.MyView.OutlineProvider;
@@ -436,7 +437,7 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
     }
 
     //退出回调
-    interface ExitCallback{
+    public interface ExitCallback{
         void exitCallback();
     }
     public void setExitCallback(ExitCallback mExitCallback) {

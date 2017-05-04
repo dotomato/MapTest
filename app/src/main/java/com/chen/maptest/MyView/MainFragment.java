@@ -1,4 +1,4 @@
-package com.chen.maptest;
+package com.chen.maptest.MyView;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -23,10 +23,15 @@ import android.widget.SeekBar;
 import android.widget.Toast;
 
 import com.ToxicBakery.viewpager.transforms.FlipHorizontalTransformer;
+import com.chen.maptest.CommentLayout;
+import com.chen.maptest.GlobalConst;
+import com.chen.maptest.GlobalVar;
+import com.chen.maptest.MainActivity;
 import com.chen.maptest.Manager.MyUM;
 import com.chen.maptest.MapAdapter.MapAdapterLayout;
 import com.chen.maptest.MapAdapter.MapAdaterCallback;
 import com.chen.maptest.MapAdapter.MyLatlng;
+import com.chen.maptest.MyMapIcon;
 import com.chen.maptest.MyModel.PointData;
 import com.chen.maptest.MyModel.PointDataResult;
 import com.chen.maptest.MyModel.PointSimpleData;
@@ -40,6 +45,10 @@ import com.chen.maptest.MyView.MapUI;
 import com.chen.maptest.MyView.OutlineProvider;
 import com.chen.maptest.MyView.QuickPageAdapter;
 import com.chen.maptest.MyView.ScrollableViewPager;
+import com.chen.maptest.R;
+import com.chen.maptest.ScanMessageRv;
+import com.chen.maptest.ScanView;
+import com.chen.maptest.UserMessageLayout;
 import com.chen.maptest.Utils.OnceRunner;
 import com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBar;
 import com.mapbox.mapboxsdk.Mapbox;
@@ -51,6 +60,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import butterknife.Unbinder;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
@@ -93,13 +103,14 @@ public class MainFragment extends Fragment implements
     private View v2;
     private CommentLayout mCommentLayout;
     private MyUM mUserManager;
+    private Unbinder unbinder;
 
     private View mView;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState){
         mView = inflater.inflate(R.layout.main_frag, container, false);
-        ButterKnife.bind(this, mView);
+        unbinder = ButterKnife.bind(this, mView);
 
         mUpView = (ViewGroup)mView.findViewById(R.id.upview);
         mMyMapIcon = (MyMapIcon)mView.findViewById(R.id.mymapicon);
@@ -136,6 +147,12 @@ public class MainFragment extends Fragment implements
         switchShowMode(MODE_SCAN,300);
 
         return mView;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        unbinder.unbind();
     }
 
     @Override
