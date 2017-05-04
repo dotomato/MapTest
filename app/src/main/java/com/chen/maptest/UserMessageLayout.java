@@ -21,6 +21,7 @@ import android.widget.TextView;
 
 
 import com.bumptech.glide.Glide;
+import com.chen.maptest.MapAdapter.MyLatlng;
 import com.chen.maptest.MyServer.MyAction1;
 import com.chen.maptest.MyServer.Myserver;
 import com.chen.maptest.MyUpyun.MyUpyunManager;
@@ -356,7 +357,7 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
     }
 
     private void uploadnoewpoint(){
-        MainActivity.MyLatlng l = GlobalVar.viewLatlng;
+        MyLatlng l = GlobalVar.viewLatlng;
 
         PointData2 pd2 = new PointData2();
         PointData pd = new PointData();

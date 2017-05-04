@@ -26,12 +26,19 @@
             app:layout_constraintTop_toTopOf="parent">
 
 
-
-            <com.mapbox.mapboxsdk.maps.MapView
-                android:id="@+id/map"
+            <com.chen.maptest.MapAdapter.MapAdapterLayout
+                android:id="@+id/mapAdapter"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                mapbox:mapbox_styleUrl="mapbox://styles/mapbox/dark-v9"/>
+                android:layout_height="match_parent">
+
+                <com.mapbox.mapboxsdk.maps.MapView
+                    android:id="@+id/map"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    mapbox:mapbox_styleUrl="mapbox://styles/mapbox/dark-v9"/>
+
+            </com.chen.maptest.MapAdapter.MapAdapterLayout>
+
 
             <com.chen.maptest.MyView.MapUI
                 android:id="@+id/mapui"

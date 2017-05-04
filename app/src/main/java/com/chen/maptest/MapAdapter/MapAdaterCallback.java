@@ -15,6 +15,6 @@ public interface MapAdaterCallback{
     void MyMarkerClick(PointSimpleData psd);
     void MyCameraChangeStart();
     void MyCameraChangeFinish();
-    void MyGPSRecive(MainActivity.MyLatlng latlng);
-    void firstLocation(MainActivity.MyLatlng latlng);
+    void MyGPSRecive(MyLatlng latlng);
+    void firstLocation(MyLatlng latlng);
 }

@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -23,8 +24,9 @@ import android.widget.Toast;
 
 import com.ToxicBakery.viewpager.transforms.FlipHorizontalTransformer;
 import com.chen.maptest.Manager.MyUM;
+import com.chen.maptest.MapAdapter.MapAdapterLayout;
 import com.chen.maptest.MapAdapter.MapAdaterCallback;
-import com.chen.maptest.MapAdapter.MmapAdapterActivity;
+import com.chen.maptest.MapAdapter.MyLatlng;
 import com.chen.maptest.MyServer.MyAction1;
 import com.chen.maptest.MyServer.Myserver;
 
@@ -47,7 +49,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class MainActivity extends MmapAdapterActivity implements
+public class MainActivity extends AppCompatActivity implements
         MapAdaterCallback, DrawerLayout.DrawerListener, ScanMessageRv.OnRecyclerViewItemClickListener {
 
 
@@ -94,6 +96,9 @@ public class MainActivity extends MmapAdapterActivity implements
     @BindView(R.id.mapui)
     public MapUI mMapui;
 
+    @BindView(R.id.mapAdapter)
+    public MapAdapterLayout mMapAdapter;
+
     private View mapView;
 
 //    private ActionBarDrawerToggle mDrawerToggle;
@@ -113,8 +118,9 @@ public class MainActivity extends MmapAdapterActivity implements
         super.onCreate(savedInstanceState);
         ButterKnife.bind(this);
 
-        mapView = getMapView();
-        setMapAdaterCallback(this);
+        mMapAdapter.onCreate(savedInstanceState);
+        mapView = mMapAdapter.getMapView();
+        mMapAdapter.setMapAdaterCallback(this);
 
         initLayout();
 
@@ -134,6 +140,55 @@ public class MainActivity extends MmapAdapterActivity implements
         switchShowMode(MODE_SCAN,300);
 
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mMapAdapter.onStart();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mMapAdapter.onResume();
+        if (shouldInitonResume) {
+            initUserView();
+            shouldInitonResume = false;
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mMapAdapter.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mMapAdapter.onStop();
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        mMapAdapter.onLowMemory();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mSelectHelper.stop();
+        mMapAdapter.onDestroy();
+    }
+
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mMapAdapter.onSaveInstanceState(outState);
+    }
+
 
     private void initLayout(){
         mRootView.addDrawerListener(this);
@@ -203,7 +258,7 @@ public class MainActivity extends MmapAdapterActivity implements
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 if (!b)
                     return;
-                onZoomCtrl(i*1.0/100);
+                mMapAdapter.onZoomCtrl(i*1.0/100);
             }
 
             @Override
@@ -251,21 +306,6 @@ public class MainActivity extends MmapAdapterActivity implements
         },ifilter);
     }
 
-    @Override
-    protected void onResume(){
-        super.onResume();
-        if (shouldInitonResume) {
-            initUserView();
-            shouldInitonResume = false;
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mSelectHelper.stop();
-    }
-
     public void MyTouch(MotionEvent motionEvent) {
     }
 
@@ -282,8 +322,8 @@ public class MainActivity extends MmapAdapterActivity implements
     }
 
     public MyLatlng calUperLatlng(MyLatlng l){
-        MyLatlng l1 = pointToMyLatlng(getCenterpUper());
-        MyLatlng l2 = pointToMyLatlng(getCenterp());
+        MyLatlng l1 = mMapAdapter.pointToMyLatlng(getCenterpUper());
+        MyLatlng l2 = mMapAdapter.pointToMyLatlng(getCenterp());
         return new MyLatlng(l.latitude+l2.latitude-l1.latitude,l.longitude+l2.longitude-l1.longitude);
     }
 
@@ -292,10 +332,10 @@ public class MainActivity extends MmapAdapterActivity implements
     }
 
     public void MyCameraChangeFinish() {
-        GlobalVar.viewLatlng = pointToMyLatlng(getCenterpUper());
+        GlobalVar.viewLatlng = mMapAdapter.pointToMyLatlng(getCenterpUper());
         mSelectHelper.start();
-        mZoombar.setProgress((int) (getZoom()*100));
-        Log.d(TAG,"zoom"+getZoom()+" LatLng"+GlobalVar.viewLatlng.toLatlng());
+        mZoombar.setProgress((int) (mMapAdapter.getZoom()*100));
+        Log.d(TAG,"zoom"+mMapAdapter.getZoom()+" LatLng"+GlobalVar.viewLatlng.toLatlng());
     }
 
     @Override
@@ -305,7 +345,7 @@ public class MainActivity extends MmapAdapterActivity implements
 
     @Override
     public void firstLocation(final MyLatlng latlng) {
-        gotoLocation(latlng,15);
+        mMapAdapter.gotoLocation(latlng,15);
 //        mapView.postDelayed(new Runnable() {
 //            @Override
 //            public void run() {
@@ -329,7 +369,7 @@ public class MainActivity extends MmapAdapterActivity implements
                 .subscribe(new MyAction1<PointDataResult>() {
                     @Override
                     public void call() {
-                        gotoLocationSmooth(calUperLatlng(
+                        mMapAdapter.gotoLocationSmooth(calUperLatlng(
                                 new MyLatlng(mVar.pointData.latitude,mVar.pointData.longitude)));
                         switchShowMode(MODE_MESSAGE,300);
                         mUserMessageLayout.initShow(MODE_MESSAGE,mVar.pointData);
@@ -375,11 +415,11 @@ public class MainActivity extends MmapAdapterActivity implements
 
         switch (mMode){
             case MODE_SCAN:
-                gotoLocationSmooth(pointToMyLatlng(getCenterpUper()));
+                mMapAdapter.gotoLocationSmooth(mMapAdapter.pointToMyLatlng(getCenterpUper()));
                 mMapui.setCenter(getCenterp());
 
                 mMyMapIcon.switchIcon(MyMapIcon.ICON_HIDE);
-                removeReadMarker();
+                mMapAdapter.removeReadMarker();
 
                 mBottomViewGroup.animate().alpha(0).setDuration(mDuration).withEndAction(new Runnable() {
                     @Override
@@ -397,13 +437,13 @@ public class MainActivity extends MmapAdapterActivity implements
 
                 break;
             case MODE_EDIT:
-                gotoLocationSmooth(calUperLatlng(pointToMyLatlng(getCenterp())));
+                mMapAdapter.gotoLocationSmooth(calUperLatlng(mMapAdapter.pointToMyLatlng(getCenterp())));
                 mMapui.setCenter(getCenterpUper());
 
                 mMyMapIcon.switchIcon(MyMapIcon.ICON_FLAG);
                 mMyMapIcon.gotoLalng(getCenterpUper());
 
-                removeReadMarker();
+                mMapAdapter.removeReadMarker();
 
                 mBottomViewGroup.setVisibility(View.VISIBLE);
                 mBottomViewGroup.animate().alpha(1).setDuration(mDuration).start();
@@ -445,8 +485,8 @@ public class MainActivity extends MmapAdapterActivity implements
 
     private void selectArea(){
         SelectAreaData sad = new SelectAreaData();
-        MyLatlng lt = pointToMyLatlng(new PointF(0,0));
-        MyLatlng rb = pointToMyLatlng(new PointF(mapView.getWidth(),mScanViewGroup.getTop()));
+        MyLatlng lt = mMapAdapter.pointToMyLatlng(new PointF(0,0));
+        MyLatlng rb = mMapAdapter.pointToMyLatlng(new PointF(mapView.getWidth(),mScanViewGroup.getTop()));
         sad.left_top_latitude = lt.latitude;
         sad.left_top_longitude = lt.longitude;
         sad.right_bottom_latitude = rb.latitude;
@@ -458,10 +498,10 @@ public class MainActivity extends MmapAdapterActivity implements
                 .subscribe(new MyAction1<SelectAreaResult>() {
                     @Override
                     public void call() {
-                        rmAllMarker();
+                        mMapAdapter.rmAllMarker();
                         Log.d(TAG, "selectArea result: " + mVar.statue + " " + mVar.pointsCount);
                         for (PointSimpleData psd:mVar.points) {
-                            addMarker(psd);
+                            mMapAdapter.addMarker(psd);
                         }
                         mScanViewGroup.setScanData(mVar.points);
                     }
@@ -534,19 +574,19 @@ public class MainActivity extends MmapAdapterActivity implements
 
     @OnClick(R.id.zoominbutton)
     public void zoomin(){
-        super.onZoomCtrl(mZoombar.getProgress()*1.0/100-0.1);
+        mMapAdapter.onZoomCtrl(mZoombar.getProgress()*1.0/100-0.1);
     }
 
 
     @OnClick(R.id.zoomoutbutton)
     public void zoomout(){
-        super.onZoomCtrl(mZoombar.getProgress()*1.0/100+0.1);
+        mMapAdapter.onZoomCtrl(mZoombar.getProgress()*1.0/100+0.1);
     }
 
     @OnClick(R.id.retlocalbutton)
     public void retlocal(){
         if (GlobalVar.gpsLatlng!=null)
-            gotoLocationSmooth(GlobalVar.gpsLatlng);
+            mMapAdapter.gotoLocationSmooth(GlobalVar.gpsLatlng);
     }
 
 
