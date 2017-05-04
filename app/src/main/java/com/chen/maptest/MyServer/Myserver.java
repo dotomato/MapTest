@@ -2,7 +2,7 @@ package com.chen.maptest.MyServer;
 
 import android.util.Log;
 
-import com.chen.maptest.MyModel.*;
+import com.chen.maptest.DateType.*;
 
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;

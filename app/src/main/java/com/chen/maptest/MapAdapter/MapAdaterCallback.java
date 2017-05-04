@@ -2,8 +2,7 @@ package com.chen.maptest.MapAdapter;
 
 import android.view.MotionEvent;
 
-import com.chen.maptest.MainActivity;
-import com.chen.maptest.MyModel.*;
+import com.chen.maptest.DateType.*;
 
 /**
  * Created by chen on 17-2-19.

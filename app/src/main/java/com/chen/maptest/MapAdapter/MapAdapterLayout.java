@@ -16,9 +16,8 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
 
-import com.chen.maptest.MyModel.PointSimpleData;
+import com.chen.maptest.DateType.PointSimpleData;
 import com.chen.maptest.R;
-import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.Marker;

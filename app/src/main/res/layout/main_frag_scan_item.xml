@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="70dp">
+
+    <android.support.constraint.ConstraintLayout
+
+        android:id="@+id/item_root"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="32dp"
+        android:layout_marginRight="32dp"
+        android:background="#FFF"
+        android:elevation="3dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+
+        <com.chen.maptest.ComViews.RoundImageView
+            android:id="@+id/usericon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginBottom="0dp"
+            android:layout_marginLeft="12dp"
+            android:layout_marginTop="0dp"
+            android:elevation="6dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/usericon"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/username"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="24dp"
+            android:layout_marginRight="24dp"
+            android:maxLines="1"
+            android:text="周玲美"
+            android:textColor="@android:color/black"
+            android:textSize="12dp"
+            app:layout_constraintLeft_toRightOf="@+id/usericon"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/usericon" />
+
+        <TextView
+            android:id="@+id/smallmsg"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:text="短消息短消息短消息短消息短消息短消息短消息短消息"
+            android:textColor="#FF444444"
+            android:textSize="12dp"
+            app:layout_constraintBottom_toBottomOf="@+id/usericon"
+            app:layout_constraintLeft_toLeftOf="@+id/username"
+            app:layout_constraintRight_toRightOf="@+id/username" />
+
+    </android.support.constraint.ConstraintLayout>
+
+
+
+</android.support.constraint.ConstraintLayout>

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+    <com.chen.maptest.ComViews.RoundImageView
+        android:id="@+id/usericon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignTop="@+id/username"
+        android:layout_marginLeft="8dp"
+        android:elevation="6dp"
+        android:scaleType="fitXY"
+        android:src="@drawable/usericon" />
+
+    <TextView
+        android:id="@+id/username"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="14dp"
+        android:layout_toRightOf="@+id/usericon"
+        android:layout_toLeftOf="@+id/likenum"
+        android:maxLines="1"
+        android:text="周玲美"
+        android:textColor="@android:color/black"
+        android:textSize="12dp" />
+
+    <TextView
+        android:id="@+id/commenttime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="2016-11-23"
+        android:textSize="10sp"
+        android:layout_below="@+id/username"
+        android:layout_marginTop="4dp"
+        android:layout_alignLeft="@+id/username"
+        android:layout_alignRight="@+id/username" />
+
+    <TextView
+        android:id="@+id/likenum"
+        android:layout_width="30sp"
+        android:layout_height="0dp"
+        android:layout_alignTop="@+id/likebutton"
+        android:layout_alignBottom="@+id/likebutton"
+        android:gravity="center_vertical|right"
+        android:layout_marginTop="4dp"
+        android:layout_marginRight="4dp"
+        android:layout_toLeftOf="@+id/likebutton"
+        android:text="456"
+        android:textSize="12sp" />
+
+    <com.sackcentury.shinebuttonlib.ShineButton
+        android:id="@+id/likebutton"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_alignTop="@+id/username"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="24dp"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="14dp"
+
+        app:siShape="@raw/like"
+        app:enable_flashing="true"
+        app:allow_random_color="true"
+        app:shine_turn_angle="90"
+        app:btn_color="@android:color/darker_gray"
+        app:btn_fill_color="#FF6666"
+        />
+
+    <TextView
+        android:id="@+id/usercomment"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/username"
+        android:layout_alignRight="@+id/likebutton"
+        android:layout_below="@+id/commenttime"
+        android:layout_centerVertical="true"
+        android:layout_marginBottom="8dp"
+        android:layout_marginTop="8dp"
+        android:lineSpacingExtra="4sp"
+        android:maxLines="20"
+        android:text="短消息短消息短消息短消息短消息短消息短消息短消息短消息短消息短消息短消息短消息短消息短消息短消息"
+        android:textColor="#FF444444"
+        android:textSize="12sp" />
+
+
+
+</RelativeLayout>

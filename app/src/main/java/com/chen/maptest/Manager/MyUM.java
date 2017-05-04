@@ -4,17 +4,15 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.chen.maptest.GlobalVar;
-import com.chen.maptest.MyModel.UserLikeCommentIDListResult;
-import com.chen.maptest.MyModel.UserLikePointIDListResult;
-import com.chen.maptest.MyModel.Userinfo;
-import com.chen.maptest.MyModel.Userinfo2;
-import com.chen.maptest.MyModel.Userinfo2List;
-import com.chen.maptest.MyModel.Userinfo2Result;
-import com.chen.maptest.MyModel.UserinfoResult;
+import com.chen.maptest.DateType.UserLikeCommentIDListResult;
+import com.chen.maptest.DateType.UserLikePointIDListResult;
+import com.chen.maptest.DateType.Userinfo;
+import com.chen.maptest.DateType.Userinfo2;
+import com.chen.maptest.DateType.Userinfo2List;
+import com.chen.maptest.DateType.Userinfo2Result;
+import com.chen.maptest.DateType.UserinfoResult;
 import com.chen.maptest.MyServer.MyAction1;
 import com.chen.maptest.MyServer.Myserver;
-
-import java.util.List;
 
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;

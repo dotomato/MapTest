@@ -32,7 +32,7 @@
         </com.chen.maptest.MapAdapter.MapAdapterLayout>
 
 
-        <com.chen.maptest.MyView.MapUI
+        <com.chen.maptest.MVPs.Main.Views.MapUI
             android:id="@+id/mapui"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -56,7 +56,7 @@
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
-        </com.chen.maptest.MyView.MapUI>
+        </com.chen.maptest.MVPs.Main.Views.MapUI>
 
     </FrameLayout>
 
@@ -130,7 +130,7 @@
     </android.support.constraint.ConstraintLayout>
 
 
-    <com.chen.maptest.MyMapIcon
+    <com.chen.maptest.MVPs.Main.Views.MyMapIcon
         android:id="@+id/mymapicon"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -170,11 +170,11 @@
         <!--tools:layout_editor_absoluteX="0dp"-->
         <!--tools:layout_editor_absoluteY="0dp" />-->
 
-    </com.chen.maptest.MyMapIcon>
+    </com.chen.maptest.MVPs.Main.Views.MyMapIcon>
 
 
 
-    <com.chen.maptest.MyView.FixRadioConstraintLayout
+    <com.chen.maptest.ComViews.FixRadioConstraintLayout
         android:id="@+id/messageviewgroup"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -183,7 +183,7 @@
         app:layout_constraintRight_toRightOf="parent">
 
 
-        <com.chen.maptest.MyView.ScrollableViewPager
+        <com.chen.maptest.ComViews.ScrollableViewPager
             android:id="@+id/viewpager"
             android:layout_width="0dp"
             android:layout_height="0dp"
@@ -194,12 +194,12 @@
             >
 
 
-        </com.chen.maptest.MyView.ScrollableViewPager>
+        </com.chen.maptest.ComViews.ScrollableViewPager>
 
 
-    </com.chen.maptest.MyView.FixRadioConstraintLayout>
+    </com.chen.maptest.ComViews.FixRadioConstraintLayout>
 
-    <com.chen.maptest.ScanView
+    <com.chen.maptest.MVPs.Main.ScanView
         android:id="@+id/scanviewgroup"
         android:layout_width="0dp"
         android:layout_height="200dp"
@@ -209,7 +209,7 @@
 
         <include
             android:id="@+id/emptylayout"
-            layout="@layout/layout_empty_message"
+            layout="@layout/main_frag_scan_empty"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginBottom="16dp"
@@ -217,13 +217,13 @@
             android:layout_marginRight="32dp"
             android:layout_marginTop="4dp" />
 
-        <com.chen.maptest.ScanMessageRv
+        <com.chen.maptest.MVPs.Main.ScanMessageRv
             android:id="@+id/scan_message_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="visible" />
 
-    </com.chen.maptest.ScanView>
+    </com.chen.maptest.MVPs.Main.ScanView>
 
 
 
