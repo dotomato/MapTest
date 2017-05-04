@@ -9,6 +9,7 @@ import android.view.View;
 
 import com.chen.maptest.MVPs.MainLeftDraw.LeftDrawLayout;
 import com.chen.maptest.R;
+import com.chen.maptest.Utils.MyUtils;
 import com.mapbox.mapboxsdk.Mapbox;
 
 import butterknife.BindView;
@@ -28,6 +29,7 @@ public class MainActivity extends AppCompatActivity implements DrawerLayout.Draw
     public DrawerLayout mRootView;
 
     private MainFragment mMainFragment;
+    private MainPresenter mMainPresenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,11 +39,17 @@ public class MainActivity extends AppCompatActivity implements DrawerLayout.Draw
         ButterKnife.bind(this);
         mRootView.addDrawerListener(this);
 
-        mMainFragment = new MainFragment();
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.contentFrame, mMainFragment);
-        transaction.commit();
+        mMainFragment = (MainFragment) getSupportFragmentManager().findFragmentById(R.id.contentFrame);
+        if (mMainFragment == null) {
+            // Create the fragment
+            mMainFragment = new MainFragment();
+            MyUtils.addFragmentToActivity(
+                    getSupportFragmentManager(), mMainFragment, R.id.contentFrame);
+        }
+
+        // Create the presenter
+        mMainPresenter = new MainPresenter(mMainFragment);
+
     }
 
 

@@ -61,7 +61,7 @@ import rx.schedulers.Schedulers;
  * Copyright *
  */
 
-public class MainFragment extends Fragment implements
+public class MainFragment extends Fragment implements MainContract.View,
         MapAdaterCallback, ScanMessageRv.OnRecyclerViewItemClickListener {
 
 
@@ -98,6 +98,8 @@ public class MainFragment extends Fragment implements
     private Unbinder unbinder;
 
     private View mView;
+    private MainContract.Presenter mPresenter;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState){
@@ -156,6 +158,7 @@ public class MainFragment extends Fragment implements
     @Override
     public void onResume() {
         super.onResume();
+        mPresenter.start();
         mMapAdapter.onResume();
         if (shouldInitonResume) {
             initUserView();
@@ -559,4 +562,8 @@ public class MainFragment extends Fragment implements
             mMapAdapter.gotoLocationSmooth(GlobalVar.gpsLatlng);
     }
 
+    @Override
+    public void setPresenter(MainContract.Presenter presenter) {
+        mPresenter = presenter;
+    }
 }
