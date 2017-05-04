@@ -192,7 +192,7 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
         mMode = mode;
         switchMode2(MODE2_TEXT);
         switch (mode) {
-            case MainActivity.MODE_EDIT:
+            case MainFragment.MODE_EDIT:
                 //用户填写数据初始化
                 hasAlbumUpload=false;
                 mAlbumImageUri=null;
@@ -212,7 +212,7 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
 
                 mSendButton.setProgress(0);
                 break;
-            case MainActivity.MODE_MESSAGE:
+            case MainFragment.MODE_MESSAGE:
 
                 Gson gson = new Gson();
                 MessageJson mj = gson.fromJson(mPointData.userMessage,MessageJson.class);
