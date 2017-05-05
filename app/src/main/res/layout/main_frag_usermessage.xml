@@ -55,7 +55,7 @@
             app:layout_constraintTop_toTopOf="@+id/locationbackground"
             android:text="经度：56.32 纬度：54.15" />
 
-        <com.chen.maptest.MVPs.Main.Views.MyBlurImageView
+        <com.chen.maptest.ComViews.MyBlurImageView
             android:id="@+id/blurimg"
             android:layout_width="0dp"
             android:layout_height="0dp"

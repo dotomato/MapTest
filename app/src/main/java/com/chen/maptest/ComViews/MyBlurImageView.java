@@ -1,4 +1,4 @@
-package com.chen.maptest.MVPs.Main.Views;
+package com.chen.maptest.ComViews;
 
 import android.content.Context;
 import android.graphics.Color;

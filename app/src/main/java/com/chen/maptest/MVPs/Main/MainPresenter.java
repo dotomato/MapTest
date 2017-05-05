@@ -1,6 +1,9 @@
 package com.chen.maptest.MVPs.Main;
 
+import android.content.Intent;
+
 import com.chen.maptest.JsonDataType.Message;
+import com.chen.maptest.MVPs.Editpoint.EditActivity;
 import com.chen.maptest.NetDataType.PointData;
 import com.chen.maptest.NetDataType.PointDataResult;
 import com.chen.maptest.NetDataType.PointSimpleData;
@@ -25,23 +28,21 @@ import rx.schedulers.Schedulers;
  * Copyright *
  */
 
-public class MainPresenter implements MainContract.Presenter {
+class MainPresenter implements MainContract.Presenter {
 
+    public static final int NEWPOINT = 10;
     private final MainContract.View mMainView;
 
 
-    private boolean shouldInitonResume;
     private OnceRunner mSelectHelper;
     private MyLatlng lt;
     private MyLatlng rb;
+    private MyLatlng ml;
 
 
-    public MainPresenter(MainContract.View mainView) {
+    MainPresenter(MainContract.View mainView) {
         mMainView = mainView;
         mMainView.setPresenter(this);
-
-        shouldInitonResume = false;
-
         initSelectHelper();
     }
 
@@ -53,6 +54,7 @@ public class MainPresenter implements MainContract.Presenter {
     public void destroy() {
         mSelectHelper.stop();
     }
+
 
     @Override
     public void mapMove(MyLatlng lefttop, MyLatlng rightbottom, MyLatlng center) {
@@ -99,7 +101,21 @@ public class MainPresenter implements MainContract.Presenter {
 
     @Override
     public void newPoint(MyLatlng l) {
-        mMainView.upPointShower();
+        ml = l;
+        Intent intent = new Intent(mMainView.getActivity()  , EditActivity.class);
+        mMainView.getActivity().startActivityForResult(intent, NEWPOINT);
+    }
+
+    @Override
+    public void onResult(int requestCode, Intent data) {
+        switch (requestCode)
+        {
+            case NEWPOINT:
+                mMainView.showNewpointShine(ml);
+                break;
+            default:
+                break;
+        }
     }
 
     @Override

@@ -1,8 +1,9 @@
 package com.chen.maptest.MVPs.Main;
 
+import android.graphics.PointF;
+
 import com.chen.maptest.BasePresenter;
 import com.chen.maptest.BaseView;
-import com.chen.maptest.NetDataType.PointSimpleData;
 import com.chen.maptest.MapAdapter.MyLatlng;
 
 import java.util.Date;
@@ -12,7 +13,7 @@ import java.util.Date;
  * Copyright *
  */
 
-public interface MainContract {
+interface MainContract {
     interface View extends BaseView<Presenter> {
 
         void moveMap(MyLatlng center);
@@ -24,6 +25,8 @@ public interface MainContract {
         void showPoint(String msgTitle, String msgText, String msgAlbum, Date time);
 
         void showPointUser(String username, String usericon);
+
+        void showNewpointShine(MyLatlng l);
 
         void upPointShower();
 

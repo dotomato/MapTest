@@ -44,27 +44,20 @@
             <!--android:name="com.baidu.lbsapi.API_KEY"-->
             <!--android:value="0GwEEEMpSNLb1dInCcO0dVhz9HiNiImH" />-->
 
-        <activity
-            android:name=".MVPs.Main.MainActivity"
-            android:windowSoftInputMode="adjustPan|stateHidden">
-
+        <activity android:name=".MVPs.Main.MainActivity" android:windowSoftInputMode="adjustPan|stateHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
         <activity android:name=".MVPs.Userinfo.UserinfoActivity" />
 
-        <activity
-            android:name="com.yalantis.ucrop.UCropActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" />
+        <activity android:name=".MVPs.Album.AlbumActivity"/>
 
-        <activity android:name=".MVPs.Album.AlbumActivity">
+        <activity android:name=".MVPs.Editpoint.EditActivity"/>
 
-        </activity>
+        <activity android:name="com.yalantis.ucrop.UCropActivity" android:screenOrientation="portrait" />
 
     </application>
 

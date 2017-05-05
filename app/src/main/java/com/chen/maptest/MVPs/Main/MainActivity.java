@@ -78,11 +78,7 @@ public class MainActivity extends AppCompatActivity implements DrawerLayout.Draw
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode != Activity.RESULT_OK)
             return;
-        switch (requestCode){
-            default:
-                break;
-        }
-
+        mMainPresenter.onResult(requestCode, data);
         super.onActivityResult(requestCode, resultCode, data);
 
     }

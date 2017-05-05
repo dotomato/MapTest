@@ -637,7 +637,7 @@ import com.chen.maptest.MyServer.MyAction1;
 import com.chen.maptest.MyServer.Myserver;
 import com.chen.maptest.Manager.MyUpyunManager;
 import com.chen.maptest.MVPs.Main.Views.InnerEdge;
-import com.chen.maptest.MVPs.Main.Views.MyBlurImageView;
+import com.chen.maptest.ComViews.MyBlurImageView;
 import com.chen.maptest.ComViews.MyTimeShow;
 import com.chen.maptest.ComViews.OutlineProvider;
 

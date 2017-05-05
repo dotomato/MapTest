@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.graphics.PointF;
 import android.support.constraint.ConstraintLayout;
 import android.util.AttributeSet;
+import android.view.ViewGroup;
 
 import com.chen.maptest.R;
 import com.chen.maptest.Utils.MyUtils;
@@ -25,7 +26,7 @@ import rx.functions.Action1;
 
 public class MyMapIcon {
 
-    public static void shine_button(Context context, final ConstraintLayout viewGroup, PointF p){
+    public static void shine_button(Context context, final ViewGroup viewGroup, PointF p){
         int tw = MyUtils.dip2px(context,35);
 
         final ShineButton shineButtonJava = new ShineButton(context);

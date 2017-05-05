@@ -21,7 +21,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.chen.maptest.NetDataType.PointSimpleData;
 import com.chen.maptest.R;
 import com.chen.maptest.Utils.Animate;
 import com.chen.maptest.Utils.ImageWrap;
@@ -60,13 +59,10 @@ public class MapAdapterLayout extends FrameLayout implements  MapView.OnMapChang
     private static MapView mMapView;
     private MapboxMap mMap;
 
-    private MarkerOptions mMarkerOption;
     private MarkerOptions mReadMarkerOption;
     private Marker mReadMark;
     private Icon mReadIcon;
     private HashMap<String, MarkerView> markerMap;
-    private HashMap<String, PointSimpleData> PSDMap;
-    private Icon mIcon;
     private Projection mProjection;
     private boolean firstshow;
 
@@ -94,7 +90,6 @@ public class MapAdapterLayout extends FrameLayout implements  MapView.OnMapChang
 
         firstshow = true;
         markerMap = new HashMap<>();
-        PSDMap = new HashMap<>();
 
     }
 
@@ -153,19 +148,15 @@ public class MapAdapterLayout extends FrameLayout implements  MapView.OnMapChang
         mUiSettings.setCompassEnabled(false);
         mUiSettings.setAttributionEnabled(false);
         mUiSettings.setLogoEnabled(true);
-        mUiSettings.setLogoGravity(Gravity.TOP | Gravity.LEFT);
+        mUiSettings.setLogoGravity(Gravity.TOP | Gravity.START);
 
         mProjection = mMap.getProjection();
 
-        mMarkerOption= new MarkerOptions();
+
+        mReadMarkerOption= new MarkerOptions();
         float scale = 0.5f;
         Matrix scaleMatrix = new Matrix();
         scaleMatrix.postScale(scale, scale);
-        Bitmap b0 = BitmapFactory.decodeResource(getResources(),R.drawable.map_msg_icon);
-        Bitmap b1 = Bitmap.createBitmap(b0, 0, 0, b0.getWidth(), b0.getHeight(), scaleMatrix, true);
-        mIcon = IconFactory.recreate("MarkerIcon",b1);
-
-        mReadMarkerOption= new MarkerOptions();
         Bitmap b2 = BitmapFactory.decodeResource(getResources(),R.drawable.down_arrow2);
         Bitmap b3 = Bitmap.createBitmap(b2, 0, 0, b2.getWidth(), b2.getHeight(), scaleMatrix, true);
         mReadIcon = IconFactory.recreate("ReadMarkerIcon",b3);
@@ -181,7 +172,7 @@ public class MapAdapterLayout extends FrameLayout implements  MapView.OnMapChang
         private LayoutInflater inflater;
         private MapboxMap mapboxMap;
 
-        public MarkerViewAdapter(@NonNull Context context, @NonNull MapboxMap mapboxMap) {
+        MarkerViewAdapter(@NonNull Context context, @NonNull MapboxMap mapboxMap) {
             super(context);
             this.inflater = LayoutInflater.from(context);
             this.mapboxMap = mapboxMap;
@@ -208,11 +199,6 @@ public class MapAdapterLayout extends FrameLayout implements  MapView.OnMapChang
             mMapAdaterCallback.MyMarkerClick(marker.getPointID(), marker.getUserID());
             return false;
         }
-    }
-
-
-    public void onSaveInstanceState(Bundle outState) {
-        mMapView.onSaveInstanceState(outState);
     }
 
     public void setMapAdaterCallback(MapAdaterCallback var){
@@ -244,23 +230,23 @@ public class MapAdapterLayout extends FrameLayout implements  MapView.OnMapChang
         markerMap.put(pointID,marker);
     }
 
-    public void addReadMarker(MyLatlng latlng){
-        if (mMap == null) {
-            Log.w(TAG,"Map Box is not ready!");
-            return;
-        }
-        if (mReadMark!=null)
-            mReadMark.remove();
-
-        mReadMarkerOption.position(latlng.toLatlng())
-                .icon(mReadIcon);
-        mReadMark = mMap.addMarker(mReadMarkerOption);
-    }
-
-    public void removeReadMarker(){
-        if (mReadMark!=null)
-            mReadMark.remove();
-    }
+//    public void addReadMarker(MyLatlng latlng){
+//        if (mMap == null) {
+//            Log.w(TAG,"Map Box is not ready!");
+//            return;
+//        }
+//        if (mReadMark!=null)
+//            mReadMark.remove();
+//
+//        mReadMarkerOption.position(latlng.toLatlng())
+//                .icon(mReadIcon);
+//        mReadMark = mMap.addMarker(mReadMarkerOption);
+//    }
+//
+//    public void removeReadMarker(){
+//        if (mReadMark!=null)
+//            mReadMark.remove();
+//    }
 
     public void gotoLocationSmooth(MyLatlng latlng){
         if (mMap == null) {

@@ -16,6 +16,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.chen.maptest.ComViews.MyTimeShow;
+import com.chen.maptest.MVPs.Main.Views.MyMapIcon;
 import com.chen.maptest.NetDataType.Userinfo;
 import com.chen.maptest.MapAdapter.MapAdapterLayout;
 import com.chen.maptest.MapAdapter.MapAdaterCallback;
@@ -182,6 +183,10 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
     }
 
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        MapAdapterLayout.getMapView().onSaveInstanceState(outState);
+    }
 
     public void MyTouch(MotionEvent motionEvent) {
     }
@@ -280,6 +285,12 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
     public void showPointUser(String username, String usericon) {
         mMsgUsername.setText(username);
         ImageWrap.iconjust(getActivity(),usericon,mMsgUsericon);
+    }
+
+    @Override
+    public void showNewpointShine(MyLatlng l) {
+        PointF p = mMapAdapter.myLatlgnToPoint(l);
+        MyMapIcon.shine_button(getContext(), mMapAdapter, p);
     }
 
     int dura = 300;

@@ -73,7 +73,7 @@ public class LeftDrawLayout extends ListView {
     }
 
     private void listviewInit(){
-        mHeader = LayoutInflater.from(mContext).inflate(R.layout.userinfo_listheader,this,false);
+        mHeader = LayoutInflater.from(mContext).inflate(R.layout.leftdraw_listheader,this,false);
         addHeaderView(mHeader);
 
         mUsericon = (ImageView) mHeader.findViewById(R.id.usericon);
@@ -87,7 +87,7 @@ public class LeftDrawLayout extends ListView {
         mData.add(new ListViewItemData("私信", MainActivity.class, MaterialDrawableBuilder.IconValue.EMAIL_OUTLINE));
         mData.add(new ListViewItemData("回复",MainActivity.class, MaterialDrawableBuilder.IconValue.COMMENT_PROCESSING_OUTLINE));
         mData.add(new ListViewItemData("我的",MainActivity.class, MaterialDrawableBuilder.IconValue.ACCOUNT_OUTLINE));
-        MyListViewAdapter ia = new MyListViewAdapter(mContext,R.layout.userinfo_listitem,mData);
+        MyListViewAdapter ia = new MyListViewAdapter(mContext,R.layout.leftdraw_listitem,mData);
         setAdapter(ia);
         setOnItemClickListener(new OnItemClickListener() {
             @Override
