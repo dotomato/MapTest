@@ -1,4 +1,4 @@
-package com.chen.maptest.DateType;
+package com.chen.maptest.NetDataType;
 
 /**
  * Created by chen on 17-4-5.

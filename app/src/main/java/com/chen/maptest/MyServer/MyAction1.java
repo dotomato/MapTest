@@ -2,7 +2,7 @@ package com.chen.maptest.MyServer;
 
 import android.util.Log;
 
-import com.chen.maptest.DateType.BaseResult;
+import com.chen.maptest.NetDataType.BaseResult;
 
 import rx.Observer;
 

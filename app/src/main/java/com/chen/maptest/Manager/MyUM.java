@@ -4,13 +4,13 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.chen.maptest.GlobalVar;
-import com.chen.maptest.DateType.UserLikeCommentIDListResult;
-import com.chen.maptest.DateType.UserLikePointIDListResult;
-import com.chen.maptest.DateType.Userinfo;
-import com.chen.maptest.DateType.Userinfo2;
-import com.chen.maptest.DateType.Userinfo2List;
-import com.chen.maptest.DateType.Userinfo2Result;
-import com.chen.maptest.DateType.UserinfoResult;
+import com.chen.maptest.NetDataType.UserLikeCommentIDListResult;
+import com.chen.maptest.NetDataType.UserLikePointIDListResult;
+import com.chen.maptest.NetDataType.Userinfo;
+import com.chen.maptest.NetDataType.Userinfo2;
+import com.chen.maptest.NetDataType.Userinfo2List;
+import com.chen.maptest.NetDataType.Userinfo2Result;
+import com.chen.maptest.NetDataType.UserinfoResult;
 import com.chen.maptest.MyServer.MyAction1;
 import com.chen.maptest.MyServer.Myserver;
 

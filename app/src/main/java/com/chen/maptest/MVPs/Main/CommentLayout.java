@@ -12,18 +12,18 @@ import android.widget.EditText;
 import android.widget.ImageView;
 
 import com.chen.maptest.Manager.MyUM;
-import com.chen.maptest.DateType.PointComment;
-import com.chen.maptest.DateType.PointData;
-import com.chen.maptest.DateType.UserComment;
-import com.chen.maptest.DateType.UserLikeComment;
-import com.chen.maptest.DateType.UserLikeCommentResult;
-import com.chen.maptest.DateType.UserNewComment;
-import com.chen.maptest.DateType.UserNewCommentResult;
+import com.chen.maptest.NetDataType.PointComment;
+import com.chen.maptest.NetDataType.PointData;
+import com.chen.maptest.NetDataType.UserComment;
+import com.chen.maptest.NetDataType.UserLikeComment;
+import com.chen.maptest.NetDataType.UserLikeCommentResult;
+import com.chen.maptest.NetDataType.UserNewComment;
+import com.chen.maptest.NetDataType.UserNewCommentResult;
 import com.chen.maptest.MyServer.MyAction1;
 import com.chen.maptest.MyServer.Myserver;
 import com.chen.maptest.ComViews.OutlineProvider;
 import com.chen.maptest.R;
-import com.chen.maptest.Utils.UserIconWarp;
+import com.chen.maptest.Utils.ImageWrap;
 import com.dd.CircularProgressButton;
 import com.sackcentury.shinebuttonlib.ShineButton;
 import com.zhy.adapter.recyclerview.CommonAdapter;
@@ -110,7 +110,7 @@ public class CommentLayout extends ConstraintLayout {
             @Override
             protected void convert(final com.zhy.adapter.recyclerview.base.ViewHolder holder,
                                    UserComment uc, int position) {
-                UserIconWarp.just(mContext, uc.userIcon, (ImageView) holder.getView(R.id.usericon));
+                ImageWrap.iconjust(mContext, uc.userIcon, (ImageView) holder.getView(R.id.usericon));
                 OutlineProvider.setOutline(holder.getView(R.id.usericon),OutlineProvider.SHAPE_OVAL);
                 holder.setText(R.id.username,uc.userName);
                 holder.setText(R.id.usercomment,uc.userComment);

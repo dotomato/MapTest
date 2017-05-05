@@ -18,7 +18,7 @@ import com.chen.maptest.MVPs.Userinfo.UserinfoActivity;
 import com.chen.maptest.ComViews.ListViewItemData;
 import com.chen.maptest.MVPs.MainLeftDraw.Utils.MyListViewAdapter;
 import com.chen.maptest.ComViews.OutlineProvider;
-import com.chen.maptest.Utils.UserIconWarp;
+import com.chen.maptest.Utils.ImageWrap;
 
 import net.steamcrafted.materialiconlib.MaterialDrawableBuilder;
 
@@ -112,6 +112,6 @@ public class LeftDrawLayout extends ListView {
     public void initUserView(){
         mUserName.setText(MyUM.getui().userName);
         mUserDes.setText(MyUM.getui().userDes);
-        UserIconWarp.just(mContext,MyUM.getui().userIcon,mUsericon);
+        ImageWrap.iconjust(mContext,MyUM.getui().userIcon,mUsericon);
     }
 }

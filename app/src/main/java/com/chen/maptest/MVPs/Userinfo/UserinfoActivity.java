@@ -23,15 +23,15 @@ import android.widget.Toast;
 import com.chen.maptest.GlobalConst;
 import com.chen.maptest.GlobalVar;
 import com.chen.maptest.Manager.MyUM;
-import com.chen.maptest.DateType.Userinfo2;
-import com.chen.maptest.DateType.UserinfoResult;
+import com.chen.maptest.NetDataType.Userinfo2;
+import com.chen.maptest.NetDataType.UserinfoResult;
 import com.chen.maptest.MyServer.MyAction1;
 import com.chen.maptest.MyServer.Myserver;
 import com.chen.maptest.Manager.MyUpyunManager;
 import com.chen.maptest.R;
 import com.chen.maptest.ComViews.OutlineProvider;
+import com.chen.maptest.Utils.ImageWrap;
 import com.chen.maptest.Utils.MyUtils;
-import com.chen.maptest.Utils.UserIconWarp;
 import com.yalantis.ucrop.UCrop;
 
 import net.steamcrafted.materialiconlib.MaterialDrawableBuilder;
@@ -111,7 +111,7 @@ public class UserinfoActivity extends AppCompatActivity implements Toolbar.OnMen
         mUsername.setText(tempUserinfo2.userinfo.userName);
         mUserdes.setText(tempUserinfo2.userinfo.userDes);
         ishuman =true;
-        UserIconWarp.just(this, tempUserinfo2.userinfo.userIcon,mUsericon);
+        ImageWrap.iconjust(this, tempUserinfo2.userinfo.userIcon,mUsericon);
     }
 
     @Override

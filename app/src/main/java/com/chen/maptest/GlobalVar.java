@@ -3,7 +3,7 @@ package com.chen.maptest;
 
 import com.chen.maptest.Manager.MyUM;
 import com.chen.maptest.MapAdapter.MyLatlng;
-import com.chen.maptest.DateType.Userinfo2List;
+import com.chen.maptest.NetDataType.Userinfo2List;
 
 /**
  * Created by chen on 17-2-25.

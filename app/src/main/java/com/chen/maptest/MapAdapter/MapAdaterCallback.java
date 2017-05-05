@@ -2,7 +2,7 @@ package com.chen.maptest.MapAdapter;
 
 import android.view.MotionEvent;
 
-import com.chen.maptest.DateType.*;
+import com.chen.maptest.NetDataType.*;
 
 /**
  * Created by chen on 17-2-19.
@@ -11,7 +11,7 @@ import com.chen.maptest.DateType.*;
 
 public interface MapAdaterCallback{
     void MyTouch(MotionEvent motionEvent);
-    void MyMarkerClick(PointSimpleData psd);
+    void MyMarkerClick(String pointID, String userID);
     void MyCameraChangeStart();
     void MyCameraChangeFinish();
     void MyGPSRecive(MyLatlng latlng);

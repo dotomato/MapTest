@@ -11,21 +11,22 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.widget.LinearLayout;
+import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.chen.maptest.DateType.Userinfo;
+import com.chen.maptest.ComViews.MyTimeShow;
+import com.chen.maptest.NetDataType.Userinfo;
 import com.chen.maptest.MapAdapter.MapAdapterLayout;
 import com.chen.maptest.MapAdapter.MapAdaterCallback;
 import com.chen.maptest.MapAdapter.MyLatlng;
-import com.chen.maptest.DateType.PointData;
-import com.chen.maptest.DateType.PointSimpleData;
+import com.chen.maptest.NetDataType.PointSimpleData;
 import com.chen.maptest.R;
+import com.chen.maptest.Utils.ImageWrap;
 import com.chen.maptest.Utils.MyUtils;
 import com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBar;
 
-import java.util.List;
+import java.util.Date;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -61,8 +62,23 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
     @BindView(R.id.msgContentLayout)
     public ViewGroup mMsgContentLayout;
 
+    @BindView(R.id.msgTitle)
+    public TextView mMsgTitle;
+
+    @BindView(R.id.msgUsername)
+    public TextView mMsgUsername;
+
+    @BindView(R.id.msgUserIcon)
+    public ImageView mMsgUsericon;
+
+    @BindView(R.id.msgTime)
+    public MyTimeShow mMsgTimeshow;
+
     @BindView(R.id.msgText)
     public TextView mMsgText;
+
+    @BindView(R.id.msgAlbum)
+    public ImageView mMsgAlbum;
 
     private View mMapView;
     private Unbinder unbinder;
@@ -170,6 +186,11 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
     public void MyTouch(MotionEvent motionEvent) {
     }
 
+    @Override
+    public void MyMarkerClick(String pointID, String userID) {
+        mPresenter.clickPoint(pointID, userID);
+    }
+
     public void MyCameraChangeStart() {
     }
 
@@ -194,12 +215,6 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
     public void firstLocation(final MyLatlng latlng) {
         mMapAdapter.gotoLocation(latlng,15);
     }
-
-
-    public void MyMarkerClick(PointSimpleData psd) {
-        mPresenter.clickPoint(psd);
-    }
-
 
     @OnClick(R.id.floatingActionButton)
     public void floatingClick(){
@@ -249,18 +264,26 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
     }
 
     @Override
-    public void showPoints(List<PointSimpleData> data) {
-
+    public void addMarker(MyLatlng l, String pointID, String usericon, String msgSmallText,String userID){
+        mMapAdapter.addMarker(l,pointID,usericon,msgSmallText,userID);
     }
 
     @Override
-    public void showPoint(PointData pd) {
+    public void showPoint(String msgTitle, String msgText, String msgAlbum, Date time) {
+        mMsgTitle.setText(msgTitle);
+        mMsgText.setText(msgText);
+        ImageWrap.albumjust(getActivity(),msgAlbum,mMsgAlbum);
+        mMsgTimeshow.setTime(time);
+    }
 
+    @Override
+    public void showPointUser(String username, String usericon) {
+        mMsgUsername.setText(username);
+        ImageWrap.iconjust(getActivity(),usericon,mMsgUsericon);
     }
 
     int dura = 300;
     boolean isUped = false;
-    String testStr = "";
     @Override
     public void upPointShower() {
         if (isUped)
@@ -272,8 +295,6 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
         mMsgScrollView.setLayoutParams(lp);
 
         isUped = true;
-        testStr += this.getString(R.string.manytext);
-        mMsgText.setText(testStr);
         mMsgScrollView.setVisibility(View.VISIBLE);
         mMapAdapter.animate().translationY(h2 /2 - self_h/2).setDuration(dura).start();
         mMsgScrollView.animate().translationY(-self_h+ h2).setDuration(dura).start();
@@ -295,8 +316,5 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
         return isUped;
     }
 
-    @Override
-    public void showPointUser(Userinfo ui) {
-    }
 
 }

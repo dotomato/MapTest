@@ -643,7 +643,7 @@ import com.chen.maptest.ComViews.OutlineProvider;
 
 import com.chen.maptest.DateType.*;
 import com.chen.maptest.R;
-import com.chen.maptest.Utils.UserIconWarp;
+import com.chen.maptest.Utils.ImageWrap;
 import com.dd.CircularProgressButton;
 import com.google.gson.Gson;
 import com.sackcentury.shinebuttonlib.ShineButton;

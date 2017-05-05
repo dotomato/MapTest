@@ -2,12 +2,10 @@ package com.chen.maptest.MVPs.Main;
 
 import com.chen.maptest.BasePresenter;
 import com.chen.maptest.BaseView;
-import com.chen.maptest.DateType.PointData;
-import com.chen.maptest.DateType.PointSimpleData;
-import com.chen.maptest.DateType.Userinfo;
+import com.chen.maptest.NetDataType.PointSimpleData;
 import com.chen.maptest.MapAdapter.MyLatlng;
 
-import java.util.List;
+import java.util.Date;
 
 /**
  * Created by chen on 17-5-4.
@@ -21,13 +19,13 @@ public interface MainContract {
 
         void zoomMap(float zoom);
 
-        void showPoints(List<PointSimpleData> data);
+        void addMarker(MyLatlng l, String pointID, String usericon, String msgSmallText, String userID);
 
-        void showPoint(PointData pd);
+        void showPoint(String msgTitle, String msgText, String msgAlbum, Date time);
+
+        void showPointUser(String username, String usericon);
 
         void upPointShower();
-
-        void showPointUser(Userinfo ui);
 
         void downPointShower();
 
@@ -40,7 +38,7 @@ public interface MainContract {
 
         void mapMove(MyLatlng lefttop, MyLatlng rightbottom, MyLatlng center);
 
-        void clickPoint(PointSimpleData psd);
+        void clickPoint(String pointID, String userID);
 
         void newPoint(MyLatlng l);
 

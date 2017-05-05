@@ -1,5 +1,6 @@
 package com.chen.maptest.MapAdapter;
 
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -13,18 +14,24 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.TextView;
 
-import com.chen.maptest.DateType.PointSimpleData;
+import com.chen.maptest.NetDataType.PointSimpleData;
 import com.chen.maptest.R;
+import com.chen.maptest.Utils.Animate;
+import com.chen.maptest.Utils.ImageWrap;
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
+import com.mapbox.mapboxsdk.annotations.MarkerView;
 import com.mapbox.mapboxsdk.camera.CameraUpdate;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
-import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.LocationSource;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
@@ -45,7 +52,7 @@ import static com.mapbox.mapboxsdk.maps.MapView.REGION_WILL_CHANGE_ANIMATED;
  * Copyright *
  */
 
-public class MapAdapterLayout extends FrameLayout implements MapboxMap.OnMarkerClickListener, MapView.OnMapChangedListener {
+public class MapAdapterLayout extends FrameLayout implements  MapView.OnMapChangedListener {
     private Context mContext;
 
     private final static String TAG = "MapAdapterLayout";
@@ -57,7 +64,7 @@ public class MapAdapterLayout extends FrameLayout implements MapboxMap.OnMarkerC
     private MarkerOptions mReadMarkerOption;
     private Marker mReadMark;
     private Icon mReadIcon;
-    private HashMap<String, Marker> markerMap;
+    private HashMap<String, MarkerView> markerMap;
     private HashMap<String, PointSimpleData> PSDMap;
     private Icon mIcon;
     private Projection mProjection;
@@ -131,9 +138,6 @@ public class MapAdapterLayout extends FrameLayout implements MapboxMap.OnMarkerC
         });
         locationEngine.requestLocationUpdates();
 
-//        mMap.setOnMapTouchListener(this);
-        mMap.setOnMarkerClickListener(this);
-//        mMap.setOnMapStatusChangeListener(this);
         mMapView.addOnMapChangedListener(this);
 
         mMap.setMyLocationEnabled(true);
@@ -166,8 +170,46 @@ public class MapAdapterLayout extends FrameLayout implements MapboxMap.OnMarkerC
         Bitmap b3 = Bitmap.createBitmap(b2, 0, 0, b2.getWidth(), b2.getHeight(), scaleMatrix, true);
         mReadIcon = IconFactory.recreate("ReadMarkerIcon",b3);
 
-        mMap.setMaxZoomPreference(15);
+        mMap.setMaxZoomPreference(17);
+
+        mMap.getMarkerViewManager().addMarkerViewAdapter(new MarkerViewAdapter(mContext, mMap));
+
     }
+
+    private class MarkerViewAdapter extends MapboxMap.MarkerViewAdapter<MsgMarker> {
+
+        private LayoutInflater inflater;
+        private MapboxMap mapboxMap;
+
+        public MarkerViewAdapter(@NonNull Context context, @NonNull MapboxMap mapboxMap) {
+            super(context);
+            this.inflater = LayoutInflater.from(context);
+            this.mapboxMap = mapboxMap;
+        }
+
+        @Nullable
+        @Override
+        public View getView(@NonNull MsgMarker marker, @Nullable View convertView, @NonNull ViewGroup parent) {
+            if (convertView==null) {
+                convertView = inflater.inflate(R.layout.main_frag_map_markerviewlayout, parent, false);
+            }
+            ImageView userIcon = (ImageView)convertView.findViewById(R.id.msgUserIcon);
+            TextView userSmallText = (TextView)convertView.findViewById(R.id.userSmallText);
+            ImageWrap.iconjust(mContext,marker.getUserIcon(),userIcon);
+            userSmallText.setText(marker.getUserSmallTest());
+            return convertView;
+        }
+
+        @Override
+        public boolean onSelect(
+                @NonNull final MsgMarker marker, @NonNull final View convertView, boolean reselectionForViewReuse) {
+            ObjectAnimator animator = Animate.tada(convertView,1);
+            animator.start();
+            mMapAdaterCallback.MyMarkerClick(marker.getPointID(), marker.getUserID());
+            return false;
+        }
+    }
+
 
     public void onSaveInstanceState(Bundle outState) {
         mMapView.onSaveInstanceState(outState);
@@ -177,17 +219,6 @@ public class MapAdapterLayout extends FrameLayout implements MapboxMap.OnMarkerC
         mMapAdaterCallback=var;
     }
     MapAdaterCallback mMapAdaterCallback=null;
-
-    @Override
-    public boolean onMarkerClick(@NonNull Marker marker) {
-        if (mMapAdaterCallback!=null) {
-            PointSimpleData psd = PSDMap.get(marker.getTitle());
-            if (psd == null)
-                return true;
-            mMapAdaterCallback.MyMarkerClick(psd);
-        }
-        return true;   //false会移动地图到marker点，true不会
-    }
 
     @Override
     public void onMapChanged(int change) {
@@ -204,13 +235,13 @@ public class MapAdapterLayout extends FrameLayout implements MapboxMap.OnMarkerC
         }
     }
 
-    public void addMarker(PointSimpleData psd){
-        mMarkerOption.position(new LatLng(psd.latitude,psd.longitude))
-                .icon(mIcon);
-        Marker marker = mMap.addMarker(mMarkerOption);
-        marker.setTitle(psd.pointID);
-        markerMap.put(psd.pointID,marker);
-        PSDMap.put(psd.pointID,psd);
+    public void addMarker(MyLatlng l, String pointID, String usericon, String msgSmallText, String userID){
+        if (markerMap.containsKey(pointID))
+            return;
+        MsgMarkOptions op = new MsgMarkOptions(usericon,msgSmallText,pointID,userID);
+        op.position(l.toLatlng());
+        MarkerView marker = mMap.addMarker(op);
+        markerMap.put(pointID,marker);
     }
 
     public void addReadMarker(MyLatlng latlng){
@@ -252,9 +283,13 @@ public class MapAdapterLayout extends FrameLayout implements MapboxMap.OnMarkerC
     }
 
     public void rmAllMarker(){
-        for (Marker var:markerMap.values()) {
+        for (MarkerView var:markerMap.values()) {
             var.remove();
         }
+    }
+
+    public void rmUnuseMarkger(){
+
     }
 
     public MyLatlng pointToMyLatlng(PointF p){

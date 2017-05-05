@@ -1,21 +1,21 @@
 package com.chen.maptest.MVPs.Main;
 
-import android.graphics.PointF;
-import android.util.Log;
-
-import com.chen.maptest.DateType.PointData;
-import com.chen.maptest.DateType.PointDataResult;
-import com.chen.maptest.DateType.PointSimpleData;
-import com.chen.maptest.DateType.SelectAreaData;
-import com.chen.maptest.DateType.SelectAreaResult;
-import com.chen.maptest.DateType.Userinfo;
-import com.chen.maptest.DateType.UserinfoResult;
+import com.chen.maptest.JsonDataType.Message;
+import com.chen.maptest.NetDataType.PointData;
+import com.chen.maptest.NetDataType.PointDataResult;
+import com.chen.maptest.NetDataType.PointSimpleData;
+import com.chen.maptest.NetDataType.SelectAreaData;
+import com.chen.maptest.NetDataType.SelectAreaResult;
+import com.chen.maptest.NetDataType.Userinfo;
+import com.chen.maptest.NetDataType.UserinfoResult;
 import com.chen.maptest.GlobalVar;
-import com.chen.maptest.Manager.MyUM;
 import com.chen.maptest.MapAdapter.MyLatlng;
 import com.chen.maptest.MyServer.MyAction1;
 import com.chen.maptest.MyServer.Myserver;
 import com.chen.maptest.Utils.OnceRunner;
+import com.google.gson.Gson;
+
+import java.util.Date;
 
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -63,12 +63,10 @@ public class MainPresenter implements MainContract.Presenter {
     }
 
     @Override
-    public void clickPoint(PointSimpleData psd) {
-        MyLatlng l =new MyLatlng(psd.latitude,psd.longitude);
-        mMainView.moveMap(l);
+    public void clickPoint(String pointID, String userID) {
 
         PointData gpd = new PointData();
-        gpd.pointID=psd.pointID;
+        gpd.pointID=pointID;
         Myserver.getApi().getPoint(gpd)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -76,19 +74,25 @@ public class MainPresenter implements MainContract.Presenter {
                     @Override
                     public void call() {
                         mMainView.upPointShower();
-                        mMainView.showPoint(mVar.pointData);
+
+                        MyLatlng l = new MyLatlng(mVar.pointData.latitude, mVar.pointData.longitude);
+                        mMainView.moveMap(l);
+
+                        Gson gson = new Gson();
+                        Message mj = gson.fromJson(mVar.pointData.userMessage,Message.class);
+                        mMainView.showPoint("title", mj.text,mj.albumURL,new Date(mVar.pointData.pointTime*1000));
                     }
                 });
 
         Userinfo nuid = new Userinfo();
-        nuid.userID=psd.userID;
+        nuid.userID=userID;
         Myserver.getApi().getuser(nuid)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new MyAction1<UserinfoResult>() {
                     @Override
                     public void call() {
-                        mMainView.showPointUser(mVar.userinfo);
+                        mMainView.showPointUser(mVar.userinfo.userName, mVar.userinfo.userIcon);
                     }
                 });
     }
@@ -159,9 +163,9 @@ public class MainPresenter implements MainContract.Presenter {
                 .subscribe(new MyAction1<SelectAreaResult>() {
                     @Override
                     public void call() {
-                        for (PointSimpleData psd:mVar.points) {
-
-                        }
+                        for (PointSimpleData psd :mVar.points)
+                            mMainView.addMarker(new MyLatlng(psd.latitude,psd.longitude),
+                                    psd.pointID, psd.userIcon, psd.smallMsg, psd.userID);
                     }
                 });
     }

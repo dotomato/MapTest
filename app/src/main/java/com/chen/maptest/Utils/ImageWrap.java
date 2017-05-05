@@ -11,11 +11,19 @@ import com.chen.maptest.R;
  * Copyright *一
  */
 
-public class UserIconWarp {
+public class ImageWrap {
 
-    public static void just(Context context, String path, ImageView imageview){
+    public static void iconjust(Context context, String path, ImageView imageview){
         if (path.equals("no_icon")) {
             Glide.with(context).load(R.drawable.usericon).asBitmap().into(imageview);
+        } else {
+            Glide.with(context).load(path).asBitmap().into(imageview);
+        }
+    }
+
+    public static void albumjust(Context context, String path, ImageView imageview){
+        if (path.equals("no_img")) {
+            Glide.with(context).load(R.drawable.default_album).asBitmap().into(imageview);
         } else {
             Glide.with(context).load(path).asBitmap().into(imageview);
         }

@@ -1,4 +1,4 @@
-package com.chen.maptest.DateType;
+package com.chen.maptest.NetDataType;
 
 import java.util.List;
 

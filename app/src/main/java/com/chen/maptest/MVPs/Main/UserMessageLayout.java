@@ -21,6 +21,7 @@ import android.widget.TextView;
 
 
 import com.bumptech.glide.Glide;
+import com.chen.maptest.JsonDataType.Message;
 import com.chen.maptest.GlobalVar;
 import com.chen.maptest.MapAdapter.MyLatlng;
 import com.chen.maptest.MyServer.MyAction1;
@@ -31,18 +32,15 @@ import com.chen.maptest.MVPs.Main.Views.MyBlurImageView;
 import com.chen.maptest.ComViews.MyTimeShow;
 import com.chen.maptest.ComViews.OutlineProvider;
 
-import com.chen.maptest.DateType.*;
+import com.chen.maptest.NetDataType.*;
 import com.chen.maptest.R;
-import com.chen.maptest.Utils.UserIconWarp;
+import com.chen.maptest.Utils.ImageWrap;
 import com.dd.CircularProgressButton;
 import com.google.gson.Gson;
 import com.sackcentury.shinebuttonlib.ShineButton;
 import com.yalantis.ucrop.UCrop;
 
 import java.io.File;
-import java.text.DecimalFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -54,7 +52,6 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
 import static com.chen.maptest.Utils.MyUtils.pickFromGallery;
-import static com.chen.maptest.Utils.MyUtils.setEditTextEditable;
 
 /**
  * Created by chen on 17-2-3.
@@ -217,7 +214,7 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
 //            case MainFragment.MODE_MESSAGE:
 //
 //                Gson gson = new Gson();
-//                MessageJson mj = gson.fromJson(mPointData.userMessage,MessageJson.class);
+//                Message mj = gson.fromJson(mPointData.userMessage,Message.class);
 //
 //                if (mj.ver==100) {
 //                    mMsgEdittext.setText(mj.text);
@@ -253,7 +250,7 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
     public void initShow2(Userinfo ui){
         mUserdName.setText(ui.userName);
         mUserdDescirpt.setText(ui.userDes);
-        UserIconWarp.just(mContext,ui.userIcon,mUserdIcon);
+        ImageWrap.iconjust(mContext,ui.userIcon,mUserdIcon);
     }
 
     int lmode2;
@@ -368,7 +365,7 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
         pd.longitude = l.longitude;
         pd.userID = GlobalVar.mUserd.ui2.userinfo.userID;
 
-        MessageJson mj= new MessageJson();
+        Message mj= new Message();
         mj.ver=100;
         mj.text = mMsgEdittext.getText().toString();
         if (hasAlbumUpload){
