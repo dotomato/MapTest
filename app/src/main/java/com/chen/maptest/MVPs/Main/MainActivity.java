@@ -1,4 +1,5 @@
 package com.chen.maptest.MVPs.Main;
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
@@ -8,6 +9,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import com.chen.maptest.MVPs.MainLeftDraw.LeftDrawLayout;
+import com.chen.maptest.Manager.MyUM;
+import com.chen.maptest.MyServer.Myserver;
 import com.chen.maptest.R;
 import com.chen.maptest.Utils.MyUtils;
 import com.mapbox.mapboxsdk.Mapbox;
@@ -39,6 +42,15 @@ public class MainActivity extends AppCompatActivity implements DrawerLayout.Draw
         ButterKnife.bind(this);
         mRootView.addDrawerListener(this);
 
+        Myserver.apiTest();
+
+        MyUM.inituserinfo(this,new MyUM.UserInitFinish() {
+            @Override
+            public void OnUserInitFinish() {
+                initUserView();
+            }
+        });
+
         mMainFragment = (MainFragment) getSupportFragmentManager().findFragmentById(R.id.contentFrame);
         if (mMainFragment == null) {
             // Create the fragment
@@ -49,7 +61,6 @@ public class MainActivity extends AppCompatActivity implements DrawerLayout.Draw
 
         // Create the presenter
         mMainPresenter = new MainPresenter(mMainFragment);
-
     }
 
 
@@ -65,8 +76,19 @@ public class MainActivity extends AppCompatActivity implements DrawerLayout.Draw
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode != Activity.RESULT_OK)
+            return;
+        switch (requestCode){
+            default:
+                break;
+        }
+
         super.onActivityResult(requestCode, resultCode, data);
-        mMainFragment.onActivityResult(requestCode, resultCode, data);
+
+    }
+
+    public void initUserView(){
+        mLeftDrawerLayout.initUserView();
     }
 
     @Override

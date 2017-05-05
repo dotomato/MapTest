@@ -50,7 +50,7 @@ public class MapAdapterLayout extends FrameLayout implements MapboxMap.OnMarkerC
 
     private final static String TAG = "MapAdapterLayout";
 
-    private MapView mMapView;
+    private static MapView mMapView;
     private MapboxMap mMap;
 
     private MarkerOptions mMarkerOption;
@@ -62,6 +62,10 @@ public class MapAdapterLayout extends FrameLayout implements MapboxMap.OnMarkerC
     private Icon mIcon;
     private Projection mProjection;
     private boolean firstshow;
+
+    public static MapView getMapView(){
+        return mMapView;
+    }
 
     public MapAdapterLayout(@NonNull Context context) {
         super(context);
@@ -134,7 +138,7 @@ public class MapAdapterLayout extends FrameLayout implements MapboxMap.OnMarkerC
 
         mMap.setMyLocationEnabled(true);
 
-        mMapView.setStyleUrl("mapbox://styles/mapbox/dark-v9");
+        mMapView.setStyleUrl("mapbox://styles/mapbox/light-v9");
 
         UiSettings mUiSettings = mMap.getUiSettings();
         mUiSettings.setScrollGesturesEnabled(true);
@@ -165,31 +169,6 @@ public class MapAdapterLayout extends FrameLayout implements MapboxMap.OnMarkerC
         mMap.setMaxZoomPreference(15);
     }
 
-    public void onStart() {
-        mMapView.onStart();
-    }
-
-    public void onResume() {
-        mMapView.onResume();
-    }
-
-    public void onPause() {
-        mMapView.onPause();
-    }
-
-    public void onStop() {
-        mMapView.onStop();
-    }
-
-    public void onLowMemory() {
-        mMapView.onLowMemory();
-    }
-
-
-    public void onDestroy() {
-        mMapView.onDestroy();
-    }
-
     public void onSaveInstanceState(Bundle outState) {
         mMapView.onSaveInstanceState(outState);
     }
@@ -208,10 +187,6 @@ public class MapAdapterLayout extends FrameLayout implements MapboxMap.OnMarkerC
             mMapAdaterCallback.MyMarkerClick(psd);
         }
         return true;   //false会移动地图到marker点，true不会
-    }
-
-    public View getMapView(){
-        return mMapView;
     }
 
     @Override

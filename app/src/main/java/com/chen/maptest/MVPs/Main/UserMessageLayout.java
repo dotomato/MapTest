@@ -190,64 +190,64 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
 
     //显示消息主体、获取图片
     public void initShow(int mode, PointData pd){
-        mPointData = pd;
-        mMode = mode;
-        switchMode2(MODE2_TEXT);
-        switch (mode) {
-            case MainFragment.MODE_EDIT:
-                //用户填写数据初始化
-                hasAlbumUpload=false;
-                mAlbumImageUri=null;
-                mAlbumImageURL=null;
-
-                mMsgEdittext.setText("");
-                mMsgEdittext.setHint("你在这里的所闻所想");
-                setEditTextEditable(mMsgEdittext,true);
-
-                mMyTimeShow.setTime(Calendar.getInstance().getTime());
-
-                mBlurImg.setSrc(R.drawable.default_album);
-                Glide.with(mContext).load(R.drawable.default_album).into(mNoBlurImg);
-
-                ml1.setVisibility(GONE);
-                ml2.setVisibility(VISIBLE);
-
-                mSendButton.setProgress(0);
-                break;
-            case MainFragment.MODE_MESSAGE:
-
-                Gson gson = new Gson();
-                MessageJson mj = gson.fromJson(mPointData.userMessage,MessageJson.class);
-
-                if (mj.ver==100) {
-                    mMsgEdittext.setText(mj.text);
-                    mMsgEdittext.setHint("");
-                    setEditTextEditable(mMsgEdittext, false);
-
-                    if (!mj.albumURL.equals("no_img")) {
-                        mBlurImg.setSrc(mj.albumURL);
-                        Glide.with(mContext).load(mj.albumURL).into(mNoBlurImg);
-                    } else {
-                        mBlurImg.setSrc(R.drawable.default_album);
-                        Glide.with(mContext).load(R.drawable.default_album).into(mNoBlurImg);
-                    }
-                }
-
-                mMyTimeShow.setTime(new Date(mPointData.pointTime*1000));
-
-                DecimalFormat decimalFormat=new DecimalFormat(".00");
-                String la=decimalFormat.format(mPointData.latitude);
-                String lo=decimalFormat.format(mPointData.longitude);
-                mLocationDes.setText("经度:"+la+"   纬度:"+lo);
-
-                mLikeNum.setText(String.valueOf(mPointData.pointLikeNum));
-                mLikeButton.setChecked(GlobalVar.mUserd.userLikePointIDList.contains(mPointData.pointID),false);
-
-                ml1.setVisibility(VISIBLE);
-                ml2.setVisibility(GONE);
-                break;
-
-        }
+//        mPointData = pd;
+//        mMode = mode;
+//        switchMode2(MODE2_TEXT);
+//        switch (mode) {
+//            case MainFragment.MODE_EDIT:
+//                //用户填写数据初始化
+//                hasAlbumUpload=false;
+//                mAlbumImageUri=null;
+//                mAlbumImageURL=null;
+//
+//                mMsgEdittext.setText("");
+//                mMsgEdittext.setHint("你在这里的所闻所想");
+//                setEditTextEditable(mMsgEdittext,true);
+//
+//                mMyTimeShow.setTime(Calendar.getInstance().getTime());
+//
+//                mBlurImg.setSrc(R.drawable.default_album);
+//                Glide.with(mContext).load(R.drawable.default_album).into(mNoBlurImg);
+//
+//                ml1.setVisibility(GONE);
+//                ml2.setVisibility(VISIBLE);
+//
+//                mSendButton.setProgress(0);
+//                break;
+//            case MainFragment.MODE_MESSAGE:
+//
+//                Gson gson = new Gson();
+//                MessageJson mj = gson.fromJson(mPointData.userMessage,MessageJson.class);
+//
+//                if (mj.ver==100) {
+//                    mMsgEdittext.setText(mj.text);
+//                    mMsgEdittext.setHint("");
+//                    setEditTextEditable(mMsgEdittext, false);
+//
+//                    if (!mj.albumURL.equals("no_img")) {
+//                        mBlurImg.setSrc(mj.albumURL);
+//                        Glide.with(mContext).load(mj.albumURL).into(mNoBlurImg);
+//                    } else {
+//                        mBlurImg.setSrc(R.drawable.default_album);
+//                        Glide.with(mContext).load(R.drawable.default_album).into(mNoBlurImg);
+//                    }
+//                }
+//
+//                mMyTimeShow.setTime(new Date(mPointData.pointTime*1000));
+//
+//                DecimalFormat decimalFormat=new DecimalFormat(".00");
+//                String la=decimalFormat.format(mPointData.latitude);
+//                String lo=decimalFormat.format(mPointData.longitude);
+//                mLocationDes.setText("经度:"+la+"   纬度:"+lo);
+//
+//                mLikeNum.setText(String.valueOf(mPointData.pointLikeNum));
+//                mLikeButton.setChecked(GlobalVar.mUserd.userLikePointIDList.contains(mPointData.pointID),false);
+//
+//                ml1.setVisibility(VISIBLE);
+//                ml2.setVisibility(GONE);
+//                break;
+//
+//        }
     }
 
     public void initShow2(Userinfo ui){

@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">RoadMap</string>
-    <string name="manytext">今晚在维也纳国家歌剧院的大厅为特殊的客人举办这个巨大的派对，表面上是庆祝狂欢的开始。</string>
+    <string name="manytext">今晚在维也纳国家歌剧院的大厅为特殊的客人举办这个巨大的派对，表面上是庆祝狂欢的开始。\
+    今晚在维也纳国家歌剧院的大厅为特殊的客人举办这个巨大的派对，表面上是庆祝狂欢的开始。\
+    今晚在维也纳国家歌剧院的大厅为特殊的客人举办这个巨大的派对，表面上是庆祝狂欢的开始。\</string>
     <string name="MapBox_access_token">pk.eyJ1IjoiZG90b21hdG8iLCJhIjoiY2owcWJpYjZjMDAxajMzb2E1bjM3ZHY1YSJ9.pd-rCr1RbJz7ETfKzCNmeg</string>
 </resources>

@@ -56,11 +56,6 @@ public class MyTimeShow extends ConstraintLayout {
         show1 = (TextView)findViewById(R.id.show1);
         timebar = (ImageView)findViewById(R.id.timebar);
 
-        OutlineProvider.setOutline(timebar,OutlineProvider.SHAPE_RECT);
-
-        if (isInEditMode())
-            setBackgroundColor(Color.rgb(50,50,50));
-
 //        showyear.setTextSize(TypedValue.COMPLEX_UNIT_DIP,20);
 //        showmonth.setTextSize(TypedValue.COMPLEX_UNIT_DIP,50);
 //        showday.setTextSize(TypedValue.COMPLEX_UNIT_DIP,50);

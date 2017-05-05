@@ -1,0 +1,1071 @@
+package com.chen.maptest.MVPs.Main;
+
+import android.annotation.TargetApi;
+import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.PointF;
+import android.os.Build;
+import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.Fragment;
+import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.view.ViewPager;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.SeekBar;
+import android.widget.Toast;
+
+import com.ToxicBakery.viewpager.transforms.FlipHorizontalTransformer;
+import com.chen.maptest.GlobalConst;
+import com.chen.maptest.GlobalVar;
+import com.chen.maptest.Manager.MyUM;
+import com.chen.maptest.MapAdapter.MapAdapterLayout;
+import com.chen.maptest.MapAdapter.MapAdaterCallback;
+import com.chen.maptest.MapAdapter.MyLatlng;
+import com.chen.maptest.MVPs.Main.Views.MyMapIcon;
+import com.chen.maptest.DateType.PointData;
+import com.chen.maptest.DateType.PointDataResult;
+import com.chen.maptest.DateType.PointSimpleData;
+import com.chen.maptest.DateType.SelectAreaData;
+import com.chen.maptest.DateType.SelectAreaResult;
+import com.chen.maptest.DateType.Userinfo;
+import com.chen.maptest.DateType.UserinfoResult;
+import com.chen.maptest.MyServer.MyAction1;
+import com.chen.maptest.MyServer.Myserver;
+import com.chen.maptest.MVPs.Main.Views.MapUI;
+import com.chen.maptest.ComViews.OutlineProvider;
+import com.chen.maptest.ComViews.QuickPageAdapter;
+import com.chen.maptest.ComViews.ScrollableViewPager;
+import com.chen.maptest.R;
+import com.chen.maptest.Utils.OnceRunner;
+import com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBar;
+import com.yalantis.ucrop.UCrop;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import butterknife.Unbinder;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
+
+/**
+ * Created by chen on 17-5-4.
+ * Copyright *
+ */
+
+public class MainFragment extends Fragment implements MainContract.View,
+        MapAdaterCallback, ScanMessageRv.OnRecyclerViewItemClickListener {
+
+
+    public final static int MODE_SCAN = 0;
+    public final static int MODE_MESSAGE = 1;
+    public final static int MODE_EDIT = 2;
+
+    private final static boolean SHOULD_CUR = false;
+    private static final String TAG = "MainFragment";
+
+    private OnceRunner mSelectHelper;
+
+    @BindView(R.id.upview)
+    public ViewGroup mUpView;
+
+    @BindView(R.id.mymapicon)
+    public MyMapIcon mMyMapIcon;
+
+    @BindView(R.id.floatingActionButton)
+    public FloatingActionButton mFloatingActionButton;
+
+    @BindView(R.id.messageviewgroup)
+    public ViewGroup mBottomViewGroup;
+
+    @BindView(R.id.viewpager)
+    public ScrollableViewPager mViewpager;
+
+    @BindView(R.id.zoombar)
+    public VerticalSeekBar mZoombar;
+
+    @BindView(R.id.zoomview)
+    public ViewGroup mZoomView;
+
+    @BindView(R.id.scanviewgroup)
+    public ScanView mScanViewGroup;
+
+    @BindView(R.id.mapui)
+    public MapUI mMapui;
+
+    @BindView(R.id.mapAdapter)
+    public MapAdapterLayout mMapAdapter;
+
+    private View mapView;
+
+    //    private ActionBarDrawerToggle mDrawerToggle;
+    public UserMessageLayout mUserMessageLayout;
+
+    private boolean shouldInitonResume;
+    private View v1;
+    private View v2;
+    private CommentLayout mCommentLayout;
+    private MyUM mUserManager;
+    private Unbinder unbinder;
+
+    private View mView;
+    private MainContract.Presenter mPresenter;
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState){
+        mView = inflater.inflate(R.layout.main_frag, container, false);
+       /* unbinder = ButterKnife.bind(this, mView);
+
+        shouldInitonResume = false;
+
+        mMapAdapter.onCreate(savedInstanceState);
+        mapView = mMapAdapter.getMapView();
+        mMapAdapter.setMapAdaterCallback(this);
+
+        initLayout();
+
+        MyUM.inituserinfo(getActivity(),new MyUM.UserInitFinish() {
+            @Override
+            public void OnUserInitFinish() {
+                initUserView();
+            }
+        });
+
+        initSelectHelper();
+
+        setBoardcastReceiver();
+
+        switchShowMode(MODE_SCAN,300);
+*/
+        return mView;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        unbinder.unbind();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        mMapAdapter.onStart();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mPresenter.start();
+        mMapAdapter.onResume();
+        if (shouldInitonResume) {
+            initUserView();
+            shouldInitonResume = false;
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mMapAdapter.onPause();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        mMapAdapter.onStop();
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        mMapAdapter.onLowMemory();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mSelectHelper.stop();
+        mMapAdapter.onDestroy();
+    }
+
+
+    private void initLayout(){
+
+        mScanViewGroup.initview(this);
+
+
+        v1 = LayoutInflater.from(getActivity()).inflate(R.layout.main_frag_usermessage,null,false);
+        v2 = LayoutInflater.from(getActivity()).inflate(R.layout.main_frag_comment,null,false);
+        List<View> viewlist = new ArrayList<>();
+        viewlist.add(v1);
+        viewlist.add(v2);
+        mViewpager.setAdapter(new QuickPageAdapter<>(viewlist));
+        mViewpager.setPageTransformer(true, new FlipHorizontalTransformer());
+        v1.setCameraDistance(1e5f);
+        v2.setCameraDistance(1e5f);
+
+        mViewpager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                switch (position){
+                    case 0:
+                        v1.setVisibility(View.VISIBLE);
+                        v2.setVisibility(View.GONE);
+                        break;
+                    case 1:
+                        v1.setVisibility(View.GONE);
+                        v2.setVisibility(View.VISIBLE);
+                        mCommentLayout.initShowStub();
+                        break;
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+
+        mUserMessageLayout = (UserMessageLayout) v1.findViewById(R.id.user_message_layout);
+        mUserMessageLayout.setExitCallback(new UserMessageLayout.ExitCallback() {
+            @Override
+            public void exitCallback() {
+                switchShowMode_force(MODE_SCAN,300);
+            }
+        });
+        mUserMessageLayout.callback(new UserMessageLayout.NewPointFinishCallback() {
+            @Override
+            public void newPointFinishCallback() {
+                selectArea();
+                switchShowMode_force(MODE_SCAN,300);
+                mMyMapIcon.shine_button(getCenterpUper());
+            }
+        });
+        mUserMessageLayout.setViewPager(mViewpager);
+        OutlineProvider.setOutline(mUserMessageLayout,OutlineProvider.SHAPE_RECT);
+
+        mCommentLayout = (CommentLayout)v2.findViewById(R.id.comment_layout);
+
+        mZoombar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                if (!b)
+                    return;
+                mMapAdapter.onZoomCtrl(i*1.0/100);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+    }
+
+    private void initUserView(){
+        ((MainActivity)getActivity()).mLeftDrawerLayout.initUserView();
+    }
+
+
+    private void initSelectHelper(){
+        mSelectHelper = new OnceRunner() {
+            @Override
+            protected void call() {
+                if (lmode == MODE_SCAN)
+                    selectArea();
+            }
+        };
+        mSelectHelper.setInternal(400);
+        new Thread(mSelectHelper).start();
+    }
+
+    private void setBoardcastReceiver() {
+        IntentFilter ifilter = new IntentFilter();
+        ifilter.addAction(GlobalConst.UPDATE_USERINFO_VIEW);
+
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                switch (intent.getAction()){
+                    case GlobalConst.UPDATE_USERINFO_VIEW:
+                        shouldInitonResume=true;
+                        break;
+                }
+            }
+        },ifilter);
+    }
+
+    public void MyTouch(MotionEvent motionEvent) {
+    }
+
+    public PointF getCenterp(){
+        return new PointF(mapView.getWidth()/2,mapView.getHeight()/2);
+    }
+
+    public PointF getCenterpUper(){
+        return new PointF(mapView.getWidth()/2,(mapView.getTop()+mBottomViewGroup.getTop())/2);
+    }
+
+    public PointF getCenterpLower(){
+        return new PointF(mapView.getWidth()/2,(mapView.getTop()+mScanViewGroup.getTop())/2);
+    }
+
+    public MyLatlng calUperLatlng(MyLatlng l){
+        MyLatlng l1 = mMapAdapter.pointToMyLatlng(getCenterpUper());
+        MyLatlng l2 = mMapAdapter.pointToMyLatlng(getCenterp());
+        return new MyLatlng(l.latitude+l2.latitude-l1.latitude,l.longitude+l2.longitude-l1.longitude);
+    }
+
+
+    public void MyCameraChangeStart() {
+    }
+
+    public void MyCameraChangeFinish() {
+        GlobalVar.viewLatlng = mMapAdapter.pointToMyLatlng(getCenterpUper());
+        mSelectHelper.start();
+        mZoombar.setProgress((int) (mMapAdapter.getZoom()*100));
+        Log.d(TAG,"zoom"+mMapAdapter.getZoom()+" LatLng"+GlobalVar.viewLatlng.toLatlng());
+    }
+
+    @Override
+    public void MyGPSRecive(MyLatlng latlng) {
+        GlobalVar.gpsLatlng = latlng;
+    }
+
+    @Override
+    public void firstLocation(final MyLatlng latlng) {
+        mMapAdapter.gotoLocation(latlng,15);
+//        mapView.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                gotoLocationSmooth(calUperLatlng(latlng));
+//            }
+//        },100);
+    }
+
+
+    public void MyMarkerClick(PointSimpleData psd) {
+        MyLatlng l =new MyLatlng(psd.latitude,psd.longitude);
+
+//        removeReadMarker();
+//        addReadMarker(l);
+
+        PointData gpd = new PointData();
+        gpd.pointID=psd.pointID;
+        Myserver.getApi().getPoint(gpd)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new MyAction1<PointDataResult>() {
+                    @Override
+                    public void call() {
+                        mMapAdapter.gotoLocationSmooth(calUperLatlng(
+                                new MyLatlng(mVar.pointData.latitude,mVar.pointData.longitude)));
+                        switchShowMode(MODE_MESSAGE,300);
+                        mUserMessageLayout.initShow(MODE_MESSAGE,mVar.pointData);
+                        mCommentLayout.initShow(0,mVar.pointData);
+                    }
+                });
+
+        Userinfo nuid = new Userinfo();
+        nuid.userID=psd.userID;
+        Myserver.getApi().getuser(nuid)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new MyAction1<UserinfoResult>() {
+                    @Override
+                    public void call() {
+                        mUserMessageLayout.initShow2(mVar.userinfo);
+                    }
+                });
+    }
+
+    int lmode=-1;
+    int mMode;
+    long mDuration;
+    public void switchShowMode(int mode, long duration){
+        mMode = mode;
+        mDuration = duration;
+        if (lmode==MODE_EDIT) {
+            mUserMessageLayout.tryExit();
+        } else {
+            _switchShowMode();
+        }
+    }
+
+    public void switchShowMode_force(int mode, long duration){
+        mMode = mode;
+        mDuration = duration;
+        _switchShowMode();
+    }
+
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    private void _switchShowMode(){
+        lmode=mMode;
+
+        switch (mMode){
+            case MODE_SCAN:
+                mMapAdapter.gotoLocationSmooth(mMapAdapter.pointToMyLatlng(getCenterpUper()));
+                mMapui.setCenter(getCenterp());
+
+                mMyMapIcon.switchIcon(MyMapIcon.ICON_HIDE);
+                mMapAdapter.removeReadMarker();
+
+                mBottomViewGroup.animate().alpha(0).setDuration(mDuration).withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        mBottomViewGroup.setVisibility(View.GONE);
+                    }
+                }).start();
+
+                mZoomView.setVisibility(View.VISIBLE);
+                mZoomView.animate().alpha(1).setDuration(mDuration).start();
+                mScanViewGroup.setVisibility(View.VISIBLE);
+                mScanViewGroup.animate().alpha(1).setDuration(mDuration).start();
+
+                mFloatingActionButton.show();
+
+                break;
+            case MODE_EDIT:
+                mMapAdapter.gotoLocationSmooth(calUperLatlng(mMapAdapter.pointToMyLatlng(getCenterp())));
+                mMapui.setCenter(getCenterpUper());
+
+                mMyMapIcon.switchIcon(MyMapIcon.ICON_FLAG);
+                mMyMapIcon.gotoLalng(getCenterpUper());
+
+                mMapAdapter.removeReadMarker();
+
+                mBottomViewGroup.setVisibility(View.VISIBLE);
+                mBottomViewGroup.animate().alpha(1).setDuration(mDuration).start();
+                mViewpager.setCurrentItem(0,false);
+                mViewpager.setScrollAble(false);
+
+                mZoomView.animate().alpha(0).setDuration(mDuration).start();
+                mScanViewGroup.animate().alpha(0).setDuration(mDuration).withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        mScanViewGroup.setVisibility(View.GONE);
+                        mZoomView.setVisibility(View.GONE);
+                    }
+                }).start();
+
+                mFloatingActionButton.hide();
+                break;
+            case MODE_MESSAGE:
+                mMapui.setCenter(getCenterpUper());
+                mMyMapIcon.switchIcon(MyMapIcon.ICON_HIDE);
+
+                mBottomViewGroup.setVisibility(View.VISIBLE);
+                mBottomViewGroup.animate().alpha(1).setDuration(mDuration).start();
+                mViewpager.setCurrentItem(0,false);
+                mViewpager.setScrollAble(true);
+
+                mZoomView.animate().alpha(0).setDuration(mDuration).start();
+                mScanViewGroup.animate().alpha(0).setDuration(mDuration).withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        mScanViewGroup.setVisibility(View.GONE);
+                        mZoomView.setVisibility(View.GONE);
+                    }
+                }).start();
+                mFloatingActionButton.hide();
+                break;
+        }
+    }
+
+    private void selectArea(){
+        SelectAreaData sad = new SelectAreaData();
+        MyLatlng lt = mMapAdapter.pointToMyLatlng(new PointF(0,0));
+        MyLatlng rb = mMapAdapter.pointToMyLatlng(new PointF(mapView.getWidth(),mScanViewGroup.getTop()));
+        sad.left_top_latitude = lt.latitude;
+        sad.left_top_longitude = lt.longitude;
+        sad.right_bottom_latitude = rb.latitude;
+        sad.right_bottom_longitude = rb.longitude;
+
+        Myserver.getApi().selectArea(sad)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new MyAction1<SelectAreaResult>() {
+                    @Override
+                    public void call() {
+                        mMapAdapter.rmAllMarker();
+                        Log.d(TAG, "selectArea result: " + mVar.statue + " " + mVar.pointsCount);
+                        for (PointSimpleData psd:mVar.points) {
+                            mMapAdapter.addMarker(psd);
+                        }
+                        mScanViewGroup.setScanData(mVar.points);
+                    }
+                });
+    }
+
+    @OnClick(R.id.floatingActionButton)
+    public void floatingClick(){
+        if (GlobalVar.mUserd ==null
+                || (!SHOULD_CUR && GlobalVar.viewLatlng==null)
+                || (SHOULD_CUR && GlobalVar.gpsLatlng==null)){
+            Toast.makeText(getActivity(),"还没有连上网络",Toast.LENGTH_SHORT).show();
+            return;
+        }
+        switchShowMode(MODE_EDIT,300);
+        mUserMessageLayout.initShow(MODE_EDIT,null);
+        mUserMessageLayout.initShow2(MyUM.getui());
+    }
+
+    public void onBackPressed(){
+        if (lmode== MODE_SCAN)
+            getActivity().finish();
+        else
+            switchShowMode(MODE_SCAN,300);
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode != Activity.RESULT_OK)
+            return;
+        switch (requestCode){
+            case UserMessageLayout.SELECT_ALBUM_IMG:
+            case UCrop.REQUEST_CROP:
+                mUserMessageLayout.ResultCallback(requestCode,resultCode,data);
+                break;
+        }
+    }
+
+    @Override
+    public void onItemClickListener(View View, PointSimpleData psd) {
+        MyMarkerClick(psd);
+    }
+
+    @OnClick(R.id.zoominbutton)
+    public void zoomin(){
+        mMapAdapter.onZoomCtrl(mZoombar.getProgress()*1.0/100-0.1);
+    }
+
+
+    @OnClick(R.id.zoomoutbutton)
+    public void zoomout(){
+        mMapAdapter.onZoomCtrl(mZoombar.getProgress()*1.0/100+0.1);
+    }
+
+    @OnClick(R.id.retlocalbutton)
+    public void retlocal(){
+        if (GlobalVar.gpsLatlng!=null)
+            mMapAdapter.gotoLocationSmooth(GlobalVar.gpsLatlng);
+    }
+
+    @Override
+    public void setPresenter(MainContract.Presenter presenter) {
+        mPresenter = presenter;
+    }
+}
+
+
+
+
+
+
+====================================================================================================
+====================================================================================================
+====================================================================================================
+====================================================================================================
+====================================================================================================
+====================================================================================================
+====================================================================================================
+====================================================================================================
+====================================================================================================
+====================================================================================================
+====================================================================================================
+====================================================================================================
+====================================================================================================
+====================================================================================================
+====================================================================================================
+====================================================================================================
+====================================================================================================
+====================================================================================================
+====================================================================================================
+====================================================================================================
+====================================================================================================
+
+
+
+
+
+
+
+package com.chen.maptest.MVPs.Main;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
+import android.support.constraint.ConstraintLayout;
+import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
+import android.text.TextUtils;
+import android.util.AttributeSet;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ScrollView;
+import android.widget.TextView;
+
+
+import com.bumptech.glide.Glide;
+import com.chen.maptest.GlobalVar;
+import com.chen.maptest.MapAdapter.MyLatlng;
+import com.chen.maptest.MyServer.MyAction1;
+import com.chen.maptest.MyServer.Myserver;
+import com.chen.maptest.Manager.MyUpyunManager;
+import com.chen.maptest.MVPs.Main.Views.InnerEdge;
+import com.chen.maptest.MVPs.Main.Views.MyBlurImageView;
+import com.chen.maptest.ComViews.MyTimeShow;
+import com.chen.maptest.ComViews.OutlineProvider;
+
+import com.chen.maptest.DateType.*;
+import com.chen.maptest.R;
+import com.chen.maptest.Utils.UserIconWarp;
+import com.dd.CircularProgressButton;
+import com.google.gson.Gson;
+import com.sackcentury.shinebuttonlib.ShineButton;
+import com.yalantis.ucrop.UCrop;
+
+import java.io.File;
+import java.text.DecimalFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
+import butterknife.ButterKnife;
+
+import butterknife.BindView;
+import butterknife.OnClick;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
+
+import static com.chen.maptest.Utils.MyUtils.pickFromGallery;
+import static com.chen.maptest.Utils.MyUtils.setEditTextEditable;
+
+/**
+ * Created by chen on 17-2-3.
+ * Copyright *
+ */
+
+public class UserMessageLayout extends ConstraintLayout implements MyUpyunManager.UploadProgress {
+
+    private final static String TAG = "UserMessageLayout";
+
+    static public final int MODE2_TEXT = 0;
+    static public final int MODE2_ALBUM = 1;
+
+    static public final int MODE3_POS = 0;
+    static public final int MODE3_NEG = 1;
+
+    static public final int SELECT_ALBUM_IMG = 0;
+
+    @BindView(R.id.usericon)
+    public ImageView mUserdIcon;
+
+    @BindView(R.id.username)
+    public TextView mUserdName;
+
+    @BindView(R.id.userdescript)
+    public TextView mUserdDescirpt;
+
+    @BindView(R.id.blurimg)
+    public MyBlurImageView mBlurImg;
+
+    @BindView(R.id.noblurimg)
+    public ImageView mNoBlurImg;
+
+    @BindView(R.id.timeshow)
+    public MyTimeShow mMyTimeShow;
+
+    @BindView(R.id.inneredge)
+    public InnerEdge mInnerEdge;
+
+    @BindView(R.id.locationdes)
+    public TextView mLocationDes;
+
+    @BindView(R.id.msgedittext)
+    public EditText mMsgEdittext;
+
+    @BindView(R.id.msgscroll)
+    public ScrollView mMsgScroll;
+
+    @BindView(R.id.messagelayout_1)
+    public ViewGroup ml1;
+
+    @BindView(R.id.messagelayout_2)
+    public ViewGroup ml2;
+
+    @BindView(R.id.sendbutton)
+    public CircularProgressButton mSendButton;
+
+    @BindView(R.id.likenum)
+    public TextView mLikeNum;
+
+    @BindView(R.id.likebutton)
+    public ShineButton mLikeButton;
+
+    private Context mContext;
+
+    private ViewPager mParent_ViewPager;
+    private int mMode;
+    private boolean hasAlbumUpload;
+    private Uri mAlbumImageUri;
+    private String mAlbumImageURL;
+
+    private List<View> viewlist;
+    private float x1;
+    private float x2;
+    private PointData mPointData;
+
+
+    public UserMessageLayout(Context context) {
+        super(context);
+        init(context);
+    }
+
+    public UserMessageLayout(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        init(context);
+    }
+
+    public UserMessageLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        init(context);
+    }
+
+    private void init(Context context){
+        mContext = context;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @Override
+    protected void onFinishInflate(){
+        super.onFinishInflate();
+        ButterKnife.bind(this);
+
+        //设置显示效果
+        OutlineProvider.setOutline(mUserdIcon,OutlineProvider.SHAPE_OVAL);
+        mMsgEdittext.getPaint().setFakeBoldText(true);
+        mUserdName.getPaint().setFakeBoldText(true);
+
+        setClickable(true);
+        setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+//                if (mParent_ViewPager==null)
+//                    return;
+//                if (mParent_ViewPager.getCurrentItem()==0)
+                    toggleMode2();
+            }
+        });
+
+        mSendButton.setIndeterminateProgressMode(true);
+    }
+
+    @Override
+    protected void onLayout(boolean changed,
+                            int l, int t, int r, int b){
+        super.onLayout(changed,l,t,r,b);
+        x1 = mMsgScroll.getX();
+        x2 = mMyTimeShow.getX();
+    }
+
+    public void setViewPager(ViewPager var){
+        mParent_ViewPager = var;
+    }
+
+    //显示消息主体、获取图片
+    public void initShow(int mode, PointData pd){
+        mPointData = pd;
+        mMode = mode;
+        switchMode2(MODE2_TEXT);
+        switch (mode) {
+            case MainFragment.MODE_EDIT:
+                //用户填写数据初始化
+                hasAlbumUpload=false;
+                mAlbumImageUri=null;
+                mAlbumImageURL=null;
+
+                mMsgEdittext.setText("");
+                mMsgEdittext.setHint("你在这里的所闻所想");
+                setEditTextEditable(mMsgEdittext,true);
+
+                mMyTimeShow.setTime(Calendar.getInstance().getTime());
+
+                mBlurImg.setSrc(R.drawable.default_album);
+                Glide.with(mContext).load(R.drawable.default_album).into(mNoBlurImg);
+
+                ml1.setVisibility(GONE);
+                ml2.setVisibility(VISIBLE);
+
+                mSendButton.setProgress(0);
+                break;
+            case MainFragment.MODE_MESSAGE:
+
+                Gson gson = new Gson();
+                MessageJson mj = gson.fromJson(mPointData.userMessage,MessageJson.class);
+
+                if (mj.ver==100) {
+                    mMsgEdittext.setText(mj.text);
+                    mMsgEdittext.setHint("");
+                    setEditTextEditable(mMsgEdittext, false);
+
+                    if (!mj.albumURL.equals("no_img")) {
+                        mBlurImg.setSrc(mj.albumURL);
+                        Glide.with(mContext).load(mj.albumURL).into(mNoBlurImg);
+                    } else {
+                        mBlurImg.setSrc(R.drawable.default_album);
+                        Glide.with(mContext).load(R.drawable.default_album).into(mNoBlurImg);
+                    }
+                }
+
+                mMyTimeShow.setTime(new Date(mPointData.pointTime*1000));
+
+                DecimalFormat decimalFormat=new DecimalFormat(".00");
+                String la=decimalFormat.format(mPointData.latitude);
+                String lo=decimalFormat.format(mPointData.longitude);
+                mLocationDes.setText("经度:"+la+"   纬度:"+lo);
+
+                mLikeNum.setText(String.valueOf(mPointData.pointLikeNum));
+                mLikeButton.setChecked(GlobalVar.mUserd.userLikePointIDList.contains(mPointData.pointID),false);
+
+                ml1.setVisibility(VISIBLE);
+                ml2.setVisibility(GONE);
+                break;
+
+        }
+    }
+
+    public void initShow2(Userinfo ui){
+        mUserdName.setText(ui.userName);
+        mUserdDescirpt.setText(ui.userDes);
+        UserIconWarp.just(mContext,ui.userIcon,mUserdIcon);
+    }
+
+    int lmode2;
+    final int MODE2_DURATION = 600;
+    public void switchMode2(int mode2){
+        lmode2 = mode2;
+        if (lmode2==MODE2_TEXT){
+            mBlurImg.animate().alpha(1).scaleX(1f).scaleY(1f).setDuration(MODE2_DURATION).start();
+            mNoBlurImg.animate().scaleX(1f).scaleY(1f).setDuration(MODE2_DURATION).start();
+            mMsgScroll.animate().x(x1).setDuration(MODE2_DURATION/2).start();
+            mMyTimeShow.animate().x(x2).setDuration(MODE2_DURATION/2).start();
+            mInnerEdge.setShadowAlpha(1);
+
+        } else {
+            mBlurImg.animate().alpha(0).scaleX(1.05f).scaleY(1.05f).setDuration(MODE2_DURATION).start();
+            mNoBlurImg.animate().scaleX(1.05f).scaleY(1.05f).setDuration(MODE2_DURATION).start();
+            mMsgScroll.animate().x(-mMsgScroll.getWidth()-300).setDuration(MODE2_DURATION/2).start();
+            mMyTimeShow.animate().x(getWidth()+100).setDuration(MODE2_DURATION/2).start();
+            mInnerEdge.setShadowAlpha(0);
+        }
+    }
+
+    public void toggleMode2(){
+        if (lmode2==MODE2_TEXT)
+            switchMode2(MODE2_ALBUM);
+        else
+            switchMode2(MODE2_TEXT);
+    }
+
+    public void tryExit(){
+        if (TextUtils.isEmpty(mMsgEdittext.getText()) && !hasAlbumUpload){
+            if (mExitCallback!=null)
+                mExitCallback.exitCallback();
+            return;
+        }
+        new AlertDialog.Builder(mContext).setMessage("要保存已输入的内容吗？")
+                .setPositiveButton("保存",new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //TODO 保存已输入的内容
+                        if (mExitCallback!=null)
+                            mExitCallback.exitCallback();
+                    }})
+                .setNegativeButton("不保存",new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (mExitCallback!=null)
+                            mExitCallback.exitCallback();
+                    }})
+                .setNeutralButton("取消", null)
+                .show();//在按键响应事件中显示此对话框
+    }
+
+    @OnClick(R.id.albumbutton)
+    public void addimg(){
+        pickFromGallery((Activity) mContext,SELECT_ALBUM_IMG, "选择封面");
+    }
+
+
+    //接收从Activity传过来的Result,已经进行过resultCode==RESULT_OK判断了
+    public void ResultCallback(int requestCode, int resultCode, Intent data){
+        switch (requestCode){
+
+            case SELECT_ALBUM_IMG:
+                if (data != null) {
+                    Uri imageUri = data.getData();
+                    Uri mDestinationUri = Uri.fromFile(new File(mContext.getCacheDir(), "UserAlbum"+UUID.randomUUID().toString()+".jpeg"));
+
+                    UCrop.of(imageUri, mDestinationUri)
+                            .withAspectRatio(3, 4)
+                            .withMaxResultSize(1080, 1440)
+                            .start((Activity) mContext);
+                }
+                break;
+
+            case UCrop.REQUEST_CROP:
+                hasAlbumUpload=true;
+                mAlbumImageUri = UCrop.getOutput(data);
+                mBlurImg.setSrc(mAlbumImageUri);
+                Glide.with(mContext).load(mAlbumImageUri).into(mNoBlurImg);
+                break;
+        }
+    }
+
+    @OnClick(R.id.sendbutton)
+    public void newPoint(){
+        mSendButton.setProgress(50);
+        if (hasAlbumUpload){
+            MyUpyunManager.getIns().upload_image("MessageAlbum",mAlbumImageUri,this);
+        } else
+            uploadnoewpoint();
+    }
+
+    //Upyun的回调
+    @Override
+    public void onProgress(float progress) {
+    }
+
+    @Override
+    public void onComplete(boolean isSuccess, String url) {
+        mAlbumImageURL = url;
+        uploadnoewpoint();
+    }
+
+    private void uploadnoewpoint(){
+        MyLatlng l = GlobalVar.viewLatlng;
+
+        PointData2 pd2 = new PointData2();
+        PointData pd = new PointData();
+
+        pd.latitude = l.latitude;
+        pd.longitude = l.longitude;
+        pd.userID = GlobalVar.mUserd.ui2.userinfo.userID;
+
+        MessageJson mj= new MessageJson();
+        mj.ver=100;
+        mj.text = mMsgEdittext.getText().toString();
+        if (hasAlbumUpload){
+            mj.albumURL=mAlbumImageURL;
+        } else {
+            mj.albumURL="no_img";
+        }
+
+        Gson gson = new Gson();
+        pd.userMessage = gson.toJson(mj);
+
+        pd2.pointData = pd;
+        pd2.userID2 = GlobalVar.mUserd.ui2.userID2;
+
+        Myserver.getApi().newPoint(pd2)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new MyAction1<PointDataResult>() {
+                    @Override
+                    public void call() {
+                        mSendButton.setProgress(100);
+                        postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (mNewPointFinishCallbackCallback !=null)
+                                    mNewPointFinishCallbackCallback.newPointFinishCallback();
+                            }
+                        },1000);
+                    }
+
+                    public void error(int statue, String errorMessage){
+                        mSendButton.setProgress(-1);
+                    }
+                });
+    }
+
+    @OnClick(R.id.likebutton)
+    public void OnLikeButtonClike(){
+        UserLikePoint ulp = new UserLikePoint();
+        ulp.pointID = mPointData.pointID;
+        ulp.isLike = mLikeButton.isChecked();
+        ulp.userID = GlobalVar.mUserd.ui2.userinfo.userID;
+        ulp.userID2 = GlobalVar.mUserd.ui2.userID2;
+        Myserver.getApi().userlikepoint(ulp)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new MyAction1<UserLikePointResult>() {
+                    @Override
+                    public void call() {
+                        updatePoint(mVar);
+                    }
+                });
+    }
+
+    private void updatePoint(UserLikePointResult mVar) {
+        if (!mPointData.pointID.equals(mVar.pointID))
+            return;
+        mLikeButton.setChecked(mVar.isLike);
+        mLikeNum.setText(String.valueOf(mVar.pointLikeNum));
+
+        List<String> ulpd = GlobalVar.mUserd.userLikePointIDList;
+        boolean isContain = ulpd.contains(mVar.pointID);
+        if (mVar.isLike && !isContain)
+            ulpd.add(mVar.pointID);
+        else if (!mVar.isLike && isContain)
+            ulpd.remove(mVar.pointID);
+    }
+
+    //退出回调
+    public interface ExitCallback{
+        void exitCallback();
+    }
+    public void setExitCallback(ExitCallback mExitCallback) {
+        this.mExitCallback = mExitCallback;
+    }
+    ExitCallback mExitCallback=null;
+
+
+
+    public interface NewPointFinishCallback {
+        void newPointFinishCallback();
+    }
+    private NewPointFinishCallback mNewPointFinishCallbackCallback =null;
+    public void callback(NewPointFinishCallback npf) {
+        this.mNewPointFinishCallbackCallback = npf;
+    }
+
+
+}
+

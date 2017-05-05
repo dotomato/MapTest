@@ -7,12 +7,15 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Base64;
+import android.view.View;
+import android.view.ViewPropertyAnimator;
 import android.widget.EditText;
 
 import com.google.gson.Gson;
@@ -162,6 +165,16 @@ public class MyUtils {
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.add(frameId, fragment);
         transaction.commit();
+    }
+
+    public static void setGoneAfterAnimate(final View v, ViewPropertyAnimator vpa){
+            long delay = vpa.getDuration();
+            v.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    v.setVisibility(View.GONE);
+                }
+            }, vpa.getDuration());
     }
 
 //    // 将 s 进行 BASE64 编码
