@@ -1,14 +1,15 @@
 package com.chen.maptest.MVPs.Main;
 
 import android.graphics.PointF;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.DividerItemDecoration;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -25,6 +26,7 @@ import com.bumptech.glide.Glide;
 import com.chen.maptest.ComViews.EdittextSizeChangeEvent;
 import com.chen.maptest.ComViews.MyTimeShow;
 import com.chen.maptest.GlobalConst;
+import com.chen.maptest.MVPs.Main.Views.CommentFooterView;
 import com.chen.maptest.MVPs.Main.Views.MyMapIcon;
 import com.chen.maptest.Manager.MyUM;
 import com.chen.maptest.MapAdapter.MapAdapterLayout;
@@ -36,9 +38,6 @@ import com.chen.maptest.R;
 import com.chen.maptest.Utils.ImageWrap;
 import com.chen.maptest.Utils.MyUtils;
 import com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBar;
-import com.sackcentury.shinebuttonlib.ShineButton;
-import com.zhy.adapter.recyclerview.wrapper.EmptyWrapper;
-import com.zhy.adapter.recyclerview.wrapper.HeaderAndFooterWrapper;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -100,6 +99,10 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
     private List<UserComment> mCommentData;
     private View mHeadView;
     private CommentAdapter mCommentAdapter;
+    private CommentFooterView mFooterView;
+    private ViewGroup mCommentLayout;
+    private View mCommentSendButton;
+    private EditText mUserCommentEdit;
 
     // TODO: 17-5-5 渐变部分、图片压缩、波浪上升
 
@@ -118,6 +121,9 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
         mZoomOut = mView.findViewById(R.id.zoomoutbutton);
         mRetLocation = mView.findViewById(R.id.retlocalbutton);
         mMsgScrollView = (ListView) mView.findViewById(R.id.msgScrollView);
+        mCommentLayout = (ViewGroup) mView.findViewById(R.id.commentLayout);
+        mCommentSendButton =  mView.findViewById(R.id.commentsendbutton);
+        mUserCommentEdit = (EditText) mView.findViewById(R.id.usercommentedit);
 
         //变量初始化
         mCommentData = new ArrayList<>();
@@ -164,18 +170,27 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
             @Override public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
+        mCommentSendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPresenter.pointComment(mUserCommentEdit.getText().toString());
+            }
+        });
+
         //消息及评论控件填充
 
         mHeadView = inflater.inflate(R.layout.main_frag_message,mMsgScrollView,false);
-        View emptyView = inflater.inflate(R.layout.main_frag_comment_empty,mMsgScrollView,false);
-        View footerView = inflater.inflate(R.layout.main_frag_comment_foorter,mMsgScrollView,false);
+        mFooterView = (CommentFooterView) inflater.inflate(R.layout.main_frag_comment_foorter,mMsgScrollView,false);
 
         mMsgScrollView.addHeaderView(mHeadView);
-        mMsgScrollView.addFooterView(footerView);
+        mMsgScrollView.addFooterView(mFooterView);
 
 
         mCommentAdapter = new CommentAdapter(getContext(),mCommentData);
+        mCommentAdapter.setMainPresenter(mPresenter);
         mMsgScrollView.setAdapter(mCommentAdapter);
+        mMsgScrollView.setHeaderDividersEnabled(false);
+        mMsgScrollView.setFooterDividersEnabled(false);
 
         mMsgScrollView.setVisibility(View.GONE);
 
@@ -197,6 +212,14 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
             }
         });
 
+//        mMsgText.addTextChangedListener(new TextWatcher() {
+//            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+//            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+//            @Override public void afterTextChanged(Editable s) {
+//                if (mMsgText.getLineCount()>1){mMsgText.setGravity(Gravity.START);
+//                } else {mMsgText.setGravity(Gravity.CENTER_HORIZONTAL);}
+//            }});
+
         ViewTreeObserver vto = mView.getViewTreeObserver();
         vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -204,7 +227,9 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
                 self_w = mView.getWidth();
                 self_h = mView.getHeight();
                 h2 = (int) (self_h*h2Radio);
-                Log.i(TAG,""+self_w+" "+self_h);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    mView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                }
             }
         });
 
@@ -320,13 +345,10 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
     }
 
     @Override
-    public void setUploadProgress(int progress) {
+    public void setUploadProgress(int progress, int visibility) {
+        Log.i(TAG,""+progress);
         mProgressBar.setProgress(progress);
-        if (progress==100){
-            mProgressBar.setVisibility(View.GONE);
-        } else {
-            mProgressBar.setVisibility(View.VISIBLE);
-        }
+        mProgressBar.setVisibility(visibility);
     }
 
     @Override
@@ -453,6 +475,8 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
         mToolbar.setAlpha(0);
         mToolbar.animate().alpha(1).setDuration(dura).start();
 
+        mMsgTitle.requestFocus();
+
         layoutagaint();
     }
 
@@ -482,14 +506,12 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
         return isEditing;
     }
 
-
-
     public void sendNewpoint() {
         int w = mMapView.getWidth();
         int h = mMapView.getHeight();
         MyLatlng center = mMapAdapter.pointToMyLatlng(new PointF(w/2,h/2));
 
-        mPresenter.sendNewpoint(
+        mPresenter.sendNewpointButton(
                 mMsgTitle.getText().toString(),
                 mMsgText.getText().toString(),
                 albumFullName,
@@ -505,15 +527,34 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
         mCommentAdapter.notifyDataSetChanged();
     }
 
+    @Override
+    public void showCommentEmpty(boolean isEmpty) {
+        mFooterView.setEmpty(isEmpty);
+    }
+
+    @Override
+    public void showCommentEdit(boolean isEdit) {
+        if (isEdit) {
+            mCommentLayout.setVisibility(View.VISIBLE);
+        } else {
+            mCommentLayout.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
     public void updateComment(UserLikeCommentResult mVar) {
         for (UserComment uc:mCommentData) {
             if (uc.commentID.equals(mVar.commentID)) {
                 uc.commentLikeNum = mVar.commentLikeNum;
-                if (mVar.isLike != MyUM.islikecomment(mVar.commentID))
-                    MyUM.likecomment(mVar.commentID,mVar.isLike);
+                //这里只更新点赞数，而是否点赞是View各自向MyUM询问的，Presenter已经让MyUM更新了
                 mCommentAdapter.notifyDataSetChanged();
             }
         }
+    }
+
+    @Override
+    public void clearComment() {
+        mUserCommentEdit.setText("");
     }
 
 

@@ -2,9 +2,10 @@ package com.chen.maptest.MVPs.Main;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.view.View;
 
+import com.chen.maptest.GlobalConst;
 import com.chen.maptest.JsonDataType.Message;
-import com.chen.maptest.MVPs.Editpoint.EditActivity;
 import com.chen.maptest.Manager.MyUM;
 import com.chen.maptest.Manager.MyUpyunManager;
 import com.chen.maptest.NetDataType.PointComment;
@@ -14,6 +15,11 @@ import com.chen.maptest.NetDataType.PointDataResult;
 import com.chen.maptest.NetDataType.PointSimpleData;
 import com.chen.maptest.NetDataType.SelectAreaData;
 import com.chen.maptest.NetDataType.SelectAreaResult;
+import com.chen.maptest.NetDataType.UserComment;
+import com.chen.maptest.NetDataType.UserLikeComment;
+import com.chen.maptest.NetDataType.UserLikeCommentResult;
+import com.chen.maptest.NetDataType.UserNewComment;
+import com.chen.maptest.NetDataType.UserNewCommentResult;
 import com.chen.maptest.NetDataType.Userinfo;
 import com.chen.maptest.NetDataType.UserinfoResult;
 import com.chen.maptest.GlobalVar;
@@ -23,6 +29,7 @@ import com.chen.maptest.MyServer.Myserver;
 import com.chen.maptest.Utils.MyUtils;
 import com.chen.maptest.Utils.OnceRunner;
 import com.google.gson.Gson;
+import com.sackcentury.shinebuttonlib.ShineButton;
 
 import java.io.File;
 import java.util.Calendar;
@@ -49,6 +56,8 @@ class MainPresenter implements MainContract.Presenter, MyUpyunManager.UploadProg
     private String _msgTitle;
     private String _msgText;
     private MyLatlng _l;
+    private PointData mPointData;
+
 
 
     MainPresenter(MainContract.View mainView) {
@@ -80,9 +89,12 @@ class MainPresenter implements MainContract.Presenter, MyUpyunManager.UploadProg
         if (mMainView.isEditing())
             return;
 
-        PointData gpd = new PointData();
-        gpd.pointID=pointID;
-        Myserver.getApi().getPoint(gpd)
+        mMainView.setUploadProgress(0, View.INVISIBLE);
+        mMainView.showCommentEdit(true);
+
+        mPointData = new PointData();
+        mPointData.pointID=pointID;
+        Myserver.getApi().getPoint(mPointData)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new MyAction1<PointDataResult>() {
@@ -111,13 +123,14 @@ class MainPresenter implements MainContract.Presenter, MyUpyunManager.UploadProg
                     }
                 });
 
-        Myserver.getApi().getpointcomment(gpd)
+        Myserver.getApi().getpointcomment(mPointData)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new MyAction1<PointComment>() {
                     @Override
                     public void call() {
                         mMainView.showComment(mVar.userCommentList);
+                        mMainView.showCommentEmpty(mVar.userCommentCount == 0);
                     }
                 });
     }
@@ -127,8 +140,11 @@ class MainPresenter implements MainContract.Presenter, MyUpyunManager.UploadProg
         if (mMainView.isEditing() || mMainView.isUped())
             return;
         mMainView.upPointEditer();
+        mMainView.setUploadProgress(0, View.INVISIBLE);
         mMainView.showPointUser(MyUM.getui().userName,MyUM.getui().userIcon);
         mMainView.showPoint("","","", Calendar.getInstance().getTime());
+        mMainView.showCommentEmpty(false);
+        mMainView.showCommentEdit(false);
     }
 
     @Override
@@ -161,12 +177,53 @@ class MainPresenter implements MainContract.Presenter, MyUpyunManager.UploadProg
     }
 
     @Override
-    public void commentList(String commentID, boolean isLike) {
-
+    public void commentLike(String commentID, boolean isLike) {
+        UserLikeComment ulc = new UserLikeComment();
+        ulc.commentID = commentID;
+        ulc.isLike = isLike;
+        ulc.userID = MyUM.getuid();
+        ulc.userID2 = MyUM.getuid2();
+        Myserver.getApi().userlikecomment(ulc)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new MyAction1<UserLikeCommentResult>() {
+                    @Override
+                    public void call() {
+                        if (mVar.isLike != MyUM.islikecomment(mVar.commentID))
+                            MyUM.likecomment(mVar.commentID,mVar.isLike);
+                        mMainView.updateComment(mVar);
+                    }
+                });
     }
 
     @Override
-    public void pointComment(String pointID, String content) {
+    public void pointComment(String content) {
+        UserNewComment unc = new UserNewComment();
+        unc.pointID = mPointData.pointID;
+        unc.userID = MyUM.getuid();
+        unc.userID2 = MyUM.getuid2();
+        unc.userComment = content;
+
+        Myserver.getApi().newcomment(unc)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new MyAction1<UserNewCommentResult>() {
+                    @Override
+                    public void call() {
+//                        mUserComment.setText("");
+                        Myserver.getApi().getpointcomment(mPointData)
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(new MyAction1<PointComment>() {
+                                    @Override
+                                    public void call() {
+                                        mMainView.showComment(mVar.userCommentList);
+                                        mMainView.showCommentEmpty(mVar.userCommentCount == 0);
+                                    }
+                                });
+                        mMainView.clearComment();
+                    }
+                });
 
     }
 
@@ -174,22 +231,25 @@ class MainPresenter implements MainContract.Presenter, MyUpyunManager.UploadProg
     public void onBackPressed() {
         if (mMainView.isUped()) {
             mMainView.downPointShower();
+            mMainView.showCommentEdit(false);
         } else if (mMainView.isEditing()) {
             mMainView.downPointEditer();
+            mMainView.showCommentEdit(false);
         } else {
             mMainView.finish();
         }
     }
 
     @Override
-    public void sendNewpoint(String msgTitle, String msgText, String msgAlbum,MyLatlng l, boolean hasAlbum) {
+    public void sendNewpointButton(String msgTitle, String msgText, String msgAlbum, MyLatlng l, boolean hasAlbum) {
         _msgTitle = msgTitle;
         _msgText = msgText;
         _l = l;
         if (hasAlbum){
             MyUpyunManager.getIns().upload_image("MessageAlbum",Uri.fromFile(new File(msgAlbum)),this);
         } else {
-            uploadnoewpoint(false);
+            mMainView.setUploadProgress(0, View.VISIBLE);
+            sendNewPoint(false);
         }
     }
 
@@ -227,16 +287,16 @@ class MainPresenter implements MainContract.Presenter, MyUpyunManager.UploadProg
 
     @Override
     public void onProgress(float progress) {
-        mMainView.setUploadProgress((int) (progress*0.9));
+        mMainView.setUploadProgress((int) (progress*90), View.VISIBLE);
     }
 
     @Override
     public void onComplete(boolean isSuccess, String url) {
         mAlbumImageURL = url;
-        uploadnoewpoint(true);
+        sendNewPoint(true);
     }
 
-    private void uploadnoewpoint(boolean hasAlbum){
+    private void sendNewPoint(boolean hasAlbum){
         MyLatlng l = GlobalVar.viewLatlng;
 
         PointData2 pd2 = new PointData2();
@@ -253,7 +313,7 @@ class MainPresenter implements MainContract.Presenter, MyUpyunManager.UploadProg
         if (hasAlbum){
             mj.albumURL=mAlbumImageURL;
         } else {
-            mj.albumURL="no_img";
+            mj.albumURL= GlobalConst.NO_ALBUM;
         }
 
         Gson gson = new Gson();
@@ -263,7 +323,6 @@ class MainPresenter implements MainContract.Presenter, MyUpyunManager.UploadProg
         pd2.userID2 = GlobalVar.mUserd.ui2.userID2;
 
 
-        mMainView.setUploadProgress(0);
 
         Myserver.getApi().newPoint(pd2)
                 .subscribeOn(Schedulers.io())
@@ -271,14 +330,14 @@ class MainPresenter implements MainContract.Presenter, MyUpyunManager.UploadProg
                 .subscribe(new MyAction1<PointDataResult>() {
                     @Override
                     public void call() {
-                        mMainView.setUploadProgress(100);
+                        mMainView.setUploadProgress(100, View.VISIBLE);
                         mMainView.downPointEditer();
                         mMainView.showNewpointShine(_l,500);
                         selectArea();
                     }
 
                     public void error(int statue, String errorMessage){
-                        mMainView.setUploadProgress(-1);
+                        mMainView.setUploadProgress(0, View.INVISIBLE);
                     }
                 });
     }

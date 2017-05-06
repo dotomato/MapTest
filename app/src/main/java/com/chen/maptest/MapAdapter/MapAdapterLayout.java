@@ -182,7 +182,7 @@ public class MapAdapterLayout extends FrameLayout implements  MapView.OnMapChang
         @Override
         public View getView(@NonNull MsgMarker marker, @Nullable View convertView, @NonNull ViewGroup parent) {
             if (convertView==null) {
-                convertView = inflater.inflate(R.layout.main_frag_map_markerviewlayout, parent, false);
+                convertView = inflater.inflate(R.layout.main_frag_markerviewlayout, parent, false);
             }
             ImageView userIcon = (ImageView)convertView.findViewById(R.id.msgUserIcon);
             TextView userSmallText = (TextView)convertView.findViewById(R.id.userSmallText);

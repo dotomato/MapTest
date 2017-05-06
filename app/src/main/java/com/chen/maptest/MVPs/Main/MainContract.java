@@ -5,6 +5,7 @@ import android.graphics.PointF;
 import com.chen.maptest.BasePresenter;
 import com.chen.maptest.BaseView;
 import com.chen.maptest.MapAdapter.MyLatlng;
+import com.chen.maptest.NetDataType.PointData;
 import com.chen.maptest.NetDataType.UserComment;
 import com.chen.maptest.NetDataType.UserLikeCommentResult;
 
@@ -47,9 +48,17 @@ interface MainContract {
 
         void replaceMsgAlbum(String fullName);
 
-        void setUploadProgress(int progress);
+        void setUploadProgress(int progress, int visibility);
 
         void showComment(List<UserComment> comments);
+
+        void showCommentEmpty(boolean isEmpty);
+
+        void showCommentEdit(boolean isEdit);
+
+        void updateComment(UserLikeCommentResult mVar);
+
+        void clearComment();
     }
 
     interface Presenter extends BasePresenter {
@@ -66,12 +75,12 @@ interface MainContract {
 
         void pointLike(String pointID, boolean isLike);
 
-        void commentList(String commentID, boolean isLike);
+        void commentLike(String commentID, boolean isLike);
 
-        void pointComment(String pointID, String content);
+        void pointComment(String content);
 
         void onBackPressed();
 
-        void sendNewpoint(String msgTitle, String msgText, String msgAlbum,MyLatlng l,boolean hasAlbum);
+        void sendNewpointButton(String msgTitle, String msgText, String msgAlbum, MyLatlng l, boolean hasAlbum);
     }
 }

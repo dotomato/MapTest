@@ -74,6 +74,8 @@ final class CommentAdapter extends BaseAdapter {
         holder.likebutton.setChecked(MyUM.islikecomment(uc.commentID),false);
         holder.likenum.setText(String.valueOf(uc.commentLikeNum));
 
+        holder.likebutton.setOnClickListener(new OnLikeButtonClick(uc, holder.likebutton));
+
         return convertView;
     }
 
@@ -95,15 +97,16 @@ final class CommentAdapter extends BaseAdapter {
         }
     }
 
-    private class OnLikeButtonClick implements View.OnClickListener {
+
+    private class OnLikeButtonClick implements ShineButton.OnClickListener {
+
         UserComment uc;
-        OnLikeButtonClick(UserComment var){ uc = var; }
+        ShineButton sb;
+        OnLikeButtonClick(UserComment var, ShineButton var2){ uc = var; sb = var2;}
 
         @Override
-        public void onClick(View view) {
-            if (mPresenter == null)
-                return;
-            mPresenter.commentList(uc.commentID, ((ShineButton) view).isChecked());
+        public void onClick(View v) {
+            mPresenter.commentLike(uc.commentID,  !MyUM.islikecomment(uc.commentID));
         }
     }
 }

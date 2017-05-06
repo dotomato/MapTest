@@ -10,7 +10,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="12"
-        android:textColor="@color/colorTextGray"
+        android:textColor="@color/colorTextVeryGray"
         android:textSize="24dp"
         android:textStyle="bold"
         app:layout_constraintBaseline_toBaselineOf="@+id/show_day"
@@ -22,7 +22,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="月"
-        android:textColor="@color/colorTextGray"
+        android:textColor="@color/colorTextVeryGray"
         android:textSize="12dp"
         app:layout_constraintBaseline_toBaselineOf="@+id/show_month"
         app:layout_constraintLeft_toRightOf="@+id/show_month"
@@ -35,36 +35,49 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="26"
-        android:textColor="@color/colorTextGray"
+        android:textColor="@color/colorTextVeryGray"
         android:textSize="24dp"
         android:textStyle="bold"
         android:layout_marginRight="0dp"
         app:layout_constraintBottom_toTopOf="@+id/timebar"
         app:layout_constraintRight_toRightOf="@+id/timebar"/>
 
+
     <ImageView
         android:id="@+id/timebar"
         android:layout_width="70dp"
-        android:layout_height="2dp"
+        android:layout_height="1dp"
         android:layout_marginLeft="0dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/show_month"
-        app:srcCompat="@color/colorTextGray"
-        android:layout_marginTop="0dp"
         android:layout_marginRight="0dp"
-        app:layout_constraintRight_toRightOf="parent" />
+        android:layout_marginTop="0dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/show_month"
+        app:srcCompat="@color/colorTextVeryGray" />
+
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:srcCompat="@color/colorTextVeryGray"
+        app:layout_constraintTop_toTopOf="@+id/timebar"
+        app:layout_constraintBottom_toBottomOf="@+id/timebar"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        />
 
     <TextView
         android:id="@+id/show_year"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="2016"
-        android:textColor="@color/colorTextGray"
+        android:textColor="@color/colorTextVeryGray"
         android:textSize="12dp"
         android:textStyle="bold"
         android:layout_marginLeft="0dp"
         app:layout_constraintLeft_toLeftOf="@+id/timebar"
-        android:layout_marginTop="0dp"
+        android:layout_marginTop="3dp"
         app:layout_constraintTop_toBottomOf="@+id/timebar" />
 
     <TextView
@@ -72,7 +85,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="星期三"
-        android:textColor="@color/colorTextGray"
+        android:textColor="@color/colorTextVeryGray"
         android:textSize="13dp"
         android:layout_marginRight="0dp"
         app:layout_constraintRight_toRightOf="@+id/timebar"
