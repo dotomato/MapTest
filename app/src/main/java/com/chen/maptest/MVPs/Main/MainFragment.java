@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -88,6 +89,9 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
     @BindView(R.id.progressBar2)
     public ProgressBar mProgressBar;
 
+    @BindView(R.id.msgCommentListView)
+    public ListView mCommentListView;
+
     private View mMapView;
     private Unbinder unbinder;
     private MainContract.Presenter mPresenter;
@@ -130,6 +134,11 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
             @Override public void onStartTrackingTouch(SeekBar seekBar) {}
             @Override public void onStopTrackingTouch(SeekBar seekBar) {}
         });
+        ConstraintLayout.LayoutParams lp = (ConstraintLayout.LayoutParams) mMsgScrollView.getLayoutParams();
+        lp.topToTop = ConstraintLayout.LayoutParams.UNSET;
+        lp.goneTopMargin = 0;
+        lp.topToBottom = R.id.mapLayout;
+
         mMsgScrollView.setVisibility(View.GONE);
 
         ViewTreeObserver vto = mView.getViewTreeObserver();
