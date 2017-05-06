@@ -7,6 +7,7 @@ import com.chen.maptest.JsonDataType.Message;
 import com.chen.maptest.MVPs.Editpoint.EditActivity;
 import com.chen.maptest.Manager.MyUM;
 import com.chen.maptest.Manager.MyUpyunManager;
+import com.chen.maptest.NetDataType.PointComment;
 import com.chen.maptest.NetDataType.PointData;
 import com.chen.maptest.NetDataType.PointData2;
 import com.chen.maptest.NetDataType.PointDataResult;
@@ -107,6 +108,16 @@ class MainPresenter implements MainContract.Presenter, MyUpyunManager.UploadProg
                     @Override
                     public void call() {
                         mMainView.showPointUser(mVar.userinfo.userName, mVar.userinfo.userIcon);
+                    }
+                });
+
+        Myserver.getApi().getpointcomment(gpd)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new MyAction1<PointComment>() {
+                    @Override
+                    public void call() {
+                        mMainView.showComment(mVar.userCommentList);
                     }
                 });
     }

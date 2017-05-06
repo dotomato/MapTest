@@ -5,8 +5,11 @@ import android.graphics.PointF;
 import com.chen.maptest.BasePresenter;
 import com.chen.maptest.BaseView;
 import com.chen.maptest.MapAdapter.MyLatlng;
+import com.chen.maptest.NetDataType.UserComment;
+import com.chen.maptest.NetDataType.UserLikeCommentResult;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by chen on 17-5-4.
@@ -45,6 +48,8 @@ interface MainContract {
         void replaceMsgAlbum(String fullName);
 
         void setUploadProgress(int progress);
+
+        void showComment(List<UserComment> comments);
     }
 
     interface Presenter extends BasePresenter {
