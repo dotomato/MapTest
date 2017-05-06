@@ -1,11 +1,13 @@
 package com.chen.maptest.MVPs.Main;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.chen.maptest.MVPs.MainLeftDraw.LeftDrawLayout;
@@ -15,11 +17,13 @@ import com.chen.maptest.R;
 import com.chen.maptest.Utils.MyUtils;
 import com.mapbox.mapboxsdk.Mapbox;
 
+import net.steamcrafted.materialiconlib.MaterialMenuInflater;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
-public class MainActivity extends AppCompatActivity implements DrawerLayout.DrawerListener{
+public class MainActivity extends AppCompatActivity implements DrawerLayout.DrawerListener, Toolbar.OnMenuItemClickListener {
 
 
     private final static String TAG = "MainActivity";
@@ -33,6 +37,8 @@ public class MainActivity extends AppCompatActivity implements DrawerLayout.Draw
 
     private MainFragment mMainFragment;
     private MainPresenter mMainPresenter;
+    private Toolbar mToolbar;
+    private Menu mMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +57,15 @@ public class MainActivity extends AppCompatActivity implements DrawerLayout.Draw
             }
         });
 
+
+
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
+
+        mToolbar.setVisibility(View.GONE);
+
+        mToolbar.setOnMenuItemClickListener(this);
+
         mMainFragment = (MainFragment) getSupportFragmentManager().findFragmentById(R.id.contentFrame);
         if (mMainFragment == null) {
             // Create the fragment
@@ -61,6 +76,16 @@ public class MainActivity extends AppCompatActivity implements DrawerLayout.Draw
 
         // Create the presenter
         mMainPresenter = new MainPresenter(mMainFragment);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MaterialMenuInflater
+                .with(this)
+                .setDefaultColor(Color.WHITE)
+                .inflate(R.menu.main_toolbar_menu, menu);
+        mMenu = menu;
+        return true;
     }
 
 
@@ -104,4 +129,13 @@ public class MainActivity extends AppCompatActivity implements DrawerLayout.Draw
 
     }
 
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.complete:
+                mMainFragment.sendNewpoint();
+                break;
+        }
+        return true;
+    }
 }

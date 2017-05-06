@@ -963,9 +963,7 @@ public class UserMessageLayout extends ConstraintLayout implements MyUpyunManage
     }
 
     @Override
-    public void onComplete(boolean isSuccess, String url) {
-        mAlbumImageURL = url;
-        uploadnoewpoint();
+    public void onComplete(boolean isSuccess, String url) {uploadnoewpoint
     }
 
     private void uploadnoewpoint(){

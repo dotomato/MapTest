@@ -4,6 +4,7 @@ import android.content.Context;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.chen.maptest.GlobalConst;
 import com.chen.maptest.R;
 
 /**
@@ -14,7 +15,7 @@ import com.chen.maptest.R;
 public class ImageWrap {
 
     public static void iconjust(Context context, String path, ImageView imageview){
-        if (path.equals("no_icon")) {
+        if (path.equals(GlobalConst.NO_ICON) || path.equals("")) {
             Glide.with(context).load(R.drawable.usericon).asBitmap().into(imageview);
         } else {
             Glide.with(context).load(path).asBitmap().into(imageview);
@@ -22,7 +23,7 @@ public class ImageWrap {
     }
 
     public static void albumjust(Context context, String path, ImageView imageview){
-        if (path.equals("no_img")) {
+        if (path.equals(GlobalConst.NO_ALBUM) || path.equals("")) {
             Glide.with(context).load(R.drawable.default_album).asBitmap().into(imageview);
         } else {
             Glide.with(context).load(path).asBitmap().into(imageview);

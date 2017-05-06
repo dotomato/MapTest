@@ -168,8 +168,7 @@
             android:clickable="true"
             app:backgroundTint="@color/colorAccent"
             app:fabSize="mini"
-            app:srcCompat="@drawable/ic_add_black_48dp2"
-            />
+            app:srcCompat="@drawable/ic_add_white_48dp2" />
 
     </FrameLayout>
 

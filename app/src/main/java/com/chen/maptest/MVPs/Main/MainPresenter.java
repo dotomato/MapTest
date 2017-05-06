@@ -1,10 +1,14 @@
 package com.chen.maptest.MVPs.Main;
 
 import android.content.Intent;
+import android.net.Uri;
 
 import com.chen.maptest.JsonDataType.Message;
 import com.chen.maptest.MVPs.Editpoint.EditActivity;
+import com.chen.maptest.Manager.MyUM;
+import com.chen.maptest.Manager.MyUpyunManager;
 import com.chen.maptest.NetDataType.PointData;
+import com.chen.maptest.NetDataType.PointData2;
 import com.chen.maptest.NetDataType.PointDataResult;
 import com.chen.maptest.NetDataType.PointSimpleData;
 import com.chen.maptest.NetDataType.SelectAreaData;
@@ -15,9 +19,12 @@ import com.chen.maptest.GlobalVar;
 import com.chen.maptest.MapAdapter.MyLatlng;
 import com.chen.maptest.MyServer.MyAction1;
 import com.chen.maptest.MyServer.Myserver;
+import com.chen.maptest.Utils.MyUtils;
 import com.chen.maptest.Utils.OnceRunner;
 import com.google.gson.Gson;
 
+import java.io.File;
+import java.util.Calendar;
 import java.util.Date;
 
 import rx.android.schedulers.AndroidSchedulers;
@@ -28,9 +35,8 @@ import rx.schedulers.Schedulers;
  * Copyright *
  */
 
-class MainPresenter implements MainContract.Presenter {
+class MainPresenter implements MainContract.Presenter, MyUpyunManager.UploadProgress {
 
-    public static final int NEWPOINT = 10;
     private final MainContract.View mMainView;
 
 
@@ -38,6 +44,10 @@ class MainPresenter implements MainContract.Presenter {
     private MyLatlng lt;
     private MyLatlng rb;
     private MyLatlng ml;
+    private String mAlbumImageURL;
+    private String _msgTitle;
+    private String _msgText;
+    private MyLatlng _l;
 
 
     MainPresenter(MainContract.View mainView) {
@@ -66,6 +76,8 @@ class MainPresenter implements MainContract.Presenter {
 
     @Override
     public void clickPoint(String pointID, String userID) {
+        if (mMainView.isEditing())
+            return;
 
         PointData gpd = new PointData();
         gpd.pointID=pointID;
@@ -82,7 +94,7 @@ class MainPresenter implements MainContract.Presenter {
 
                         Gson gson = new Gson();
                         Message mj = gson.fromJson(mVar.pointData.userMessage,Message.class);
-                        mMainView.showPoint("title", mj.text,mj.albumURL,new Date(mVar.pointData.pointTime*1000));
+                        mMainView.showPoint(" ", mj.text,mj.albumURL,new Date(mVar.pointData.pointTime*1000));
                     }
                 });
 
@@ -100,19 +112,21 @@ class MainPresenter implements MainContract.Presenter {
     }
 
     @Override
-    public void newPoint(MyLatlng l) {
-        ml = l;
-        Intent intent = new Intent(mMainView.getActivity()  , EditActivity.class);
-        mMainView.getActivity().startActivityForResult(intent, NEWPOINT);
+    public void newPointButton(MyLatlng l) {
+        if (mMainView.isEditing() || mMainView.isUped())
+            return;
+        mMainView.upPointEditer();
+        mMainView.showPointUser(MyUM.getui().userName,MyUM.getui().userIcon);
+        mMainView.showPoint("","","", Calendar.getInstance().getTime());
     }
 
     @Override
     public void onResult(int requestCode, Intent data) {
         switch (requestCode)
         {
-            case NEWPOINT:
-                mMainView.showNewpointShine(ml);
-                break;
+            case MainFragment.ALBUM_REQUESR_CODE:
+                Uri uri = data.getData();
+                mMainView.replaceMsgAlbum(MyUtils.UritoFullName(mMainView.getActivity(),uri));
             default:
                 break;
         }
@@ -149,8 +163,22 @@ class MainPresenter implements MainContract.Presenter {
     public void onBackPressed() {
         if (mMainView.isUped()) {
             mMainView.downPointShower();
+        } else if (mMainView.isEditing()) {
+            mMainView.downPointEditer();
         } else {
             mMainView.finish();
+        }
+    }
+
+    @Override
+    public void sendNewpoint(String msgTitle, String msgText, String msgAlbum,MyLatlng l, boolean hasAlbum) {
+        _msgTitle = msgTitle;
+        _msgText = msgText;
+        _l = l;
+        if (hasAlbum){
+            MyUpyunManager.getIns().upload_image("MessageAlbum",Uri.fromFile(new File(msgAlbum)),this);
+        } else {
+            uploadnoewpoint(false);
         }
     }
 
@@ -182,6 +210,64 @@ class MainPresenter implements MainContract.Presenter {
                         for (PointSimpleData psd :mVar.points)
                             mMainView.addMarker(new MyLatlng(psd.latitude,psd.longitude),
                                     psd.pointID, psd.userIcon, psd.smallMsg, psd.userID);
+                    }
+                });
+    }
+
+    @Override
+    public void onProgress(float progress) {
+        mMainView.setUploadProgress((int) (progress*0.9));
+    }
+
+    @Override
+    public void onComplete(boolean isSuccess, String url) {
+        mAlbumImageURL = url;
+        uploadnoewpoint(true);
+    }
+
+    private void uploadnoewpoint(boolean hasAlbum){
+        MyLatlng l = GlobalVar.viewLatlng;
+
+        PointData2 pd2 = new PointData2();
+        PointData pd = new PointData();
+
+        pd.latitude = _l.latitude;
+        pd.longitude = _l.longitude;
+        pd.userID = GlobalVar.mUserd.ui2.userinfo.userID;
+
+        Message mj= new Message();
+        mj.ver=100;
+        mj.text = _msgText;
+        mj.title = _msgTitle;
+        if (hasAlbum){
+            mj.albumURL=mAlbumImageURL;
+        } else {
+            mj.albumURL="no_img";
+        }
+
+        Gson gson = new Gson();
+        pd.userMessage = gson.toJson(mj);
+
+        pd2.pointData = pd;
+        pd2.userID2 = GlobalVar.mUserd.ui2.userID2;
+
+
+        mMainView.setUploadProgress(0);
+
+        Myserver.getApi().newPoint(pd2)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new MyAction1<PointDataResult>() {
+                    @Override
+                    public void call() {
+                        mMainView.setUploadProgress(100);
+                        mMainView.downPointEditer();
+                        mMainView.showNewpointShine(_l,500);
+                        selectArea();
+                    }
+
+                    public void error(int statue, String errorMessage){
+                        mMainView.setUploadProgress(-1);
                     }
                 });
     }

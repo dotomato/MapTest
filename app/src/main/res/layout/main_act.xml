@@ -7,12 +7,29 @@
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:toolbar="http://schemas.android.com/apk/res-auto"
     tools:context=".MVPs.Main.MainActivity">
 
-   <FrameLayout
-       android:layout_width="match_parent"
-       android:layout_height="match_parent"
-       android:id="@+id/contentFrame">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:elevation="6dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="?attr/actionBarSize"
+            android:theme="@style/GalaxyZooThemeToolbarDarkOverflow" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/contentFrame">
+
+    </FrameLayout>
+
+
 
    </FrameLayout>
 

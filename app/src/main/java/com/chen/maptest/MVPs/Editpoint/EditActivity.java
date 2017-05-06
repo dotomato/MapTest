@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -18,8 +17,6 @@ import com.chen.maptest.Utils.MyUtils;
 
 import net.steamcrafted.materialiconlib.MaterialDrawableBuilder;
 import net.steamcrafted.materialiconlib.MaterialMenuInflater;
-
-import butterknife.ButterKnife;
 
 /**
  * Created by chen on 17-5-5.
@@ -73,7 +70,7 @@ public class EditActivity extends AppCompatActivity implements Toolbar.OnMenuIte
         MaterialMenuInflater
                 .with(this)
                 .setDefaultColor(Color.WHITE)
-                .inflate(R.menu.edit_toolbar_menu, menu);
+                .inflate(R.menu.main_toolbar_menu, menu);
         mMenu = menu;
         return true;
     }

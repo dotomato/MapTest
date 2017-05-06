@@ -11,17 +11,20 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.chen.maptest.ComViews.EdittextSizeChangeEvent;
 import com.chen.maptest.ComViews.MyTimeShow;
+import com.chen.maptest.GlobalConst;
 import com.chen.maptest.MVPs.Main.Views.MyMapIcon;
-import com.chen.maptest.NetDataType.Userinfo;
 import com.chen.maptest.MapAdapter.MapAdapterLayout;
 import com.chen.maptest.MapAdapter.MapAdaterCallback;
 import com.chen.maptest.MapAdapter.MyLatlng;
-import com.chen.maptest.NetDataType.PointSimpleData;
 import com.chen.maptest.R;
 import com.chen.maptest.Utils.ImageWrap;
 import com.chen.maptest.Utils.MyUtils;
@@ -39,8 +42,9 @@ import butterknife.Unbinder;
  * Copyright *
  */
 
-public class MainFragment extends Fragment implements MainContract.View, MapAdaterCallback {
+public class MainFragment extends Fragment implements MainContract.View, MapAdaterCallback, View.OnClickListener {
 
+    public static final int ALBUM_REQUESR_CODE = 10;
     private static final String TAG = "MainFragment";
 
     final float h2Radio = 1/3.0f;
@@ -64,7 +68,7 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
     public ViewGroup mMsgContentLayout;
 
     @BindView(R.id.msgTitle)
-    public TextView mMsgTitle;
+    public EditText mMsgTitle;
 
     @BindView(R.id.msgUsername)
     public TextView mMsgUsername;
@@ -76,10 +80,13 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
     public MyTimeShow mMsgTimeshow;
 
     @BindView(R.id.msgText)
-    public TextView mMsgText;
+    public EdittextSizeChangeEvent mMsgText;
 
     @BindView(R.id.msgAlbum)
     public ImageView mMsgAlbum;
+
+    @BindView(R.id.progressBar2)
+    public ProgressBar mProgressBar;
 
     private View mMapView;
     private Unbinder unbinder;
@@ -89,6 +96,11 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
     private int self_h;
     private View mView;
     private int h2;
+    private View mToolbar;
+    private boolean hasAlbum;
+    private String albumFullName;
+
+    // TODO: 17-5-5 渐变部分、图片压缩、波浪上升
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -130,6 +142,8 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
                 Log.i(TAG,""+self_w+" "+self_h);
             }
         });
+
+        mToolbar = getActivity().findViewById(R.id.toolbar);
     }
 
     @Override
@@ -223,10 +237,7 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
 
     @OnClick(R.id.floatingActionButton)
     public void floatingClick(){
-        int w = mMapView.getWidth();
-        int h = mMapView.getHeight();
-        MyLatlng center = mMapAdapter.pointToMyLatlng(new PointF(w/2,h/2));
-        mPresenter.newPoint(center);
+        mPresenter.newPointButton(null);
     }
 
     public void onBackPressed(){
@@ -236,6 +247,23 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
     @Override
     public void finish(){
         getActivity().finish();
+    }
+
+    @Override
+    public void replaceMsgAlbum(String fullName) {
+        hasAlbum = true;
+        albumFullName = fullName;
+        Glide.with(getContext()).load(fullName).into(mMsgAlbum);
+    }
+
+    @Override
+    public void setUploadProgress(int progress) {
+        mProgressBar.setProgress(progress);
+        if (progress==100){
+            mProgressBar.setVisibility(View.GONE);
+        } else {
+            mProgressBar.setVisibility(View.VISIBLE);
+        }
     }
 
     @OnClick(R.id.zoominbutton)
@@ -277,8 +305,15 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
     public void showPoint(String msgTitle, String msgText, String msgAlbum, Date time) {
         mMsgTitle.setText(msgTitle);
         mMsgText.setText(msgText);
-        ImageWrap.albumjust(getActivity(),msgAlbum,mMsgAlbum);
+        if (msgAlbum.equals(GlobalConst.NO_ALBUM)) {
+            mMsgAlbum.setVisibility(View.GONE);
+        }
+        else {
+            mMsgAlbum.setVisibility(View.VISIBLE);
+            ImageWrap.albumjust(getActivity(), msgAlbum, mMsgAlbum);
+        }
         mMsgTimeshow.setTime(time);
+        mView.requestLayout();
     }
 
     @Override
@@ -288,9 +323,14 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
     }
 
     @Override
-    public void showNewpointShine(MyLatlng l) {
-        PointF p = mMapAdapter.myLatlgnToPoint(l);
-        MyMapIcon.shine_button(getContext(), mMapAdapter, p);
+    public void showNewpointShine(MyLatlng l, long delay) {
+        final PointF p = mMapAdapter.myLatlgnToPoint(l);
+        mView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                MyMapIcon.shine_button(getContext(), mMapAdapter, p);
+            }
+        }, delay);
     }
 
     int dura = 300;
@@ -299,17 +339,22 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
     public void upPointShower() {
         if (isUped)
             return;
+        isUped = true;
 
         int lh = View.MeasureSpec.makeMeasureSpec(self_h - h2, View.MeasureSpec.EXACTLY);
         ConstraintLayout.LayoutParams lp = (ConstraintLayout.LayoutParams) mMsgScrollView.getLayoutParams();
         lp.height = lh;
         mMsgScrollView.setLayoutParams(lp);
 
-        isUped = true;
+        mFloatingActionButton.hide();
+
         mMsgScrollView.setVisibility(View.VISIBLE);
         mMapAdapter.animate().translationY(h2 /2 - self_h/2).setDuration(dura).start();
         mMsgScrollView.animate().translationY(-self_h+ h2).setDuration(dura).start();
         mMsgContentLayout.requestLayout();
+
+        MyUtils.setEditTextEditable(mMsgTitle,false);
+        MyUtils.setEditTextEditable(mMsgText,false);
     }
 
     @Override
@@ -317,9 +362,58 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
         if (!isUped)
             return;
         isUped = false;
+
+        mFloatingActionButton.show();
+
         mMapAdapter.animate().translationY(0).setDuration(dura).start();
         mMsgScrollView.animate().translationY(0).setDuration(dura).start();
         MyUtils.setGoneAfterAnimate(mMsgScrollView,mMsgScrollView.animate());
+    }
+
+    boolean isEditing = false;
+    @Override
+    public void upPointEditer() {
+        if (isEditing)
+            return;
+        isEditing = true;
+
+        hasAlbum = false;
+        albumFullName = "";
+
+        int lh = View.MeasureSpec.makeMeasureSpec(self_h - h2, View.MeasureSpec.EXACTLY);
+        ConstraintLayout.LayoutParams lp = (ConstraintLayout.LayoutParams) mMsgScrollView.getLayoutParams();
+        lp.height = lh;
+        mMsgScrollView.setLayoutParams(lp);
+
+        mMsgScrollView.setVisibility(View.VISIBLE);
+        mMapAdapter.animate().translationY(h2 /2 - self_h/2).setDuration(dura).start();
+        mMsgScrollView.animate().translationY(-self_h+ h2).setDuration(dura).start();
+        mMsgContentLayout.requestLayout();
+
+        MyUtils.setEditTextEditable(mMsgTitle,true);
+        MyUtils.setEditTextEditable(mMsgText,true);
+
+        mFloatingActionButton.hide();
+
+        mToolbar.setVisibility(View.VISIBLE);
+        mToolbar.setAlpha(0);
+        mToolbar.animate().alpha(1).setDuration(dura).start();
+    }
+
+    @Override
+    public void downPointEditer() {
+        if (!isEditing)
+            return;
+        isEditing = false;
+
+        mMapAdapter.animate().translationY(0).setDuration(dura).start();
+        mMsgScrollView.animate().translationY(0).setDuration(dura).start();
+        MyUtils.setGoneAfterAnimate(mMsgScrollView,mMsgScrollView.animate());
+
+        mFloatingActionButton.show();
+
+        mToolbar.animate().alpha(0).setDuration(dura).start();
+        MyUtils.setGoneAfterAnimate(mToolbar,mToolbar.animate());
     }
 
     @Override
@@ -327,5 +421,30 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
         return isUped;
     }
 
+    @Override
+    public boolean isEditing() {
+        return isEditing;
+    }
 
+
+    @OnClick(R.id.msgAlbum)
+    public void onClick(View v) {
+        if (isEditing()){
+            MyUtils.pickFromGallery(getActivity(), ALBUM_REQUESR_CODE,"选择图片");
+        }
+    }
+
+    public void sendNewpoint() {
+        int w = mMapView.getWidth();
+        int h = mMapView.getHeight();
+        MyLatlng center = mMapAdapter.pointToMyLatlng(new PointF(w/2,h/2));
+
+        mPresenter.sendNewpoint(
+                mMsgTitle.getText().toString(),
+                mMsgText.getText().toString(),
+                albumFullName,
+                center,
+                hasAlbum
+        );
+    }
 }

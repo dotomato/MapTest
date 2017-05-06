@@ -8,5 +8,6 @@ package com.chen.maptest.JsonDataType;
 public class Message {
     public int ver;
     public String text;
+    public String title;
     public String albumURL;
 }

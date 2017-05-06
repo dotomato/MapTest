@@ -26,15 +26,25 @@ interface MainContract {
 
         void showPointUser(String username, String usericon);
 
-        void showNewpointShine(MyLatlng l);
+        void showNewpointShine(MyLatlng l, long delay);
 
         void upPointShower();
 
         void downPointShower();
 
+        void upPointEditer();
+
+        void downPointEditer();
+
         boolean isUped();
 
+        boolean isEditing();
+
         void finish();
+
+        void replaceMsgAlbum(String fullName);
+
+        void setUploadProgress(int progress);
     }
 
     interface Presenter extends BasePresenter {
@@ -43,7 +53,7 @@ interface MainContract {
 
         void clickPoint(String pointID, String userID);
 
-        void newPoint(MyLatlng l);
+        void newPointButton(MyLatlng l);
 
         void retLocation();
 
@@ -56,5 +66,7 @@ interface MainContract {
         void pointComment(String pointID, String content);
 
         void onBackPressed();
+
+        void sendNewpoint(String msgTitle, String msgText, String msgAlbum,MyLatlng l,boolean hasAlbum);
     }
 }
