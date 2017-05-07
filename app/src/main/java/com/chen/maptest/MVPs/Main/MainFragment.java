@@ -109,7 +109,7 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
     private ImageView mMsgAlbum;
 
 
-    // TODO: 17-5-5 渐变部分、图片压缩、波浪上升
+    // TODO: 17-5-5 波浪上升
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

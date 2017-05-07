@@ -55,4 +55,5 @@ dependencies {
     compile 'com.h6ah4i.android.widget.verticalseekbar:verticalseekbar:0.7.2'
     testCompile 'junit:junit:4.12'
     compile 'com.flaviofaria:kenburnsview:1.0.7'
+    compile 'id.zelory:compressor:1.0.4'
 }

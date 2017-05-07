@@ -1,7 +1,9 @@
 package com.chen.maptest.MVPs.Main;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Environment;
 import android.view.View;
 
 import com.chen.maptest.GlobalConst;
@@ -35,7 +37,9 @@ import java.io.File;
 import java.util.Calendar;
 import java.util.Date;
 
+import id.zelory.compressor.Compressor;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
 /**
@@ -262,9 +266,27 @@ class MainPresenter implements MainContract.Presenter, MyUpyunManager.UploadProg
         _msgText = msgText;
         _l = l;
         if (hasAlbum){
-            MyUpyunManager.getIns().upload_image("MessageAlbum",Uri.fromFile(new File(msgAlbum)),this);
+            mMainView.setUploadProgress(10, View.VISIBLE);
+            new Compressor.Builder(mMainView.getActivity())
+                    .setMaxWidth(1080)
+                    .setMaxHeight(1920)
+                    .setQuality(80)
+                    .setCompressFormat(Bitmap.CompressFormat.JPEG)
+                    .setDestinationDirectoryPath(Environment.getExternalStoragePublicDirectory(
+                            Environment.DIRECTORY_PICTURES).getAbsolutePath())
+                    .build()
+                    .compressToFileAsObservable(new File(msgAlbum))
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Action1<File>() {
+                        @Override
+                        public void call(File file) {
+                            mMainView.setUploadProgress(20, View.VISIBLE);
+                            MyUpyunManager.getIns().upload_image("MessageAlbum",Uri.fromFile(file),MainPresenter.this);
+                        }
+                    });
         } else {
-            mMainView.setUploadProgress(0, View.VISIBLE);
+            mMainView.setUploadProgress(10, View.VISIBLE);
             sendNewPoint(false);
         }
     }
@@ -303,7 +325,7 @@ class MainPresenter implements MainContract.Presenter, MyUpyunManager.UploadProg
 
     @Override
     public void onProgress(float progress) {
-        mMainView.setUploadProgress((int) (progress*90), View.VISIBLE);
+        mMainView.setUploadProgress((int) (progress*70)+20, View.VISIBLE);
     }
 
     @Override
