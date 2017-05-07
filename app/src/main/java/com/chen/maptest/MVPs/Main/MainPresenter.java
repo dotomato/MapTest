@@ -272,8 +272,6 @@ class MainPresenter implements MainContract.Presenter, MyUpyunManager.UploadProg
                     .setMaxHeight(1920)
                     .setQuality(80)
                     .setCompressFormat(Bitmap.CompressFormat.JPEG)
-                    .setDestinationDirectoryPath(Environment.getExternalStoragePublicDirectory(
-                            Environment.DIRECTORY_PICTURES).getAbsolutePath())
                     .build()
                     .compressToFileAsObservable(new File(msgAlbum))
                     .subscribeOn(Schedulers.io())
