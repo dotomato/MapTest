@@ -54,35 +54,36 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
 
     final float h2Radio = 1/3.0f;
 
-    public FloatingActionButton mFloatingActionButton;
+    private FloatingActionButton mFloatingActionButton;
 
-    public MapAdapterLayout mMapAdapter;
+    private MapAdapterLayout mMapAdapter;
 
-    public VerticalSeekBar mZoombar;
+    private VerticalSeekBar mZoombar;
 
-    public ViewGroup mZoomCtrl;
+    private ViewGroup mZoomCtrl;
 
-    public View mZoomIn;
+    private View mZoomIn;
 
-    public View mZoomOut;
+    private View mZoomOut;
 
-    public View mRetLocation;
+    private View mRetLocation;
 
-    public ListView mMsgScrollView;
+    private ListView mMsgScrollView;
 
-    public EditText mMsgTitle;
+    private EditText mMsgTitle;
 
-    public TextView mMsgUsername;
+    private TextView mMsgUsername;
 
-    public ImageView mMsgUsericon;
+    private ImageView mMsgUsericon;
 
-    public MyTimeShow mMsgTimeshow;
+    private MyTimeShow mMsgTimeshow;
 
-    public EdittextSizeChangeEvent mMsgText;
+    private EdittextSizeChangeEvent mMsgText;
 
-    public ImageView mMsgAlbum;
 
-    public ProgressBar mProgressBar;
+    private ProgressBar mProgressBar;
+
+    private ViewGroup mMsgContainer;
 
     private View mMapView;
     private MainContract.Presenter mPresenter;
@@ -104,7 +105,9 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
     private TextView mPointLikeNum;
     private ShineButton mPointLikeButton;
     private ViewGroup mPointLiker;
-    private TextView mPointCommentNum;
+    private TextView mPointCommentNum;    
+    private ImageView mMsgAlbum;
+
 
     // TODO: 17-5-5 渐变部分、图片压缩、波浪上升
 
@@ -126,6 +129,7 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
         mCommentLayout = (ViewGroup) mView.findViewById(R.id.commentLayout);
         mCommentSendButton =  mView.findViewById(R.id.commentsendbutton);
         mUserCommentEdit = (EditText) mView.findViewById(R.id.usercommentedit);
+        mMsgContainer = (ViewGroup) mView.findViewById(R.id.msgContainer);
 
         //变量初始化
         mCommentData = new ArrayList<>();
@@ -191,10 +195,8 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
         mCommentAdapter = new CommentAdapter(getContext(),mCommentData);
         mCommentAdapter.setMainPresenter(mPresenter);
         mMsgScrollView.setAdapter(mCommentAdapter);
-        mMsgScrollView.setHeaderDividersEnabled(false);
+        mMsgScrollView.setHeaderDividersEnabled(true);
         mMsgScrollView.setFooterDividersEnabled(false);
-
-        mMsgScrollView.setVisibility(View.GONE);
 
         //消息内控件初始化
         mMsgTitle = (EditText)mHeadView.findViewById(R.id.msgTitle);
@@ -430,19 +432,23 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
             return;
         isUped = true;
 
-        int lh = View.MeasureSpec.makeMeasureSpec(self_h - h2, View.MeasureSpec.EXACTLY);
-        ConstraintLayout.LayoutParams lp = (ConstraintLayout.LayoutParams) mMsgScrollView.getLayoutParams();
-        lp.height = lh;
-        mMsgScrollView.setLayoutParams(lp);
+        resizeMsgContainer();
 
         mFloatingActionButton.hide();
 
-        mMsgScrollView.setVisibility(View.VISIBLE);
+        mMsgContainer.setVisibility(View.VISIBLE);
         mMapAdapter.animate().translationY(h2 /2 - self_h/2).setDuration(dura).start();
-        mMsgScrollView.animate().translationY(-self_h+ h2).setDuration(dura).start();
+        mMsgContainer.animate().translationY(-self_h+ h2).setDuration(dura).start();
 
         MyUtils.setEditTextEditable(mMsgTitle,false);
         MyUtils.setEditTextEditable(mMsgText,false);
+    }
+
+    private void resizeMsgContainer() {
+        int lh = View.MeasureSpec.makeMeasureSpec(self_h - h2, View.MeasureSpec.EXACTLY);
+        ConstraintLayout.LayoutParams lp = (ConstraintLayout.LayoutParams) mMsgContainer.getLayoutParams();
+        lp.height = lh;
+        mMsgContainer.setLayoutParams(lp);
     }
 
     @Override
@@ -456,8 +462,8 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
         mFloatingActionButton.show();
 
         mMapAdapter.animate().translationY(0).setDuration(dura).start();
-        mMsgScrollView.animate().translationY(0).setDuration(dura).start();
-        MyUtils.setGoneAfterAnimate(mMsgScrollView,mMsgScrollView.animate());
+        mMsgContainer.animate().translationY(0).setDuration(dura).start();
+        MyUtils.setGoneAfterAnimate(mMsgContainer,mMsgContainer.animate());
 
         mCommentData.clear();
         mCommentAdapter.notifyDataSetChanged();
@@ -473,14 +479,11 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
         hasAlbum = false;
         albumFullName = "";
 
-        int lh = View.MeasureSpec.makeMeasureSpec(self_h - h2, View.MeasureSpec.EXACTLY);
-        ConstraintLayout.LayoutParams lp = (ConstraintLayout.LayoutParams) mMsgScrollView.getLayoutParams();
-        lp.height = lh;
-        mMsgScrollView.setLayoutParams(lp);
+        resizeMsgContainer();
 
-        mMsgScrollView.setVisibility(View.VISIBLE);
+        mMsgContainer.setVisibility(View.VISIBLE);
         mMapAdapter.animate().translationY(h2 /2 - self_h/2).setDuration(dura).start();
-        mMsgScrollView.animate().translationY(-self_h+ h2).setDuration(dura).start();
+        mMsgContainer.animate().translationY(-self_h+ h2).setDuration(dura).start();
 
         MyUtils.setEditTextEditable(mMsgTitle,true);
         MyUtils.setEditTextEditable(mMsgText,true);
@@ -503,8 +506,8 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
         isEditing = false;
 
         mMapAdapter.animate().translationY(0).setDuration(dura).start();
-        mMsgScrollView.animate().translationY(0).setDuration(dura).start();
-        MyUtils.setGoneAfterAnimate(mMsgScrollView,mMsgScrollView.animate());
+        mMsgContainer.animate().translationY(0).setDuration(dura).start();
+        MyUtils.setGoneAfterAnimate(mMsgContainer,mMsgContainer.animate());
 
         mFloatingActionButton.show();
 

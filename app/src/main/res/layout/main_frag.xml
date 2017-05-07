@@ -128,14 +128,29 @@
 
     </android.support.constraint.ConstraintLayout>
 
-    <ListView
-        android:id="@+id/msgScrollView"
-        android:background="@color/cpb_white"
+    <LinearLayout
+        android:id="@+id/msgContainer"
         android:layout_width="0dp"
         android:layout_height="500dp"
+        android:orientation="vertical"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="parent" />
+        app:layout_constraintTop_toBottomOf="parent">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="10dp"
+            android:src="#FF002255" />
+
+
+        <ListView
+            android:id="@+id/msgScrollView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@android:color/white" />
+    </LinearLayout>
+
 
     <FrameLayout
         android:layout_width="0dp"
