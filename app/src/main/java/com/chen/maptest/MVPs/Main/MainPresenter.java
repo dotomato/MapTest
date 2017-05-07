@@ -108,7 +108,7 @@ class MainPresenter implements MainContract.Presenter, MyUpyunManager.UploadProg
 
                         Gson gson = new Gson();
                         Message mj = gson.fromJson(mVar.pointData.userMessage,Message.class);
-                        mMainView.showPoint(" ", mj.text,mj.albumURL,new Date(mVar.pointData.pointTime*1000),
+                        mMainView.showPoint(mj.title, mj.text,mj.albumURL,new Date(mVar.pointData.pointTime*1000),
                                 mVar.pointData.pointLikeNum, MyUM.islikepoint(mVar.pointData.pointID));
                     }
                 });

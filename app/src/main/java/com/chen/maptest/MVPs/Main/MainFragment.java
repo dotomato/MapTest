@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.AbsListView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -115,6 +116,7 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
     private ViewGroup mPointLiker;
     private TextView mPointCommentNum;    
     private ImageView mMsgAlbum;
+    private boolean commentShowed;
 
 
     @Override
@@ -205,6 +207,24 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
         mMsgScrollView.setHeaderDividersEnabled(true);
         mMsgScrollView.setFooterDividersEnabled(false);
 
+        commentShowed = false;
+
+        //
+        mMsgScrollView.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                boolean b = (firstVisibleItem==0 && visibleItemCount>1) || firstVisibleItem!=0;
+                if (b == commentShowed || !isUped)
+                    return;
+                showCommentLayout(b);
+            }
+        });
+
         //消息内控件初始化
         mMsgTitle = (EditText)mHeadView.findViewById(R.id.msgTitle);
         mMsgUsername = (TextView)mHeadView.findViewById(R.id.msgUsername);
@@ -258,6 +278,15 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
         mToolbar = getActivity().findViewById(R.id.toolbar);
 
         return mView;
+    }
+
+    private void showCommentLayout(boolean b) {
+        if (b){
+            mCommentLayout.animate().translationY(0).setDuration(600).start();
+        } else {
+            mCommentLayout.animate().translationY(MyUtils.dip2px(getContext(),150)).setDuration(600).start();
+        }
+        commentShowed = b;
     }
 
 
@@ -368,7 +397,6 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
 
     @Override
     public void setUploadProgress(int progress, int visibility) {
-        Log.i(TAG,""+progress);
         mProgressBar.setProgress(progress);
         mProgressBar.setVisibility(visibility);
     }
@@ -452,10 +480,10 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
 
         mMapAdapter.animate().translationY(h2 /2 - self_h/2).setStartDelay(dura).setDuration(dura2).start();
         mPointLiker.setVisibility(View.VISIBLE);
-        mCommentLayout.setVisibility(View.VISIBLE);
 
 //        mHeadView.setAlpha(0);
 //        mHeadView.animate().alpha(1).setDuration(dura).setStartDelay(dura).start();
+        showCommentLayout(false);
 
         showMsgInnerContainer(true,l);
 
@@ -536,7 +564,7 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
         showMsgInnerContainer(false, null);
 
         mFloatingActionButton.show();
-        mCommentLayout.setVisibility(View.GONE);
+        showCommentLayout(false);
 
         mMapAdapter.animate().translationY(0).setStartDelay(0).setDuration(dura).start();
         mCommentData.clear();
@@ -573,7 +601,7 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
 
         mMsgTitle.requestFocus();
         mPointLiker.setVisibility(View.GONE);
-        mCommentLayout.setVisibility(View.GONE);
+        showCommentLayout(false);
 
         layoutagaint();
     }
@@ -588,7 +616,7 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
         mMapAdapter.animate().translationY(0).setStartDelay(0).setDuration(dura).start();
 
         mFloatingActionButton.show();
-        mCommentLayout.setVisibility(View.GONE);
+        showCommentLayout(false);
 
         mToolbar.animate().alpha(0).setDuration(dura).start();
         MyUtils.setGoneAfterAnimate(mToolbar,mToolbar.animate());
@@ -609,9 +637,16 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
         int h = mMapView.getHeight();
         MyLatlng center = mMapAdapter.pointToMyLatlng(new PointF(w/2,h/2));
 
+        String title = mMsgTitle.getText().toString();
+        if (title.length()==0)
+            title = " ";
+        String text = mMsgText.getText().toString();
+        if (text.length()==0)
+            text = " ";
+
         mPresenter.sendNewpointButton(
-                mMsgTitle.getText().toString(),
-                mMsgText.getText().toString(),
+                title,
+                text,
                 albumFullName,
                 center,
                 hasAlbum
