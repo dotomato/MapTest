@@ -90,5 +90,65 @@
         android:layout_marginBottom="36dp"
         android:visibility="visible" />
 
+    <LinearLayout
+        android:id="@+id/pointLiker"
+        android:layout_width="match_parent"
+        android:layout_height="24dp"
+        android:orientation="horizontal">
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/pointCommentNum"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:ems="3"
+            android:gravity="center_vertical|right"
+            android:maxLines="1"
+            android:text="12"
+            android:textColor="@color/colorTextVeryGray" />
+
+        <net.steamcrafted.materialiconlib.MaterialIconView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="24dp"
+            android:scaleType="center"
+            app:materialIcon="comment_text_outline"
+            app:materialIconColor="@color/colorTextVeryGray"
+            app:materialIconSize="24dp" />
+
+        <TextView
+            android:id="@+id/pointLikeNum"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:ems="3"
+            android:gravity="center_vertical|right"
+            android:maxLines="1"
+            android:text="3"
+            android:textColor="@color/colorTextVeryGray" />
+
+        <com.sackcentury.shinebuttonlib.ShineButton
+            android:id="@+id/pointLikeButton"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="center_horizontal|top"
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="24dp"
+            app:allow_random_color="true"
+            app:btn_color="@color/colorTextVeryGray"
+            app:btn_fill_color="#FF6666"
+            app:enable_flashing="true"
+            app:shine_turn_angle="90"
+            app:siShape="@raw/like" />
+    </LinearLayout>
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="20dp" />
+
 
 </LinearLayout>

@@ -15,9 +15,10 @@ import com.chen.maptest.NetDataType.PointDataResult;
 import com.chen.maptest.NetDataType.PointSimpleData;
 import com.chen.maptest.NetDataType.SelectAreaData;
 import com.chen.maptest.NetDataType.SelectAreaResult;
-import com.chen.maptest.NetDataType.UserComment;
 import com.chen.maptest.NetDataType.UserLikeComment;
 import com.chen.maptest.NetDataType.UserLikeCommentResult;
+import com.chen.maptest.NetDataType.UserLikePoint;
+import com.chen.maptest.NetDataType.UserLikePointResult;
 import com.chen.maptest.NetDataType.UserNewComment;
 import com.chen.maptest.NetDataType.UserNewCommentResult;
 import com.chen.maptest.NetDataType.Userinfo;
@@ -29,7 +30,6 @@ import com.chen.maptest.MyServer.Myserver;
 import com.chen.maptest.Utils.MyUtils;
 import com.chen.maptest.Utils.OnceRunner;
 import com.google.gson.Gson;
-import com.sackcentury.shinebuttonlib.ShineButton;
 
 import java.io.File;
 import java.util.Calendar;
@@ -51,7 +51,6 @@ class MainPresenter implements MainContract.Presenter, MyUpyunManager.UploadProg
     private OnceRunner mSelectHelper;
     private MyLatlng lt;
     private MyLatlng rb;
-    private MyLatlng ml;
     private String mAlbumImageURL;
     private String _msgTitle;
     private String _msgText;
@@ -91,6 +90,7 @@ class MainPresenter implements MainContract.Presenter, MyUpyunManager.UploadProg
 
         mMainView.setUploadProgress(0, View.INVISIBLE);
         mMainView.showCommentEdit(true);
+        mMainView.showPointLiker(true);
 
         mPointData = new PointData();
         mPointData.pointID=pointID;
@@ -107,7 +107,8 @@ class MainPresenter implements MainContract.Presenter, MyUpyunManager.UploadProg
 
                         Gson gson = new Gson();
                         Message mj = gson.fromJson(mVar.pointData.userMessage,Message.class);
-                        mMainView.showPoint(" ", mj.text,mj.albumURL,new Date(mVar.pointData.pointTime*1000));
+                        mMainView.showPoint(" ", mj.text,mj.albumURL,new Date(mVar.pointData.pointTime*1000),
+                                mVar.pointData.pointLikeNum, MyUM.islikepoint(mVar.pointData.pointID));
                     }
                 });
 
@@ -129,7 +130,7 @@ class MainPresenter implements MainContract.Presenter, MyUpyunManager.UploadProg
                 .subscribe(new MyAction1<PointComment>() {
                     @Override
                     public void call() {
-                        mMainView.showComment(mVar.userCommentList);
+                        mMainView.showComment(mVar.userCommentList, mVar.userCommentCount);
                         mMainView.showCommentEmpty(mVar.userCommentCount == 0);
                     }
                 });
@@ -142,9 +143,10 @@ class MainPresenter implements MainContract.Presenter, MyUpyunManager.UploadProg
         mMainView.upPointEditer();
         mMainView.setUploadProgress(0, View.INVISIBLE);
         mMainView.showPointUser(MyUM.getui().userName,MyUM.getui().userIcon);
-        mMainView.showPoint("","","", Calendar.getInstance().getTime());
+        mMainView.showPoint("","","", Calendar.getInstance().getTime(),0,false);
         mMainView.showCommentEmpty(false);
         mMainView.showCommentEdit(false);
+        mMainView.showPointLiker(false);
     }
 
     @Override
@@ -172,8 +174,22 @@ class MainPresenter implements MainContract.Presenter, MyUpyunManager.UploadProg
     }
 
     @Override
-    public void pointLike(String pointID, boolean isLike) {
-
+    public void pointLike(boolean isLike) {
+        UserLikePoint ulp = new UserLikePoint();
+        ulp.pointID = mPointData.pointID;
+        ulp.isLike = isLike;
+        ulp.userID = GlobalVar.mUserd.ui2.userinfo.userID;
+        ulp.userID2 = GlobalVar.mUserd.ui2.userID2;
+        Myserver.getApi().userlikepoint(ulp)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new MyAction1<UserLikePointResult>() {
+                    @Override
+                    public void call() {
+                        mMainView.updatePoint(mVar.pointLikeNum,mVar.isLike);
+                        MyUM.likepoint(mPointData.pointID, mVar.isLike);
+                    }
+                });
     }
 
     @Override
@@ -217,7 +233,7 @@ class MainPresenter implements MainContract.Presenter, MyUpyunManager.UploadProg
                                 .subscribe(new MyAction1<PointComment>() {
                                     @Override
                                     public void call() {
-                                        mMainView.showComment(mVar.userCommentList);
+                                        mMainView.showComment(mVar.userCommentList, mVar.userCommentCount);
                                         mMainView.showCommentEmpty(mVar.userCommentCount == 0);
                                     }
                                 });
@@ -297,8 +313,6 @@ class MainPresenter implements MainContract.Presenter, MyUpyunManager.UploadProg
     }
 
     private void sendNewPoint(boolean hasAlbum){
-        MyLatlng l = GlobalVar.viewLatlng;
-
         PointData2 pd2 = new PointData2();
         PointData pd = new PointData();
 

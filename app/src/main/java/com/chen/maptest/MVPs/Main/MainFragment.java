@@ -6,10 +6,7 @@ import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -38,6 +35,7 @@ import com.chen.maptest.R;
 import com.chen.maptest.Utils.ImageWrap;
 import com.chen.maptest.Utils.MyUtils;
 import com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBar;
+import com.sackcentury.shinebuttonlib.ShineButton;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -103,6 +101,10 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
     private ViewGroup mCommentLayout;
     private View mCommentSendButton;
     private EditText mUserCommentEdit;
+    private TextView mPointLikeNum;
+    private ShineButton mPointLikeButton;
+    private ViewGroup mPointLiker;
+    private TextView mPointCommentNum;
 
     // TODO: 17-5-5 渐变部分、图片压缩、波浪上升
 
@@ -202,6 +204,10 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
         mMsgText = (EdittextSizeChangeEvent)mHeadView.findViewById(R.id.msgText);
         mMsgAlbum = (ImageView)mHeadView.findViewById(R.id.msgAlbum);
         mProgressBar = (ProgressBar)mHeadView.findViewById(R.id.progressBar2);
+        mPointLikeNum = (TextView)mHeadView.findViewById(R.id.pointLikeNum);
+        mPointLikeButton = (ShineButton)mHeadView.findViewById(R.id.pointLikeButton);
+        mPointLiker = (ViewGroup)mHeadView.findViewById(R.id.pointLiker);
+        mPointCommentNum = (TextView)mHeadView.findViewById(R.id.pointCommentNum);
 
         mMsgAlbum.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -209,6 +215,13 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
                 if (isEditing()){
                     MyUtils.pickFromGallery(getActivity(), ALBUM_REQUESR_CODE,"选择图片");
                 }
+            }
+        });
+
+        mPointLikeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPresenter.pointLike(mPointLikeButton.isChecked());
             }
         });
 
@@ -372,7 +385,8 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
     }
 
     @Override
-    public void showPoint(String msgTitle, String msgText, String msgAlbum, Date time) {
+    public void showPoint(String msgTitle, String msgText, String msgAlbum, Date time,
+                          int msgLikeNum, boolean isLike) {
         mMsgTitle.setText(msgTitle);
         mMsgText.setText(msgText);
         if (msgAlbum.equals(GlobalConst.NO_ALBUM)) {
@@ -384,6 +398,8 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
         }
         mMsgTimeshow.setTime(time);
         layoutagaint();
+        mPointLikeNum.setText(String.valueOf(msgLikeNum));
+        mPointLikeButton.setChecked(isLike, false);
     }
 
 
@@ -521,10 +537,11 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
     }
 
     @Override
-    public void showComment(List<UserComment> comments){
+    public void showComment(List<UserComment> comments, int commentNum){
         mCommentData.clear();
         mCommentData.addAll(comments);
         mCommentAdapter.notifyDataSetChanged();
+        mPointCommentNum.setText(String.valueOf(commentNum));
     }
 
     @Override
@@ -555,6 +572,20 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
     @Override
     public void clearComment() {
         mUserCommentEdit.setText("");
+    }
+
+    @Override
+    public void showPointLiker(boolean b) {
+        if (b)
+            mPointLiker.setVisibility(View.VISIBLE);
+        else
+            mPointLiker.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void updatePoint(int pointLikeNum, boolean isLike) {
+        mPointLikeNum.setText(String.valueOf(pointLikeNum));
+        mPointLikeButton.setChecked(isLike);
     }
 
 

@@ -26,7 +26,8 @@ interface MainContract {
 
         void addMarker(MyLatlng l, String pointID, String usericon, String msgSmallText, String userID);
 
-        void showPoint(String msgTitle, String msgText, String msgAlbum, Date time);
+        void showPoint(String msgTitle, String msgText, String msgAlbum, Date time,
+                       int msgLikeNum, boolean isLike);
 
         void showPointUser(String username, String usericon);
 
@@ -50,7 +51,7 @@ interface MainContract {
 
         void setUploadProgress(int progress, int visibility);
 
-        void showComment(List<UserComment> comments);
+        void showComment(List<UserComment> comments, int commentNum);
 
         void showCommentEmpty(boolean isEmpty);
 
@@ -59,6 +60,10 @@ interface MainContract {
         void updateComment(UserLikeCommentResult mVar);
 
         void clearComment();
+
+        void showPointLiker(boolean b);
+
+        void updatePoint(int pointLikeNum, boolean isLike);
     }
 
     interface Presenter extends BasePresenter {
@@ -73,7 +78,7 @@ interface MainContract {
 
         void reciveLocation(MyLatlng l);
 
-        void pointLike(String pointID, boolean isLike);
+        void pointLike(boolean isLike);
 
         void commentLike(String commentID, boolean isLike);
 
