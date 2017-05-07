@@ -248,24 +248,34 @@ public class MapAdapterLayout extends FrameLayout implements  MapView.OnMapChang
 //            mReadMark.remove();
 //    }
 
-    public void gotoLocationSmooth(MyLatlng latlng){
+    public void gotoLocationSmooth(MyLatlng latlng, int duration){
         if (mMap == null) {
             Log.w(TAG,"Map Box is not ready!");
             return;
         }
         CameraUpdate mCameraUpdate =
                 CameraUpdateFactory.newLatLng(latlng.toLatlng());
-        mMap.easeCamera(mCameraUpdate,500);
+        mMap.animateCamera(mCameraUpdate,duration);
     }
 
-    public void gotoLocation(MyLatlng latlng, double zoom){
+    public void gotoLocationZoomSmooth(MyLatlng latlng, double zoom, int duration){
         if (mMap == null) {
             Log.w(TAG,"Map Box is not ready!");
             return;
         }
         CameraUpdate mCameraUpdate =
                 CameraUpdateFactory.newLatLngZoom(latlng.toLatlng(), zoom);
-        mMap.animateCamera(mCameraUpdate,1000);
+        mMap.animateCamera(mCameraUpdate,duration);
+    }
+
+    public void gotoLocation(MyLatlng latlng){
+        if (mMap == null) {
+            Log.w(TAG,"Map Box is not ready!");
+            return;
+        }
+        CameraUpdate mCameraUpdate =
+                CameraUpdateFactory.newLatLng(latlng.toLatlng());
+        mMap.moveCamera(mCameraUpdate);
     }
 
     public void rmAllMarker(){

@@ -1,5 +1,7 @@
 package com.chen.maptest.MVPs.Main;
 
+import android.animation.Animator;
+import android.animation.ObjectAnimator;
 import android.graphics.PointF;
 import android.os.Build;
 import android.os.Bundle;
@@ -12,6 +14,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -25,7 +28,6 @@ import com.chen.maptest.ComViews.MyTimeShow;
 import com.chen.maptest.GlobalConst;
 import com.chen.maptest.MVPs.Main.Views.CommentFooterView;
 import com.chen.maptest.MVPs.Main.Views.MyMapIcon;
-import com.chen.maptest.Manager.MyUM;
 import com.chen.maptest.MapAdapter.MapAdapterLayout;
 import com.chen.maptest.MapAdapter.MapAdaterCallback;
 import com.chen.maptest.MapAdapter.MyLatlng;
@@ -41,6 +43,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import io.codetail.animation.ViewAnimationUtils;
+
 
 /**
  * Created by chen on 17-5-4.
@@ -53,6 +57,9 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
     private static final String TAG = "MainFragment";
 
     final float h2Radio = 1/3.0f;
+    public static int dura = 300;
+    public static int dura2 = 1000;
+
 
     private FloatingActionButton mFloatingActionButton;
 
@@ -84,6 +91,7 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
     private ProgressBar mProgressBar;
 
     private ViewGroup mMsgContainer;
+    private ViewGroup mMsgInnerContainer;
 
     private View mMapView;
     private MainContract.Presenter mPresenter;
@@ -109,8 +117,6 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
     private ImageView mMsgAlbum;
 
 
-    // TODO: 17-5-5 波浪上升
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState){
@@ -130,6 +136,7 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
         mCommentSendButton =  mView.findViewById(R.id.commentsendbutton);
         mUserCommentEdit = (EditText) mView.findViewById(R.id.usercommentedit);
         mMsgContainer = (ViewGroup) mView.findViewById(R.id.msgContainer);
+        mMsgInnerContainer = (ViewGroup) mView.findViewById(R.id.msgInnerContainer);
 
         //变量初始化
         mCommentData = new ArrayList<>();
@@ -339,7 +346,7 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
 
     @Override
     public void firstLocation(final MyLatlng latlng) {
-        mMapAdapter.gotoLocation(latlng,15);
+        mMapAdapter.gotoLocationZoomSmooth(latlng,15,1000);
     }
 
 
@@ -372,8 +379,16 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
     }
 
     @Override
-    public void moveMap(MyLatlng center) {
-        mMapAdapter.gotoLocationSmooth(center);
+    public void moveMap(final MyLatlng center, boolean delay) {
+        if (delay)
+            mView.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mMapAdapter.gotoLocationSmooth(center, dura2);
+                }
+            },dura);
+        else
+            mMapAdapter.gotoLocationSmooth(center,dura2);
     }
 
     @Override
@@ -422,10 +437,9 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
         }, delay);
     }
 
-    int dura = 300;
     boolean isUped = false;
     @Override
-    public void upPointShower() {
+    public void upPointShower(MyLatlng l) {
         mMsgScrollView.setScrollY(0);
 
         if (isUped)
@@ -436,12 +450,73 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
 
         mFloatingActionButton.hide();
 
-        mMsgContainer.setVisibility(View.VISIBLE);
-        mMapAdapter.animate().translationY(h2 /2 - self_h/2).setDuration(dura).start();
-        mMsgContainer.animate().translationY(-self_h+ h2).setDuration(dura).start();
+        mMapAdapter.animate().translationY(h2 /2 - self_h/2).setStartDelay(dura).setDuration(dura2).start();
+        mPointLiker.setVisibility(View.VISIBLE);
+        mCommentLayout.setVisibility(View.VISIBLE);
+
+//        mHeadView.setAlpha(0);
+//        mHeadView.animate().alpha(1).setDuration(dura).setStartDelay(dura).start();
+
+        showMsgInnerContainer(true,l);
 
         MyUtils.setEditTextEditable(mMsgTitle,false);
         MyUtils.setEditTextEditable(mMsgText,false);
+    }
+
+    private void showMsgInnerContainer(boolean isShow, MyLatlng l) {
+        if (isShow) {
+            PointF p = mMapAdapter.myLatlgnToPoint(l);
+            int cx = (int) (p.x - mMsgContainer.getLeft());
+            int cy = (int) (p.y - mMsgContainer.getTop());
+            cx = Math.max(0,cx);
+            cy = Math.max(0,cy);
+            int dx = Math.max(cx, mMsgInnerContainer.getWidth() - cx);
+            int dy = Math.max(cy, mMsgInnerContainer.getHeight() - cy);
+            float finalRadius = (float) Math.hypot(dx, dy);
+
+            mMsgInnerContainer.setVisibility(View.VISIBLE);
+            Animator animator =
+                    ViewAnimationUtils.createCircularReveal(mMsgInnerContainer, cx, cy, 0, finalRadius);
+            animator.setInterpolator(new AccelerateDecelerateInterpolator());
+            animator.setDuration(dura);
+            animator.start();
+        } else {
+            int cx = (mMsgInnerContainer.getLeft()+mMsgInnerContainer.getRight())/2;
+            int cy = mMsgInnerContainer.getBottom();
+            cx = Math.max(0,cx);
+            cy = Math.max(0,cy);
+            int dx = Math.max(cx, mMsgInnerContainer.getWidth() - cx);
+            int dy = Math.max(cy, mMsgInnerContainer.getHeight() - cy);
+            float finalRadius = (float) Math.hypot(dx, dy);
+
+            Animator animator =
+                    ViewAnimationUtils.createCircularReveal(mMsgInnerContainer, cx, cy, finalRadius, 0);
+            animator.setInterpolator(new AccelerateDecelerateInterpolator());
+            animator.setDuration(dura);
+            animator.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mMsgInnerContainer.setVisibility(View.GONE);
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animation) {
+
+                }
+
+                @Override
+                public void onAnimationRepeat(Animator animation) {
+
+                }
+            });
+            animator.start();
+
+        }
     }
 
     private void resizeMsgContainer() {
@@ -458,13 +533,12 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
         if (!isUped)
             return;
         isUped = false;
+        showMsgInnerContainer(false, null);
 
         mFloatingActionButton.show();
+        mCommentLayout.setVisibility(View.GONE);
 
-        mMapAdapter.animate().translationY(0).setDuration(dura).start();
-        mMsgContainer.animate().translationY(0).setDuration(dura).start();
-        MyUtils.setGoneAfterAnimate(mMsgContainer,mMsgContainer.animate());
-
+        mMapAdapter.animate().translationY(0).setStartDelay(0).setDuration(dura).start();
         mCommentData.clear();
         mCommentAdapter.notifyDataSetChanged();
     }
@@ -481,20 +555,25 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
 
         resizeMsgContainer();
 
-        mMsgContainer.setVisibility(View.VISIBLE);
-        mMapAdapter.animate().translationY(h2 /2 - self_h/2).setDuration(dura).start();
-        mMsgContainer.animate().translationY(-self_h+ h2).setDuration(dura).start();
+        mMapAdapter.animate().translationY(h2 /2 - self_h/2).setStartDelay(dura).setDuration(dura2).start();
 
         MyUtils.setEditTextEditable(mMsgTitle,true);
         MyUtils.setEditTextEditable(mMsgText,true);
 
         mFloatingActionButton.hide();
+        MyLatlng l = mMapAdapter.pointToMyLatlng(new PointF(mMapView.getWidth()/2,mMapView.getHeight()/2));
+        showMsgInnerContainer(true,l);
+
+        mHeadView.setAlpha(0);
+        mHeadView.animate().alpha(1).setDuration(dura).setStartDelay(dura).start();
 
         mToolbar.setVisibility(View.VISIBLE);
         mToolbar.setAlpha(0);
         mToolbar.animate().alpha(1).setDuration(dura).start();
 
         mMsgTitle.requestFocus();
+        mPointLiker.setVisibility(View.GONE);
+        mCommentLayout.setVisibility(View.GONE);
 
         layoutagaint();
     }
@@ -504,12 +583,12 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
         if (!isEditing)
             return;
         isEditing = false;
+        showMsgInnerContainer(false,null);
 
-        mMapAdapter.animate().translationY(0).setDuration(dura).start();
-        mMsgContainer.animate().translationY(0).setDuration(dura).start();
-        MyUtils.setGoneAfterAnimate(mMsgContainer,mMsgContainer.animate());
+        mMapAdapter.animate().translationY(0).setStartDelay(0).setDuration(dura).start();
 
         mFloatingActionButton.show();
+        mCommentLayout.setVisibility(View.GONE);
 
         mToolbar.animate().alpha(0).setDuration(dura).start();
         MyUtils.setGoneAfterAnimate(mToolbar,mToolbar.animate());
@@ -553,15 +632,6 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
     }
 
     @Override
-    public void showCommentEdit(boolean isEdit) {
-        if (isEdit) {
-            mCommentLayout.setVisibility(View.VISIBLE);
-        } else {
-            mCommentLayout.setVisibility(View.GONE);
-        }
-    }
-
-    @Override
     public void updateComment(UserLikeCommentResult mVar) {
         for (UserComment uc:mCommentData) {
             if (uc.commentID.equals(mVar.commentID)) {
@@ -575,14 +645,6 @@ public class MainFragment extends Fragment implements MainContract.View, MapAdat
     @Override
     public void clearComment() {
         mUserCommentEdit.setText("");
-    }
-
-    @Override
-    public void showPointLiker(boolean b) {
-        if (b)
-            mPointLiker.setVisibility(View.VISIBLE);
-        else
-            mPointLiker.setVisibility(View.GONE);
     }
 
     @Override

@@ -3,7 +3,6 @@ package com.chen.maptest.MVPs.Main;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.Environment;
 import android.view.View;
 
 import com.chen.maptest.GlobalConst;
@@ -93,8 +92,6 @@ class MainPresenter implements MainContract.Presenter, MyUpyunManager.UploadProg
             return;
 
         mMainView.setUploadProgress(0, View.INVISIBLE);
-        mMainView.showCommentEdit(true);
-        mMainView.showPointLiker(true);
 
         mPointData = new PointData();
         mPointData.pointID=pointID;
@@ -104,10 +101,10 @@ class MainPresenter implements MainContract.Presenter, MyUpyunManager.UploadProg
                 .subscribe(new MyAction1<PointDataResult>() {
                     @Override
                     public void call() {
-                        mMainView.upPointShower();
 
                         MyLatlng l = new MyLatlng(mVar.pointData.latitude, mVar.pointData.longitude);
-                        mMainView.moveMap(l);
+                        mMainView.upPointShower(l);
+                        mMainView.moveMap(l,true);
 
                         Gson gson = new Gson();
                         Message mj = gson.fromJson(mVar.pointData.userMessage,Message.class);
@@ -149,8 +146,6 @@ class MainPresenter implements MainContract.Presenter, MyUpyunManager.UploadProg
         mMainView.showPointUser(MyUM.getui().userName,MyUM.getui().userIcon);
         mMainView.showPoint("","","", Calendar.getInstance().getTime(),0,false);
         mMainView.showCommentEmpty(false);
-        mMainView.showCommentEdit(false);
-        mMainView.showPointLiker(false);
     }
 
     @Override
@@ -168,7 +163,7 @@ class MainPresenter implements MainContract.Presenter, MyUpyunManager.UploadProg
     @Override
     public void retLocation() {
         if (GlobalVar.gpsLatlng != null){
-            mMainView.moveMap(GlobalVar.gpsLatlng);
+            mMainView.moveMap(GlobalVar.gpsLatlng,false);
         }
     }
 
@@ -251,10 +246,8 @@ class MainPresenter implements MainContract.Presenter, MyUpyunManager.UploadProg
     public void onBackPressed() {
         if (mMainView.isUped()) {
             mMainView.downPointShower();
-            mMainView.showCommentEdit(false);
         } else if (mMainView.isEditing()) {
             mMainView.downPointEditer();
-            mMainView.showCommentEdit(false);
         } else {
             mMainView.finish();
         }

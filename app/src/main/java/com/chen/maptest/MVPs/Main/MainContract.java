@@ -20,7 +20,7 @@ import java.util.List;
 interface MainContract {
     interface View extends BaseView<Presenter> {
 
-        void moveMap(MyLatlng center);
+        void moveMap(MyLatlng center, boolean delay);
 
         void zoomMap(float zoom);
 
@@ -33,7 +33,7 @@ interface MainContract {
 
         void showNewpointShine(MyLatlng l, long delay);
 
-        void upPointShower();
+        void upPointShower(MyLatlng l);
 
         void downPointShower();
 
@@ -55,13 +55,9 @@ interface MainContract {
 
         void showCommentEmpty(boolean isEmpty);
 
-        void showCommentEdit(boolean isEdit);
-
         void updateComment(UserLikeCommentResult mVar);
 
         void clearComment();
-
-        void showPointLiker(boolean b);
 
         void updatePoint(int pointLikeNum, boolean isLike);
     }
